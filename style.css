@@ -4,6 +4,7 @@ body {
   font-family: 'Segoe UI', sans-serif;
   text-align: center;
   padding: 40px 20px;
+  position: relative;
 }
 
 h1 {
@@ -39,4 +40,48 @@ footer {
   margin-top: 50px;
   color: #888;
   font-size: 0.9em;
+}
+
+#loader {
+  position: fixed;
+  background-color: #121212;
+  top: 0; left: 0; width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+#loader img {
+  width: 120px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.9; }
+}
+
+.logo {
+  position: absolute;
+  width: 40px;
+  opacity: 0.7;
+}
+
+.logo.top-left {
+  top: 10px;
+  left: 10px;
+}
+
+.logo.top-right {
+  top: 10px;
+  right: 10px;
+}
+
+.logo-center {
+  width: 100px;
+  margin: 20px auto;
+  display: block;
+  opacity: 1;
 }
