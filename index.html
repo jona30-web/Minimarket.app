@@ -3,29 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#2e2e2e" />
-  <meta name="description" content="MiniMarket - Gestión de inventario y ventas para tu negocio." />
+  <meta name="theme-color" content="#121212" />
+  <meta name="description" content="MiniMarket - Sistema de gestión rápido y sencillo" />
   <meta name="author" content="Jonathan Tuquerrez" />
-  <meta name="keywords" content="minimarket, inventario, ventas, supermercado, tienda" />
+  <meta name="keywords" content="minimarket, inventario, ventas, supermercado" />
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <title>MiniMarket</title>
+  <style>
+    @keyframes fadeInDown {
+      0% { opacity: 0; transform: translateY(-20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      animation: fadeInDown 1s ease-out;
+    }
+  </style>
 </head>
 <body>
-
   <header>
     <h1>Bienvenido a <span class="highlight">MiniMarket</span></h1>
     <p class="tagline">Tu sistema de gestión rápido y sencillo</p>
+    <button>Explorar productos</button>
+    <input type="text" placeholder="Buscar productos..." />
   </header>
 
-  <main>
-    <button onclick="alert('Función en desarrollo')">Explorar productos</button>
-    <input type="text" placeholder="Buscar productos..." class="search-input" />
-  </main>
-
   <footer>
-    <p>&copy; 2025 MiniMarket | Creado por Jonathan Tuquerrez</p>
+    © 2025 MiniMarket | Creado por Jonathan Tuquerrez
   </footer>
 
   <script src="app.js"></script>
