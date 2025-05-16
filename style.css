@@ -1,4 +1,4 @@
-/* Fondo general y tipografía */
+/* Fondo general */
 body {
   background-color: #121212;
   color: #ffffff;
@@ -6,43 +6,45 @@ body {
   text-align: center;
   padding: 40px 20px;
   margin: 0;
-  position: relative;
 }
 
-/* Título principal */
+/* Título */
 h1 {
   color: #39ff14;
-  font-size: 3em;
+  font-size: 2.8em;
   margin-bottom: 10px;
-  text-shadow: 0 0 15px #39ff14;
+  text-shadow: 0 0 12px #39ff14;
+}
+
+.highlight {
+  color: #39ff14;
+  text-shadow: 0 0 12px #39ff14;
 }
 
 /* Subtítulo */
-p {
+p.tagline {
   font-size: 1.2em;
   color: #cccccc;
   margin-bottom: 30px;
 }
 
-/* Botones e inputs */
-button,
-input[type="text"] {
+/* Botones e input */
+button, input[type="text"] {
   background-color: #1f1f1f;
   border: 2px solid #39ff14;
   color: #39ff14;
-  padding: 10px 15px;
+  padding: 12px 20px;
   font-size: 1em;
   margin: 10px 5px;
-  border-radius: 8px;
+  border-radius: 6px;
   box-shadow: 0 0 8px #39ff14;
-  transition: 0.3s;
+  transition: 0.3s ease;
 }
 
-button:hover,
-input[type="text"]:focus {
+button:hover, input[type="text"]:focus {
   background-color: #292929;
   outline: none;
-  box-shadow: 0 0 15px #39ff14;
+  box-shadow: 0 0 12px #39ff14;
 }
 
 /* Footer */
@@ -52,43 +54,34 @@ footer {
   font-size: 0.9em;
 }
 
-/* Logo principal en el centro */
-.logo.center {
-  width: 160px;
-  margin: 20px auto;
-  display: block;
-  animation: pulse 3s infinite;
+/* Logo Container */
+.logo-container {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  margin-bottom: 20px;
 }
 
-/* Logos en las esquinas */
-.logo.corner {
-  width: 50px;
+/* Logo pequeño en esquinas */
+.logo-small {
+  width: 40px;
+  height: 40px;
   position: absolute;
   top: 10px;
-  z-index: 10;
-  opacity: 0.7;
 }
 
-.logo.left {
+.top-left {
   left: 10px;
 }
 
-.logo.right {
+.top-right {
   right: 10px;
 }
 
-/* Animación del logo central */
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.9;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0.9;
-  }
+/* Logo central más grande */
+.logo-large {
+  width: 110px;
+  height: 110px;
+  margin: 0 auto;
+  display: block;
 }
