@@ -1,3 +1,4 @@
+/* Fondo general y tipografía */
 body {
   background-color: #121212;
   color: #ffffff;
@@ -5,91 +6,89 @@ body {
   text-align: center;
   padding: 40px 20px;
   margin: 0;
+  position: relative;
 }
 
+/* Título principal */
 h1 {
   color: #39ff14;
-  font-size: 2.5em;
+  font-size: 3em;
   margin-bottom: 10px;
-  text-shadow: 0 0 10px #39ff14;
+  text-shadow: 0 0 15px #39ff14;
 }
 
+/* Subtítulo */
 p {
   font-size: 1.2em;
   color: #cccccc;
   margin-bottom: 30px;
 }
 
-button, input[type="text"] {
+/* Botones e inputs */
+button,
+input[type="text"] {
   background-color: #1f1f1f;
-  border: 1px solid #39ff14;
+  border: 2px solid #39ff14;
   color: #39ff14;
   padding: 10px 15px;
   font-size: 1em;
-  margin: 5px;
-  border-radius: 5px;
-  box-shadow: 0 0 5px #39ff14;
-  transition: background-color 0.3s, transform 0.2s;
+  margin: 10px 5px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px #39ff14;
+  transition: 0.3s;
 }
 
-button:hover, input[type="text"]:focus {
+button:hover,
+input[type="text"]:focus {
   background-color: #292929;
   outline: none;
-  transform: scale(1.03);
+  box-shadow: 0 0 15px #39ff14;
 }
 
+/* Footer */
 footer {
   margin-top: 50px;
   color: #888;
   font-size: 0.9em;
 }
 
-/* Loader */
-#loader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #121212;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
+/* Logo principal en el centro */
+.logo.center {
+  width: 160px;
+  margin: 20px auto;
+  display: block;
+  animation: pulse 3s infinite;
 }
 
-#loader img {
-  width: 120px;
-  animation: spin 2s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Logos flotantes */
-.logo {
+/* Logos en las esquinas */
+.logo.corner {
+  width: 50px;
   position: absolute;
-  width: 40px;
-  opacity: 0.2;
-  z-index: 1;
+  top: 10px;
+  z-index: 10;
+  opacity: 0.7;
 }
 
-.logo.top-left {
-  top: 10px;
+.logo.left {
   left: 10px;
 }
 
-.logo.top-right {
-  top: 10px;
+.logo.right {
   right: 10px;
 }
 
-.logo.center {
-  top: 50%;
-  left: 50%;
-  width: 80px;
-  transform: translate(-50%, -50%);
-  opacity: 0.4;
+/* Animación del logo central */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
 }
