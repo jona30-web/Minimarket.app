@@ -3,38 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#2e2e2e" />
+  <meta name="theme-color" content="#000000" />
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <title>MiniMarket</title>
 </head>
 <body>
-  <!-- Pantalla de carga -->
-  <div id="loader">
-    <img src="loader.png.jpg" alt="Cargando..." />
-  </div>
+  <!-- Logos en esquinas -->
+  <img src="logo.png.jpg" class="corner-logo top-left" alt="Logo MiniMarket" />
+  <img src="logo.png.jpg" class="corner-logo top-right" alt="Logo MiniMarket" />
 
-  <!-- Logotipos decorativos -->
-  <img src="logo.png.jpg" class="logo top-left" alt="Logo MiniMarket" />
-  <img src="logo.png.jpg" class="logo top-right" alt="Logo MiniMarket" />
-  <img src="logo.png.jpg" class="logo center" alt="Logo MiniMarket grande" />
+  <!-- Logo central más grande -->
+  <div class="center-logo-container">
+    <img src="logo.png.jpg" class="center-logo" alt="Logo MiniMarket Central" />
+  </div>
 
   <header>
     <h1>Bienvenido a <span class="highlight">MiniMarket</span></h1>
     <p class="tagline">Tu sistema de gestión rápido y sencillo</p>
+  </header>
+
+  <main>
     <button>Explorar productos</button>
     <input type="text" placeholder="Buscar productos..." />
-  </header>
+  </main>
 
   <footer>
     © 2025 MiniMarket | Creado y desarrollado por Jonathan Tuquerrez
   </footer>
-
-  <script>
-    // Ocultar loader cuando carga
-    window.addEventListener("load", () => {
-      document.getElementById("loader").style.display = "none";
-    });
-  </script>
 </body>
 </html>
