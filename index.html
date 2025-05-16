@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -5,56 +6,38 @@
   <meta name="theme-color" content="#2e2e2e" />
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="logo.png.jpg" type="image/jpeg" />
   <title>MiniMarket</title>
-  <style>
-    /* Estilos para animación de carga */
-    #loader {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: #121212;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-    #loader img {
-      width: 150px;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.1); opacity: 0.7; }
-    }
-  </style>
 </head>
 <body>
+
   <!-- Animación de carga -->
   <div id="loader">
     <img src="loader.png.jpg" alt="Cargando..." />
   </div>
 
-  <!-- Contenido principal -->
+  <!-- Logos en las esquinas -->
+  <img src="logo.png.jpg" class="logo top-left" alt="Logo MiniMarket">
+  <img src="logo.png.jpg" class="logo top-right" alt="Logo MiniMarket">
+
+  <!-- Logo grande al centro -->
+  <img src="logo.png.jpg" class="logo-center" alt="Logo Principal">
+
   <header>
-    <img src="logo.png.jpg" alt="MiniMarket Logo" style="width:100px; margin-bottom: 10px;">
     <h1>Bienvenido a <span class="highlight">MiniMarket</span></h1>
     <p class="tagline">Tu sistema de gestión rápido y sencillo</p>
+    <button>Explorar productos</button>
+    <input type="text" placeholder="Buscar productos...">
   </header>
-
-  <button onclick="alert('Explorando productos...')">Explorar productos</button>
-  <input type="text" placeholder="Buscar productos..." />
 
   <footer>
     © 2025 MiniMarket | Creado y desarrollado por Jonathan Tuquerrez
   </footer>
 
   <script>
-    // Ocultar loader cuando cargue la página
-    window.addEventListener('load', function () {
-      const loader = document.getElementById('loader');
-      loader.style.display = 'none';
+    // Simular carga
+    window.addEventListener("load", () => {
+      document.getElementById("loader").style.display = "none";
     });
   </script>
 </body>
