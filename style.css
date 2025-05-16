@@ -1,87 +1,91 @@
-/* Fondo general */
 body {
   background-color: #121212;
   color: #ffffff;
   font-family: 'Segoe UI', sans-serif;
   text-align: center;
   padding: 40px 20px;
-  margin: 0;
+  overflow-x: hidden;
 }
 
-/* Título */
 h1 {
   color: #39ff14;
-  font-size: 2.8em;
+  font-size: 2.5em;
   margin-bottom: 10px;
-  text-shadow: 0 0 12px #39ff14;
+  text-shadow: 0 0 10px #39ff14;
+  animation: fadeInUp 1s ease-out;
 }
 
-.highlight {
-  color: #39ff14;
-  text-shadow: 0 0 12px #39ff14;
-}
-
-/* Subtítulo */
-p.tagline {
+p {
   font-size: 1.2em;
   color: #cccccc;
   margin-bottom: 30px;
+  animation: fadeInUp 1.5s ease-out;
 }
 
-/* Botones e input */
 button, input[type="text"] {
   background-color: #1f1f1f;
-  border: 2px solid #39ff14;
+  border: 1px solid #39ff14;
   color: #39ff14;
-  padding: 12px 20px;
+  padding: 10px 15px;
   font-size: 1em;
-  margin: 10px 5px;
-  border-radius: 6px;
-  box-shadow: 0 0 8px #39ff14;
-  transition: 0.3s ease;
+  margin: 5px;
+  border-radius: 5px;
+  box-shadow: 0 0 5px #39ff14;
+  animation: fadeInUp 2s ease-out;
 }
 
 button:hover, input[type="text"]:focus {
   background-color: #292929;
   outline: none;
-  box-shadow: 0 0 12px #39ff14;
 }
 
-/* Footer */
 footer {
   margin-top: 50px;
   color: #888;
   font-size: 0.9em;
+  animation: fadeInUp 2.5s ease-out;
 }
 
-/* Logo Container */
+/* Logos */
 .logo-container {
   position: relative;
-  width: 100%;
-  height: 150px;
-  margin-bottom: 20px;
+  margin: 40px 0;
+  animation: fadeInUp 1.2s ease-out;
 }
 
-/* Logo pequeño en esquinas */
-.logo-small {
+.logo-esquina {
   width: 40px;
-  height: 40px;
   position: absolute;
   top: 10px;
+  animation: girar 10s linear infinite;
 }
 
-.top-left {
+.logo-esquina.izquierda {
   left: 10px;
 }
 
-.top-right {
+.logo-esquina.derecha {
   right: 10px;
 }
 
-/* Logo central más grande */
-.logo-large {
-  width: 110px;
-  height: 110px;
-  margin: 0 auto;
-  display: block;
+.logo-central {
+  width: 100px;
+  animation: fadeInUp 1.2s ease-out;
+}
+
+/* Animaciones */
+@keyframes girar {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
