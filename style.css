@@ -1,1 +1,42 @@
-body { font-family: Arial, sans-serif; background: #f8f8f8; }
+body {
+  background-color: #121212;
+  color: #ffffff;
+  font-family: 'Segoe UI', sans-serif;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+h1 {
+  color: #39ff14;
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  text-shadow: 0 0 10px #39ff14;
+}
+
+p {
+  font-size: 1.2em;
+  color: #cccccc;
+  margin-bottom: 30px;
+}
+
+button, input[type="text"] {
+  background-color: #1f1f1f;
+  border: 1px solid #39ff14;
+  color: #39ff14;
+  padding: 10px 15px;
+  font-size: 1em;
+  margin: 5px;
+  border-radius: 5px;
+  box-shadow: 0 0 5px #39ff14;
+}
+
+button:hover, input[type="text"]:focus {
+  background-color: #292929;
+  outline: none;
+}
+
+footer {
+  margin-top: 50px;
+  color: #888;
+  font-size: 0.9em;
+}
