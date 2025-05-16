@@ -1,28 +1,38 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#121212" />
+  <meta name="theme-color" content="#2e2e2e" />
+  <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <title>MiniMarket</title>
 </head>
 <body>
+
+  <!-- Logos girando en las esquinas -->
+  <img src="logosinfondo.png.png" alt="Logo MiniMarket" class="logo-esquina izquierda">
+  <img src="logosinfondo.png.png" alt="Logo MiniMarket" class="logo-esquina derecha">
+
+  <!-- Logo central -->
   <div class="logo-container">
-    <img src="logo.png.jpg" class="logo-small top-left" alt="Logo MiniMarket" />
-    <img src="logo.png.jpg" class="logo-large center" alt="Logo MiniMarket grande" />
-    <img src="logo.png.jpg" class="logo-small top-right" alt="Logo MiniMarket" />
+    <img src="logosinfondo.png.png" alt="Logo central" class="logo-central">
   </div>
 
-  <h1>Bienvenido a <span class="highlight">MiniMarket</span></h1>
-  <p class="tagline">Tu sistema de gestión rápido y sencillo</p>
+  <!-- Contenido principal -->
+  <header>
+    <h1>Bienvenido a <span class="highlight">MiniMarket</span></h1>
+    <p class="tagline">Tu sistema de gestión rápido y sencillo</p>
 
-  <button onclick="alert('Explorando productos...')">Explorar productos</button>
-  <input type="text" placeholder="Buscar productos..." />
+    <button>Explorar productos</button>
+    <input type="text" placeholder="Buscar productos..." />
+  </header>
 
+  <!-- Pie de página -->
   <footer>
     © 2025 MiniMarket | Creado y desarrollado por Jonathan Tuquerrez
   </footer>
+
 </body>
 </html>
