@@ -1,105 +1,336 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#121212" />
   <title>MiniMarket</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="favicon.ico" type="image/x-icon" />
 </head>
 <body>
 
-  <!-- Logos girando en las esquinas -->
-  <img src="logosinfondo.png.png" alt="Logo MiniMarket" class="logo-esquina izquierda">
-  <img src="logosinfondo.png.png" alt="Logo MiniMarket" class="logo-esquina derecha">
-
-  <!-- Logo central -->
-  <div class="logo-container">
-    <img src="logosinfondo.png.png" alt="Logo central" class="logo-central">
-  </div>
-
+  <!-- Encabezado -->
   <header>
-    <h1>Bienvenido a <span class="highlight">MiniMarket</span></h1>
-    <p class="tagline">Tu sistema de gestión rápido y sencillo</p>
+    <h1>MiniMarket</h1>
   </header>
 
-  <main>
-    <h2>Inventario</h2>
+  <!-- Botón para mostrar/ocultar inventario -->
+  <section class="controls">
+    <button id="toggle-inventory">Ver Inventario</button>
+  </section>
 
-    <h3>1: Confitería</h3>
-    <div class="producto">Aldor Play Gusanos Gomitas Saborizadas - 55g - $1.00</div>
-    <div class="producto">Arcor El Chavo Chupetes Saborizados - 11g - $0.15</div>
-    <div class="producto">Arcor El Chavo Chupetes Pack - 528g - $4.00</div>
-    <div class="producto">Colombina Bon Bon Bum Pack x24 - 480g - $3.70</div>
-    <div class="producto">Colombina Bon Bon Bum Fresa x u - 20g - $0.15</div>
-    <div class="producto">Confiteca Plop Fresa Ácida Pack x24 - 480g - $2.70</div>
-    <div class="producto">Confiteca Plop Fresa Ácida x u - 20g - $0.15</div>
+  <!-- Sección de inventario (inicialmente oculta) -->
+  <section id="inventory-section" class="hidden">
+    <!-- 1: Confitería -->
+    <div class="card">
+      <h4>Aldor Play Gusanos Gomitas Saborizadas</h4>
+      <p><strong>Unidad:</strong> 55g</p>
+      <p><strong>Precio:</strong> $1.00</p>
+    </div>
+    <div class="card">
+      <h4>Arcor El Chavo Chupetes Saborizados</h4>
+      <p><strong>Unidad:</strong> 11g</p>
+      <p><strong>Precio:</strong> $0.15</p>
+    </div>
+    <div class="card">
+      <h4>Arcor El Chavo Chupetes Pack</h4>
+      <p><strong>Unidad:</strong> 528g</p>
+      <p><strong>Precio:</strong> $4.00</p>
+    </div>
+    <div class="card">
+      <h4>Colombina Bon Bon Bum Pack x24</h4>
+      <p><strong>Unidad:</strong> 480g</p>
+      <p><strong>Precio:</strong> $3.70</p>
+    </div>
+    <div class="card">
+      <h4>Colombina Bon Bon Bum Fresa x u</h4>
+      <p><strong>Unidad:</strong> 20g</p>
+      <p><strong>Precio:</strong> $0.15</p>
+    </div>
+    <div class="card">
+      <h4>Confiteca Plop Fresa Ácida Pack x24</h4>
+      <p><strong>Unidad:</strong> 480g</p>
+      <p><strong>Precio:</strong> $2.70</p>
+    </div>
+    <div class="card">
+      <h4>Confiteca Plop Fresa Ácida x u</h4>
+      <p><strong>Unidad:</strong> 20g</p>
+      <p><strong>Precio:</strong> $0.15</p>
+    </div>
 
-    <h3>2: Jabonería Protex</h3>
-    <div class="producto">Protex Fresh Pack x3u - 330g - $3.45</div>
-    <div class="producto">Protex Herbal x u - 110g - $1.25</div>
-    <div class="producto">Protex Macadamia - 110g - $1.25</div>
-    <div class="producto">Protex Omega 3 - 110g - $1.25</div>
-    <div class="producto">Protex Limpieza Profunda Pack x3u - 330g - $3.45</div>
+    <!-- 2: Jabonería Protex -->
+    <div class="card">
+      <h4>Protex Fresh Pack x3u</h4>
+      <p><strong>Unidad:</strong> 330g</p>
+      <p><strong>Precio:</strong> $3.45</p>
+    </div>
+    <div class="card">
+      <h4>Protex Herbal x u</h4>
+      <p><strong>Unidad:</strong> 110g</p>
+      <p><strong>Precio:</strong> $1.25</p>
+    </div>
+    <div class="card">
+      <h4>Protex Macadamia</h4>
+      <p><strong>Unidad:</strong> 110g</p>
+      <p><strong>Precio:</strong> $1.25</p>
+    </div>
+    <div class="card">
+      <h4>Protex Omega 3</h4>
+      <p><strong>Unidad:</strong> 110g</p>
+      <p><strong>Precio:</strong> $1.25</p>
+    </div>
+    <div class="card">
+      <h4>Protex Limpieza Profunda Pack x3u</h4>
+      <p><strong>Unidad:</strong> 330g</p>
+      <p><strong>Precio:</strong> $3.45</p>
+    </div>
 
-    <h3>3: Bebidas y Energizantes</h3>
-    <div class="producto">Sporade Cereza - 500ml - $0.55</div>
-    <div class="producto">Sporade Tropical - 1200ml - $1.00</div>
-    <div class="producto">Sporade Uva - 500ml - $0.55</div>
-    <div class="producto">Sporade Manzana - 1.2L - $1.00</div>
-    <div class="producto">Volt Frambuesa Ginseng - 650ml - $1.00</div>
-    <div class="producto">Volt Maca Arándano - 400ml - $0.50</div>
-    <div class="producto">Volt Uva Aloe - 400ml - $0.50</div>
-    <div class="producto">Té Hierba Luisa 20u - 24g - $1.15</div>
-    <div class="producto">Té Aromáticas Horchata 20u - 24g - $1.15</div>
-    <div class="producto">COLA BIG Negra - 300ml - $0.25</div>
-    <div class="producto">COLA BIG Fresa - 300ml - $0.25</div>
-    <div class="producto">COLA BIG Naranja - 300ml - $0.25</div>
-    <div class="producto">COLA BIG Limón - 300ml - $0.25</div>
+    <!-- 3: Bebidas y Energizantes -->
+    <div class="card">
+      <h4>Sporade Cereza</h4>
+      <p><strong>Unidad:</strong> 500ml</p>
+      <p><strong>Precio:</strong> $0.55</p>
+    </div>
+    <div class="card">
+      <h4>Sporade Tropical</h4>
+      <p><strong>Unidad:</strong> 1200ml</p>
+      <p><strong>Precio:</strong> $1.00</p>
+    </div>
+    <div class="card">
+      <h4>Sporade Uva</h4>
+      <p><strong>Unidad:</strong> 500ml</p>
+      <p><strong>Precio:</strong> $0.55</p>
+    </div>
+    <div class="card">
+      <h4>Sporade Manzana</h4>
+      <p><strong>Unidad:</strong> 1.2L</p>
+      <p><strong>Precio:</strong> $1.00</p>
+    </div>
+    <div class="card">
+      <h4>Volt Frambuesa Ginseng</h4>
+      <p><strong>Unidad:</strong> 650ml</p>
+      <p><strong>Precio:</strong> $1.00</p>
+    </div>
+    <div class="card">
+      <h4>Volt Maca Arándano</h4>
+      <p><strong>Unidad:</strong> 400ml</p>
+      <p><strong>Precio:</strong> $0.50</p>
+    </div>
+    <div class="card">
+      <h4>Volt Uva Aloe</h4>
+      <p><strong>Unidad:</strong> 400ml</p>
+      <p><strong>Precio:</strong> $0.50</p>
+    </div>
+    <div class="card">
+      <h4>Té Hierba Luisa Pack 20u</h4>
+      <p><strong>Unidad:</strong> 24g</p>
+      <p><strong>Precio:</strong> $1.15</p>
+    </div>
+    <div class="card">
+      <h4>Té Horchata Pack 20u</h4>
+      <p><strong>Unidad:</strong> 24g</p>
+      <p><strong>Precio:</strong> $1.15</p>
+    </div>
+    <div class="card">
+      <h4>COLA BIG Negra</h4>
+      <p><strong>Unidad:</strong> 300ml</p>
+      <p><strong>Precio:</strong> $0.25</p>
+    </div>
+    <div class="card">
+      <h4>COLA BIG Fresa</h4>
+      <p><strong>Unidad:</strong> 300ml</p>
+      <p><strong>Precio:</strong> $0.25</p>
+    </div>
+    <div class="card">
+      <h4>COLA BIG Naranja</h4>
+      <p><strong>Unidad:</strong> 300ml</p>
+      <p><strong>Precio:</strong> $0.25</p>
+    </div>
+    <div class="card">
+      <h4>COLA BIG Limón</h4>
+      <p><strong>Unidad:</strong> 300ml</p>
+      <p><strong>Precio:</strong> $0.25</p>
+    </div>
 
-    <h3>4: Yogures</h3>
-    <div class="producto">Alpina Frutilla - 150g - $0.70</div>
-    <div class="producto">Alpina Mora - 150g - $0.70</div>
-    <div class="producto">Alpina Durazno - 150g - $0.70</div>
-    <div class="producto">Chivería Mix Vainilla Granola - 170g - $1.00</div>
-    <div class="producto">Kiosko Bebible Frutilla - 180g - $0.75</div>
-    <div class="producto">Toni Yogurt Natural - 950g - $3.15</div>
-    <div class="producto">Toni Yogurt Griego - 150g - $1.45</div>
-    <div class="producto">Toni Mix Durazno - 190g - $0.85</div>
-    <div class="producto">Toni Mix Frutilla - 190g - $0.85</div>
+    <!-- 4: Yogures -->
+    <div class="card">
+      <h4>Alpina Frutilla</h4>
+      <p><strong>Unidad:</strong> 150g</p>
+      <p><strong>Precio:</strong> $0.70</p>
+    </div>
+    <div class="card">
+      <h4>Alpina Mora</h4>
+      <p><strong>Unidad:</strong> 150g</p>
+      <p><strong>Precio:</strong> $0.70</p>
+    </div>
+    <div class="card">
+      <h4>Alpina Durazno</h4>
+      <p><strong>Unidad:</strong> 150g</p>
+      <p><strong>Precio:</strong> $0.70</p>
+    </div>
+    <div class="card">
+      <h4>Chivería Mix Vainilla Granola</h4>
+      <p><strong>Unidad:</strong> 170g</p>
+      <p><strong>Precio:</strong> $1.00</p>
+    </div>
+    <div class="card">
+      <h4>Kiosko Bebible Frutilla</h4>
+      <p><strong>Unidad:</strong> 180g</p>
+      <p><strong>Precio:</strong> $0.75</p>
+    </div>
+    <div class="card">
+      <h4>Toni Yogurt Natural</h4>
+      <p><strong>Unidad:</strong> 950g</p>
+      <p><strong>Precio:</strong> $3.15</p>
+    </div>
+    <div class="card">
+      <h4>Toni Yogurt Griego</h4>
+      <p><strong>Unidad:</strong> 150g</p>
+      <p><strong>Precio:</strong> $1.45</p>
+    </div>
+    <div class="card">
+      <h4>Toni Mix Durazno</h4>
+      <p><strong>Unidad:</strong> 190g</p>
+      <p><strong>Precio:</strong> $0.85</p>
+    </div>
+    <div class="card">
+      <h4>Toni Mix Frutilla</h4>
+      <p><strong>Unidad:</strong> 190g</p>
+      <p><strong>Precio:</strong> $0.85</p>
+    </div>
 
-    <h3>5: Pronaca y Alimentos Básicos</h3>
-    <div class="producto">Pasta de Tomate - 250g - $1.82</div>
-    <div class="producto">Salsa Pizza - 490g - $2.68</div>
-    <div class="producto">Salsa Spaghetti - 490g - $2.77</div>
-    <div class="producto">Salsa Spaghetti Napolitana - 500g - $3.65</div>
-    <div class="producto">Ají Indio Bravo - 100ml - $0.66</div>
-    <div class="producto">Fritada Funda - 1kg - $6.31</div>
-    <div class="producto">Cuero en Rollos - 1kg - $4.85</div>
-    <div class="producto">Chuletas Bandeja 4u - 1kg - $10.95</div>
-    <div class="producto">Chuletas Marinadas - 1kg - $5.50</div>
-    <div class="producto">Jamón Sanduchero Fritz - 200g - $3.00</div>
-    <div class="producto">Jamón Mr Pollo - 200g - $3.49</div>
-    <div class="producto">Salchicha Vienesa x1 - $0.65</div>
-    <div class="producto">Tocineta Rebanada 2x2 - $14.98</div>
-    <div class="producto">Jamón Espaldazo - $9.55</div>
-    <div class="producto">Jamón Línea Diaria - 85g - $1.00</div>
-    <div class="producto">Chorizo Línea Diaria - 130g - $1.00</div>
-    <div class="producto">Pepperoni Plumrose - 300g - $3.00</div>
-    <div class="producto">Jamón Pierna - 200g - $3.84</div>
-    <div class="producto">Chorizo Argentino - 300g - $4.50</div>
-    <div class="producto">Avena YA - 1kg - $1.82</div>
-    <div class="producto">Fideos Cayambe Tallarín - 400g - $1.00</div>
-    <div class="producto">Fideos Cayambe Broca - 400g - $1.00</div>
-    <div class="producto">Fideos Cayambe Cabello de Ángel - 400g - $1.00</div>
-    <div class="producto">Harina YA - 1kg - $2.85</div>
-  </main>
+    <!-- 5: Pronaca y Alimentos Básicos -->
+    <div class="card">
+      <h4>Pasta de Tomate</h4>
+      <p><strong>Unidad:</strong> 250g</p>
+      <p><strong>Precio:</strong> $1.82</p>
+    </div>
+    <div class="card">
+      <h4>Salsa Pizza</h4>
+      <p><strong>Unidad:</strong> 490g</p>
+      <p><strong>Precio:</strong> $2.68</p>
+    </div>
+    <div class="card">
+      <h4>Salsa Spaghetti</h4>
+      <p><strong>Unidad:</strong> 490g</p>
+      <p><strong>Precio:</strong> $2.77</p>
+    </div>
+    <div class="card">
+      <h4>Salsa Spaghetti Napolitana</h4>
+      <p><strong>Unidad:</strong> 500g</p>
+      <p><strong>Precio:</strong> $3.65</p>
+    </div>
+    <div class="card">
+      <h4>Ají Indio Bravo</h4>
+      <p><strong>Unidad:</strong> 100ml</p>
+      <p><strong>Precio:</strong> $0.66</p>
+    </div>
+    <div class="card">
+      <h4>Fritada Funda</h4>
+      <p><strong>Unidad:</strong> 1kg</p>
+      <p><strong>Precio:</strong> $6.31</p>
+    </div>
+    <div class="card">
+      <h4>Cuero en Rollos</h4>
+      <p><strong>Unidad:</strong> 1kg</p>
+      <p><strong>Precio:</strong> $4.85</p>
+    </div>
+    <div class="card">
+      <h4>Chuletas Bandeja 4u</h4>
+      <p><strong>Unidad:</strong> 1kg</p>
+      <p><strong>Precio:</strong> $10.95</p>
+    </div>
+    <div class="card">
+      <h4>Chuletas Marinadas</h4>
+      <p><strong>Unidad:</strong> 1kg</p>
+      <p><strong>Precio:</strong> $5.50</p>
+    </div>
+    <div class="card">
+      <h4>Jamón Sanduchero Fritz</h4>
+      <p><strong>Unidad:</strong> 200g</p>
+      <p><strong>Precio:</strong> $3.00</p>
+    </div>
+    <div class="card">
+      <h4>Jamón Mr Pollo</h4>
+      <p><strong>Unidad:</strong> 200g</p>
+      <p><strong>Precio:</strong> $3.49</p>
+    </div>
+    <div class="card">
+      <h4>Salchicha Vienesa x1</h4>
+      <p><strong>Unidad:</strong> 1 und</p>
+      <p><strong>Precio:</strong> $0.65</p>
+    </div>
+    <div class="card">
+      <h4>Tocineta Rebanada 2x2</h4>
+      <p><strong>Unidad:</strong> 1 und</p>
+      <p><strong>Precio:</strong> $14.98</p>
+    </div>
+    <div class="card">
+      <h4>Jamón Espaldazo</h4>
+      <p><strong>Unidad:</strong> 1 und</p>
+      <p><strong>Precio:</strong> $9.55</p>
+    </div>
+    <div class="card">
+      <h4>Jamón Línea Diaria 85g</h4>
+      <p><strong>Unidad:</strong> 85g</p>
+      <p><strong>Precio:</strong> $1.00</p>
+    </div>
+    <div class="card">
+      <h4>Chorizo Línea Diaria 130g</h4>
+      <p><strong>Unidad:</strong> 130g</p>
+      <p><strong>Precio:</strong> $1.00</p>
+    </div>
+    <div class="card">
+      <h4>Pepperoni Plumrose</h4>
+      <p><strong>Unidad:</strong> 300g</p>
+      <p><strong>Precio:</strong> $3.00</p>
+    </div>
+    <div class="card">
+      <h4>Jamón Pierna 200g</h4>
+      <p><strong>Unidad:</strong> 200g</p>
+      <p><strong>Precio:</strong> $3.84</p>
+    </div>
+    <div class="card">
+      <h4>Chorizo Argentino 300g</h4>
+      <p><strong>Unidad:</strong> 300g</p>
+      <p><strong>Precio:</strong> $4.50</p>
+    </div>
+    <div class="card">
+      <h4>Avena YA</h4>
+      <p><strong>Unidad:</strong> 1kg</p>
+      <p><strong>Precio:</strong> $1.82</p>
+    </div>
+    <div class="card">
+      <h4>Fideos Cayambe Tallarín</h4>
+      <p><strong>Unidad:</strong> 400g</p>
+      <p><strong>Precio:</strong> $1.00</p>
+    </div>
+    <div class="card">
+      <h4>Fideos Cayambe Broca</h4>
+      <p><strong>Unidad:</strong> 400g</p>
+      <p><strong>Precio:</strong> $1.00</p>
+    </div>
+    <div class="card">
+      <h4>Fideos Cayambe Cabello de Ángel</h4>
+      <p><strong>Unidad:</strong> 400g</p>
+      <p><strong>Precio:</strong> $1.00</p>
+    </div>
+    <div class="card">
+      <h4>Harina YA</h4>
+      <p><strong>Unidad:</strong> 1kg</p>
+      <p><strong>Precio:</strong> $2.85</p>
+    </div>
+  </section>
 
-  <footer>
-    © 2025 MiniMarket | Creado y desarrollado por Jonathan Tuquerrez
-  </footer>
+  <script>
+    const btn = document.getElementById('toggle-inventory');
+    const inv = document.getElementById('inventory-section');
+    btn.addEventListener('click', () => {
+      inv.classList.toggle('hidden');
+      btn.textContent = inv.classList.contains('hidden')
+        ? 'Ver Inventario'
+        : 'Ocultar Inventario';
+    });
+  </script>
 
 </body>
 </html>
-
