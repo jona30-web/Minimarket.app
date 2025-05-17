@@ -1,143 +1,183 @@
 body {
-    background-color: #000;
-    color: #fff;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    position: relative;
-    text-align: center;
-    padding: 2vh 2vw;
+  background-color: #000;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Cambiado de height a min-height */
+  margin: 0;
+  position: relative; /* Importante para posicionamiento absoluto de elementos internos si es necesario */
+  text-align: center;
+  padding: 0; /* Eliminado padding innecesario */
+  flex-direction: column; /* Añadido para ordenar elementos verticalmente */
 }
 
 .container {
-    max-width: 600px;
-    width: 100%;
+  max-width: none; /* Eliminado max-width para que ocupe todo el ancho */
+  width: 100%; /* Asegura que el contenedor ocupe el 100% del ancho */
+  display: flex; /* Añadido para centrar elementos internos con Flexbox */
+  flex-direction: column;
+  align-items: center; /* Centra horizontalmente los elementos */
+  padding: 20px; /* Añade padding para separar del borde de la pantalla si es necesario */
+  box-sizing: border-box; /* Incluye el padding en el ancho total del elemento */
 }
 
 h1 {
-    color: #00ff00;
-    font-size: clamp(1.8rem, 5vw, 2.5rem);
-    margin-bottom: 0.6em;
+  color: #00ff00;
+  font-size: clamp(2.5rem, 8vw, 3.5rem); /* Aumentado tamaño fuente */
+  margin-bottom: 0.5em; /* Ajustado margen */
 }
 
 p {
-    color: #ccc;
-    font-size: clamp(1rem, 2.5vw, 1.2rem);
-    margin-bottom: 1.5em;
+  color: #ddd; /* Cambiado color a gris claro */
+  font-size: clamp(1.2rem, 3vw, 1.5rem); /* Aumentado tamaño fuente */
+  margin-bottom: 2em; /* Ajustado margen */
+  max-width: 80%; /* Limitado ancho del párrafo para mejor legibilidad */
+  line-height: 1.5; /* Añadido interlineado para mejorar la legibilidad */
 }
 
 .buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-    margin-bottom: 1.5em;
+  display: flex;
+  flex-wrap: nowrap; /* Evita que los botones se envuelvan a la siguiente línea */
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 2em;
 }
 
 .btn {
-    padding: clamp(10px, 3vw, 15px) clamp(20px, 6vw, 30px);
-    font-size: clamp(1rem, 2.5vw, 1.2rem);
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
+  padding: 15px 30px; /* Ajustado padding */
+  font-size: clamp(1.2rem, 3vw, 1.5rem); /* Aumentado tamaño fuente */
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  text-transform: uppercase; /* Añadido para que el texto sea mayúscula */
+  font-weight: bold; /* Añadido para que el texto sea más fuerte */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Añadida transición suave */
 }
 
 .btn-explore {
-    background-color: #222;
-    color: #00ff00;
-    border: 2px solid #00ff00;
+  background-color: #00ff00;
+  color: #000;
+  border: 2px solid #00ff00;
+}
+
+.btn-explore:hover {
+  background-color: #00e600; /* Cambio de color al pasar el ratón */
+  color: #000;
 }
 
 .btn-scan {
-    background-color: #222;
-    color: #ff00ff;
-    border: 2px solid #ff00ff;
+  background-color: transparent;
+  color: #ff00ff;
+  border: 2px solid #ff00ff;
+}
+
+.btn-scan:hover {
+  background-color: rgba(255, 0, 255, 0.2); /* Fondo semitransparente al pasar el ratón */
+  color: #ff00ff;
 }
 
 .search-bar {
-    margin-top: 20px;
-    padding: 10px;
-    width: 100%;
-    max-width: 300px;
-    border: 2px solid #00ff00;
-    border-radius: 5px;
-    background-color: #222;
-    color: #ccc;
-    font-size: clamp(0.9rem, 2.5vw, 1rem);
+  margin-top: 2em;
+  padding: 15px;
+  width: 80%;
+  max-width: 400px; /* Aumentado max-width */
+  border: 2px solid #00ff00;
+  border-radius: 25px; /* Más redondeado */
+  background-color: #111;
+  color: #fff;
+  font-size: clamp(1rem, 2.5vw, 1.2rem); /* Aumentado tamaño fuente */
+  outline: none; /* Elimina el borde de enfoque por defecto */
+  transition: border-color 0.3s ease; /* Transición suave para el borde */
+}
+
+.search-bar:focus {
+  border-color: #00b300; /* Cambio de color del borde al enfocar */
+  box-shadow: 0 0 5px rgba(0, 255, 0, 0.5); /* Añade una sombra suave al enfocar */
 }
 
 footer {
-    position: fixed;
-    bottom: 10px;
-    width: 100%;
-    text-align: center;
-    color: #888;
-    font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+  position: fixed; /* Cambiado a fixed para que se pegue al fondo */
+  bottom: 0; /* Pegado al fondo */
+  left: 0; /* Pegado a la izquierda */
+  width: 100%;
+  text-align: center;
+  color: #888;
+  font-size: clamp(0.8rem, 2vw, 1rem);
+  padding: 10px 0; /* Añadido padding para que no esté pegado al borde */
+  background-color: #000; /* Mismo color de fondo que el body */
 }
 
 .logo {
-    margin-bottom: 1.5em;
-    border: 2px solid #ff00ff;
-    padding: 10px;
-    display: inline-block;
-    border-radius: 5px;
-    max-width: 100px;
+  margin-bottom: 2em;
+  border: 2px solid #ff00ff;
+  padding: 15px;
+  display: inline-block;
+  border-radius: 10px;
+  max-width: 200px; /* Aumentado tamaño del logo */
 }
 
 .logo img {
-    width: 100%;
-    height: auto;
+  width: 100%;
+  height: auto;
 }
 
 .dropdown {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    display: inline-block;
+  position: absolute;
+  top: 20px; /* Ajustado posición */
+  right: 20px; /* Ajustado posición */
+  display: inline-block;
 }
 
 .dropbtn {
-    background-color: inherit;
-    color: inherit;
-    padding: 10px;
-    border: none;
-    cursor: pointer;
-    font-size: 1.5rem;
-    border-radius: 5px;
+  background-color: transparent; /* Cambiado a transparente */
+  color: #fff; /* Color de texto blanco */
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 2rem; /* Aumentado tamaño fuente */
+  border-radius: 5px;
+  transition: color 0.3s ease; /* Transición suave para el color */
 }
 
+.dropbtn:hover {
+  color: #00ff00; /* Cambio de color al pasar el ratón */
+}
+
+
 .dropdown-content {
-    display: none;
-    position: absolute;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-    z-index: 1;
-    top: 100%;
-    right: 0;
-    background-color: #111;
-    border-radius: 5px;
-    overflow: hidden;
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 200px; /* Aumentado ancho */
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  background-color: #111;
+  border-radius: 10px; /* Más redondeado */
+  overflow: hidden;
+  margin-top: 10px; /* Añadido margen superior */
+  border: 1px solid #333; /* Añadido borde */
 }
 
 .dropdown-content a {
-    color: #fff;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    font-size: clamp(0.9rem, 2.5vw, 1rem);
+  color: #fff;
+  padding: 15px 20px; /* Ajustado padding */
+  text-decoration: none;
+  display: block;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  transition: background-color 0.3s ease; /* Transición suave */
 }
 
 .dropdown-content a:hover {
-    background-color: #444;
+  background-color: #444;
 }
 
 .show {
-    display: block;
+  display: block;
 }
