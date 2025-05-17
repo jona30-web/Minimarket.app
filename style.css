@@ -1,300 +1,133 @@
+:root {
+  --green: #00FF33;
+  --pink:  #FF33FF;
+  --bg:    #000000;
+  --text:  #FFFFFF;
+}
+
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    background-color: #1a1a1a;
-    color: #fff;
-    overflow: hidden;
-    height: 100vh;
-    width: 100vw;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  min-height: 100vh;
+  padding-bottom: 200px;
 }
 
-.container {
-    display: flex;
-    height: 100%;
-    width: 100%;
+/* Íconos superiores */
+.icono {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 32px;
+  position: absolute;
+  border: 4px solid var(--pink);
+}
+.icono.plus {
+  top: 30px;
+  left: 30px;
+}
+.icono.menu {
+  top: 30px;
+  right: 30px;
 }
 
-/* Botones de control */
-.control-buttons {
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    display: flex;
-    gap: 20px;
-    z-index: 1000;
+/* Menú desplegable */
+.menu-desplegable {
+  width: 280px;
+  background-color: #111111;
+  border-radius: 12px;
+  padding: 20px;
+  position: absolute;
+  top: 120px;
+  right: 30px;
+}
+.menu-desplegable ul {
+  list-style: none;
+}
+.menu-desplegable li {
+  margin-bottom: 16px;
+  font-size: 18px;
+  color: var(--text);
 }
 
-.control-btn {
-    width: 35px;
-    height: 35px;
-    background-color: #2a2a2a;
-    border: 2px solid #ff00ff;
-    border-radius: 5px;
-    box-shadow: 0 0 10px #ff00ff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 18px;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.control-btn:hover {
-    transform: scale(1.1);
-}
-
-/* Menú lateral */
-.sidebar {
-    width: 200px;
-    background-color: #2a2a2a;
-    padding: 20px 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    border-right: 2px solid #ff00ff;
-    box-shadow: 0 0 10px #ff00ff;
-    height: 100%;
-    position: fixed;
-    top: 0;
-    left: -200px; /* Ocultar por defecto */
-    transition: left 0.3s ease; /* Animación suave */
-    z-index: 1000;
-}
-
-.sidebar.active {
-    left: 0; /* Mostrar al activar */
-}
-
-.logo img {
-    width: 80px;
-    margin-bottom: 40px;
-    border: 4px solid #ff00ff;
-    border-radius: 10px;
-    box-shadow: 0 0 15px #ff00ff;
-}
-
-.menu {
-    list-style: none;
-    width: 100%;
-    margin-top: 20px;
-}
-
-.menu li {
-    padding: 12px 10px;
-    margin: 10px 0;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    transition: background 0.3s;
-    font-size: 14px;
-    width: 100%;
-}
-
-.menu li:hover {
-    background-color: #ff00ff;
-}
-
-.menu li.active {
-    background-color: #ff00ff;
-}
-
-.menu .icon {
-    margin-right: 15px;
-}
-
-/* Contenido principal */
-.main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 30px;
-    margin-left: 0; /* Sin margen inicial, ya que el sidebar está oculto */
-    height: 100%;
-    transition: margin-left 0.3s ease; /* Animación suave */
-}
-
-.main-content.active {
-    margin-left: 200px; /* Mostrar margen cuando el sidebar esté activo */
-}
-
+/* Encabezados */
 h1 {
-    font-size: 36px;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-    line-height: 1.2;
+  margin-top: 200px;
+  font-size: 56px;
+  line-height: 64px;
+  color: var(--green);
+  text-align: center;
 }
 
-h1 span {
-    color: #00ff00;
-    text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+h2 {
+  margin-top: 16px;
+  font-size: 18px;
+  text-align: center;
 }
 
-p {
-    font-size: 16px;
-    color: #fff;
-    margin-bottom: 50px;
-    max-width: 90%;
+/* Botones principales */
+.botones {
+  display: flex;
+  margin-top: 80px;
 }
 
-.buttons {
-    display: flex;
-    gap: 40px;
-    margin-bottom: 30px;
+.boton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 30px;
+  font-size: 24px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  background: transparent;
+  cursor: pointer;
+}
+.boton.explorar {
+  width: 600px;
+  height: 100px;
+  border: 4px solid var(--green);
+  color: var(--green);
+  margin-right: 40px;
+}
+.boton.escanear {
+  width: 400px;
+  height: 100px;
+  border: 4px solid var(--pink);
+  color: var(--pink);
 }
 
-.btn {
-    padding: 12px 25px;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.3s;
-    text-transform: uppercase;
-    min-width: 160px;
+/* Campo de búsqueda */
+.search {
+  width: 927px;
+  height: 80px;
+  margin-top: 80px;
+  padding: 16px;
+  background-color: #222222;
+  border: 2px solid var(--green);
+  border-radius: 12px;
+  font-size: 18px;
+  color: var(--text);
 }
 
-.btn.explore {
-    background-color: #333;
-    color: #00ff00;
-    border: 2px solid #00ff00;
-    box-shadow: 0 0 10px #00ff00;
-}
-
-.btn.scanner {
-    background-color: #333;
-    color: #ff00ff;
-    border: 2px solid #ff00ff;
-    box-shadow: 0 0 10px #ff00ff;
-}
-
-.btn:hover {
-    transform: scale(1.05);
-}
-
-.search-bar {
-    width: 70%;
-    padding: 12px;
-    font-size: 16px;
-    background-color: #333;
-    color: #fff;
-    border: 2px solid #00ff00;
-    border-radius: 5px;
-    box-shadow: 0 0 10px #00ff00;
-    margin-bottom: 40px;
-    max-width: 350px;
-}
-
-.search-bar::placeholder {
-    color: #888;
-}
-
+/* Pie de página */
 footer {
-    font-size: 12px;
-    color: #888;
-    position: fixed;
-    bottom: 15px;
-    width: 100%;
-    text-align: center;
-}
-
-/* Media queries específicas para Poco X3 Pro (1080 x 2400) */
-@media only screen and (min-width: 1080px) and (max-width: 2400px) and (orientation: portrait) {
-    .sidebar {
-        width: 180px;
-        left: -180px; /* Ocultar por defecto */
-    }
-    .sidebar.active {
-        left: 0;
-    }
-    .main-content.active {
-        margin-left: 180px;
-    }
-    .logo img {
-        width: 70px;
-    }
-    .menu li {
-        padding: 10px 8px;
-        margin: 12px 0;
-        font-size: 13px;
-    }
-    h1 {
-        font-size: 32px;
-    }
-    p {
-        font-size: 14px;
-    }
-    .btn {
-        padding: 10px 20px;
-        font-size: 14px;
-        min-width: 140px;
-    }
-    .search-bar {
-        width: 80%;
-        max-width: 300px;
-    }
-    .control-buttons {
-        top: 10px;
-        left: 10px;
-    }
-    .control-btn {
-        width: 30px;
-        height: 30px;
-        font-size: 16px;
-    }
-}
-
-/* Media queries generales para pantallas pequeñas */
-@media (max-width: 768px) {
-    .sidebar {
-        width: 100px;
-        left: -100px;
-    }
-    .sidebar.active {
-        left: 0;
-    }
-    .main-content.active {
-        margin-left: 100px;
-    }
-    .logo img {
-        width: 60px;
-    }
-    .menu li {
-        padding: 8px 6px;
-        margin: 10px 0;
-        font-size: 12px;
-    }
-    h1 {
-        font-size: 26px;
-    }
-    p {
-        font-size: 13px;
-    }
-    .btn {
-        padding: 8px 15px;
-        font-size: 13px;
-        min-width: 120px;
-    }
-    .search-bar {
-        width: 85%;
-        max-width: 280px;
-    }
-    .control-buttons {
-        top: 8px;
-        left: 8px;
-    }
-    .control-btn {
-        width: 28px;
-        height: 28px;
-        font-size: 14px;
-    }
+  position: absolute;
+  bottom: 30px;
+  text-align: center;
+  font-size: 14px;
+  color: #666666;
+  width: 100%;
 }
