@@ -1,62 +1,52 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Arial', sans-serif;
-}
-
 body {
-    background: #000;
+    background-color: #000;
     color: #fff;
+    font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    overflow: hidden;
+    margin: 0;
     position: relative;
+    text-align: center;
+    padding: 2vh 2vw;
 }
 
 .container {
-    text-align: center;
-    position: relative;
-}
-
-/* Botones de control (para el logo en la esquina superior izquierda y el menú) */
-.control-buttons {
-    position: fixed;
-    top: 20px;
+    max-width: 600px;
     width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 10px;
 }
 
 h1 {
     color: #00ff00;
-    font-size: 3em;
-    margin-bottom: 10px;
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    margin-bottom: 0.6em;
 }
 
 p {
     color: #ccc;
-    margin-bottom: 20px;
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    margin-bottom: 1.5em;
 }
 
 .buttons {
     display: flex;
+    flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
+    margin-bottom: 1.5em;
 }
 
 .btn {
-    padding: 15px 30px;
-    font-size: 1.2em;
+    padding: clamp(10px, 3vw, 15px) clamp(20px, 6vw, 30px);
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
     border: none;
     border-radius: 10px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 10px;
+    white-space: nowrap;
 }
 
 .btn-explore {
@@ -74,61 +64,66 @@ p {
 .search-bar {
     margin-top: 20px;
     padding: 10px;
-    width: 300px;
+    width: 100%;
+    max-width: 300px;
     border: 2px solid #00ff00;
     border-radius: 5px;
     background-color: #222;
     color: #ccc;
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
 }
 
 footer {
     position: fixed;
     bottom: 10px;
+    width: 100%;
+    text-align: center;
     color: #888;
-    font-size: 0.8em;
+    font-size: clamp(0.7rem, 1.5vw, 0.9rem);
 }
 
 .logo {
+    margin-bottom: 1.5em;
     border: 2px solid #ff00ff;
     padding: 10px;
     display: inline-block;
     border-radius: 5px;
+    max-width: 100px;
 }
 
-.center-logo {
-    margin-bottom: 20px;
-}
-
-.top-logo {
-    margin: 0;
+.logo img {
+    width: 100%;
+    height: auto;
 }
 
 .dropdown {
+    position: absolute;
+    top: 10px;
+    right: 10px;
     display: inline-block;
 }
 
 .dropbtn {
-    background-color: #222;
-    color: #fff;
+    background-color: inherit;
+    color: inherit;
     padding: 10px;
-    border: 2px solid #ff00ff; /* Borde magenta para el botón */
+    border: none;
     cursor: pointer;
+    font-size: 1.5rem;
     border-radius: 5px;
 }
 
 .dropdown-content {
     display: none;
     position: absolute;
-    width: 260px; /* Ancho de 260 píxeles */
-    height: 250px; /* Alto de 250 píxeles */
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    min-width: 160px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
     z-index: 1;
-    top: 100%; /* Se despliega justo debajo del botón */
-    right: 0; /* Alineado a la derecha */
-    margin-top: 5px; /* Espacio entre el botón y el menú */
-    background-color: #333; /* Fondo oscuro para que coincida con tu diseño */
-    border-radius: 5px; /* Bordes redondeados */
-    overflow-y: auto; /* Permite desplazamiento si el contenido excede el alto */
+    top: 100%;
+    right: 0;
+    background-color: #111;
+    border-radius: 5px;
+    overflow: hidden;
 }
 
 .dropdown-content a {
@@ -136,7 +131,7 @@ footer {
     padding: 12px 16px;
     text-decoration: none;
     display: block;
-    line-height: 1.5; /* Mejora la legibilidad */
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
 }
 
 .dropdown-content a:hover {
