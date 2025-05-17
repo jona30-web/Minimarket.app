@@ -1,51 +1,41 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MiniMarket</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MiniMarket</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Botones de control -->
-        <div class="control-buttons">
-            <div class="control-btn">+</div>
-            <div class="control-btn menu-toggle">≡</div>
-        </div>
+  <!-- Íconos superior -->
+  <div class="icono plus">+</div>
+  <div class="icono menu">≡</div>
 
-        <!-- Menú lateral -->
-        <div class="sidebar">
-            <div class="logo">
-                <img src="logo.png.jpg" alt="MiniMarket Logo">
-            </div>
-            <ul class="menu">
-                <li><span class="icon">📦</span> Inventario</li>
-                <li class="active"><span class="icon">🛒</span> Ventas</li>
-                <li><span class="icon">⏳</span> Historial</li>
-                <li><span class="icon">📊</span> Estadísticas</li>
-                <li><span class="icon">⚙️</span> Configuración</li>
-            </ul>
-        </div>
+  <!-- Menú desplegable -->
+  <div class="menu-desplegable">
+    <ul>
+      <li>📦 Inventario</li>
+      <li>🛒 Ventas</li>
+      <li>⏱️ Historial</li>
+      <li>📊 Estadísticas</li>
+      <li>⚙️ Configuración</li>
+    </ul>
+  </div>
 
-        <!-- Contenido principal -->
-        <div class="main-content">
-            <h1>Bienvenido a <span>MiniMarket</span></h1>
-            <p>Tu sistema de gestión rápido y sencillo</p>
-            <div class="buttons">
-                <button class="btn explore">EXPLORAR PRODUCTOS</button>
-                <button class="btn scanner">ESCANER</button>
-            </div>
-            <input type="text" class="search-bar" placeholder="Buscar productos...">
-            <footer>© 2025 MiniMarket | Creado y desarrollado por Jonathan Tuquerez</footer>
-        </div>
-    </div>
+  <!-- Encabezados -->
+  <h1>Bienvenido a MiniMarket</h1>
+  <h2>Tu sistema de gestión rápido y sencillo</h2>
 
-    <script>
-        // JavaScript para controlar el menú desplegable
-        document.querySelector('.menu-toggle').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('active');
-        });
-    </script>
+  <!-- Botones principales -->
+  <div class="botones">
+    <button class="boton explorar">🛒 Explorar Productos</button>
+    <button class="boton escanear">📷 Escáner</button>
+  </div>
+
+  <!-- Campo de búsqueda -->
+  <input class="search" type="text" placeholder="Buscar productos...">
+
+  <!-- Pie de página -->
+  <footer>© 2025 MiniMarket | Creado y desarrollado por Jonathan Tuquerrez</footer>
 </body>
 </html>
