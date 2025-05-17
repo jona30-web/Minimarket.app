@@ -11,7 +11,7 @@
         <!-- Botones de control -->
         <div class="control-buttons">
             <div class="control-btn">+</div>
-            <div class="control-btn">≡</div>
+            <div class="control-btn menu-toggle">≡</div>
         </div>
 
         <!-- Menú lateral -->
@@ -40,5 +40,12 @@
             <footer>© 2025 MiniMarket | Creado y desarrollado por Jonathan Tuquerez</footer>
         </div>
     </div>
+
+    <script>
+        // JavaScript para controlar el menú desplegable
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('active');
+        });
+    </script>
 </body>
 </html>
