@@ -6,7 +6,7 @@
 }
 
 body {
-    background-color: #000;
+    background: #000;
     color: #fff;
     display: flex;
     justify-content: center;
@@ -27,8 +27,8 @@ body {
     top: 20px;
     width: 100%;
     display: flex;
-    justify-content: space-between; /* Separar botones: uno a la izquierda, otro a la derecha */
-    padding: 0 20px; /* Espacio en los extremos */
+    justify-content: space-between;
+    padding: 0 20px;
     z-index: 1000;
 }
 
@@ -49,6 +49,54 @@ body {
 
 .control-btn:hover {
     transform: scale(1.1);
+}
+
+/* Menú lateral desplegable */
+.sidebar {
+    width: 200px;
+    background-color: #333; /* Fondo consistente con el diseño */
+    padding: 20px 10px;
+    position: fixed;
+    top: 0;
+    left: -200px; /* Ocultar por defecto */
+    height: 100%;
+    border-right: 2px solid #ff00ff; /* Borde neón magenta como otros elementos */
+    box-shadow: 0 0 10px #ff00ff;
+    transition: left 0.3s ease; /* Animación suave */
+    z-index: 999;
+}
+
+.sidebar.active {
+    left: 0; /* Mostrar al activar */
+}
+
+.menu {
+    list-style: none;
+    width: 100%;
+}
+
+.menu li {
+    padding: 12px 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-size: 14px;
+    color: #fff; /* Texto blanco como el resto */
+}
+
+.menu li:hover {
+    background-color: #ff00ff; /* Neón magenta al pasar el mouse */
+}
+
+.menu li.active {
+    background-color: #ff00ff; /* Neón magenta para el ítem activo */
+}
+
+.menu .icon {
+    margin-right: 15px;
 }
 
 /* Logo */
@@ -140,6 +188,20 @@ p {
     color: #888;
 }
 
+/* Footer */
+.custom-footer {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 12px;
+    color: #888;
+    background-color: #1a1a1a;
+    padding: 5px 10px;
+    border: 2px solid #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #fff;
+}
+
 /* Media queries para Poco X3 Pro (1080 x 2400) */
 @media only screen and (min-width: 1080px) and (max-width: 2400px) and (orientation: portrait) {
     .control-buttons {
@@ -150,6 +212,13 @@ p {
         width: 35px;
         height: 35px;
         font-size: 18px;
+    }
+    .sidebar {
+        width: 180px;
+        left: -180px;
+    }
+    .sidebar.active {
+        left: 0;
     }
     .logo img {
         width: 90px;
@@ -168,6 +237,12 @@ p {
         width: 70%;
         max-width: 350px;
     }
+    .custom-footer {
+        bottom: 15px;
+        right: 15px;
+        font-size: 11px;
+        padding: 4px 8px;
+    }
 }
 
 /* Media queries generales para pantallas pequeñas */
@@ -180,6 +255,13 @@ p {
         width: 30px;
         height: 30px;
         font-size: 16px;
+    }
+    .sidebar {
+        width: 150px;
+        left: -150px;
+    }
+    .sidebar.active {
+        left: 0;
     }
     .logo img {
         width: 80px;
@@ -197,5 +279,11 @@ p {
     .search-bar {
         width: 80%;
         max-width: 300px;
+    }
+    .custom-footer {
+        bottom: 10px;
+        right: 10px;
+        font-size: 10px;
+        padding: 3px 6px;
     }
 }
