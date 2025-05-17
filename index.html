@@ -11,7 +11,18 @@
         <!-- Botones de control -->
         <div class="control-buttons">
             <div class="control-btn">+</div>
-            <div class="control-btn">≡</div>
+            <div class="control-btn menu-toggle">≡</div>
+        </div>
+
+        <!-- Menú lateral desplegable -->
+        <div class="sidebar">
+            <ul class="menu">
+                <li><span class="icon">📦</span> Inventario</li>
+                <li class="active"><span class="icon">🛒</span> Ventas</li>
+                <li><span class="icon">⏳</span> Historial</li>
+                <li><span class="icon">📊</span> Estadísticas</li>
+                <li><span class="icon">⚙️</span> Configuración</li>
+            </ul>
         </div>
 
         <!-- Logo -->
@@ -29,9 +40,19 @@
             </div>
             <input type="text" class="search-bar" placeholder="Buscar productos...">
         </div>
+
+        <!-- Footer -->
+        <footer class="custom-footer">
+            © 2025 MiniMarket | Creado y desarrollado por Jonathan Tuquerez
+        </footer>
     </div>
 
     <script>
+        // JavaScript para controlar el menú desplegable
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('active');
+        });
+
         // JavaScript para activar la cámara al hacer clic en "ESCANER"
         document.querySelector('.btn.scanner').addEventListener('click', function() {
             navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
