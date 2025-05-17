@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MiniMarket UI - POS</title>
+    <title>MiniMarket UI - POS Avanzado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
 
     <style>
         body {
@@ -24,8 +25,11 @@
         .neon-border-magenta {
             box-shadow: 0 0 3px #ff00ff, 0 0 5px #ff00ff, 0 0 7px #ff00ff;
         }
-        .btn-scan {
-             background-color: rgba(255, 0, 255, 0.1);
+        .btn-view-list {
+            background-color: rgba(0, 255, 0, 0.1); 
+        }
+        .btn-action-magenta {
+            background-color: rgba(255, 0, 255, 0.1);
         }
         ::-webkit-scrollbar {
             width: 8px;
@@ -70,22 +74,16 @@
             visibility: hidden;
         }
         #preloader img {
-            width: 150px; /* Ajusta el tamaño del loader según necesites */
+            width: 150px; 
             height: auto;
-            /* Considera añadir una animación de 'spin' si tu loader no es un GIF animado */
-            /* animation: spin 1.5s linear infinite; */
         }
-        /* @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        } */
 
         .input-field {
             background-color: #2d2d2d;
             border: 1px solid #4a4a4a;
             color: white;
             padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem; /* rounded-md */
+            border-radius: 0.375rem;
             transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
         .input-field:focus {
@@ -93,30 +91,86 @@
             box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.3);
             outline: none;
         }
-        #demoProductList .category-title {
-            font-size: 1.25rem; /* text-xl */
-            font-weight: 600; /* font-semibold */
+        .input-field[readonly] {
+            background-color: #4a4a4a;
+            cursor: not-allowed;
+        }
+        #demoProductList .category-title, #currentProductsList .category-title {
+            font-size: 1.25rem;
+            font-weight: 600;
             color: #f0abfc; 
-            margin-top: 1rem; /* mt-4 */
-            margin-bottom: 0.5rem; /* mb-2 */
-            padding-bottom: 0.25rem; /* pb-1 */
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.25rem;
             border-bottom: 1px solid #4a4a4a;
         }
-         #demoProductList .product-entry {
-            padding: 0.5rem; /* p-2 */
-            border-bottom: 1px solid #3a3a3a; /* border-neutral-700 */
+        #demoProductList .product-entry, #currentProductsList .product-entry {
+            padding: 0.5rem;
+            border-bottom: 1px solid #3a3a3a;
         }
-        #demoProductList .product-entry:last-child {
+        #demoProductList .product-entry:last-child, #currentProductsList .product-entry:last-child {
             border-bottom: none;
         }
-        #demoProductList .product-name {
-            font-weight: 600; /* font-semibold */
+        #demoProductList .product-name, #currentProductsList .product-name {
+            font-weight: 600;
         }
-        #demoProductList .product-details {
-            font-size: 0.875rem; /* text-sm */
-            color: #a0aec0; /* text-gray-400 */
+        #demoProductList .product-details, #currentProductsList .product-details {
+            font-size: 0.875rem;
+            color: #a0aec0;
+        }
+        .stock-info {
+            font-size: 0.75rem; 
+            color: #facc15; 
+        }
+        .out-of-stock {
+            color: #f87171; 
+            font-weight: bold;
+        }
+        .report-sale-item {
+            background-color: #2a2a2a;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            margin-bottom: 0.75rem;
+        }
+        .report-sale-item ul {
+            list-style-type: disc;
+            margin-left: 1.5rem;
+            font-size: 0.875rem;
         }
 
+        #scanner-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            z-index: 100000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+        #interactive.viewport {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 2px solid #00ff00;
+        }
+        #interactive.viewport video, 
+        #interactive.viewport canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+        #scanner-message {
+            color: white;
+            margin-top: 15px;
+            font-size: 1rem;
+            text-align: center;
+        }
     </style>
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col items-center pt-4 sm:pt-8 px-4">
@@ -139,8 +193,8 @@
                 </svg>
             </button>
             <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-64 sm:w-72 bg-neutral-900 border-2 border-fuchsia-500 neon-border-magenta rounded-lg shadow-xl z-20 overflow-hidden">
-                <a href="#" id="linkInventario" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
-                    <i class="fas fa-cash-register w-5 h-5 mr-3 text-fuchsia-400"></i> Modo Venta (POS)
+                <a href="#" id="linkPOSView" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
+                    <i class="fas fa-shopping-cart w-5 h-5 mr-3 text-fuchsia-400"></i> Carrito / Modo Venta
                 </a>
                 <a href="#" id="linkVerInventario" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
                     <i class="fas fa-eye w-5 h-5 mr-3 text-fuchsia-400"></i> Ver Inventario
@@ -158,26 +212,45 @@
         </div>
     </header>
 
+    <div id="scanner-container" class="hidden">
+        <div id="interactive" class="viewport"></div>
+        <p id="scanner-message" class="text-white mt-4">Apunte la cámara al código de barras...</p>
+        <button id="stopScannerBtn" class="mt-4 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg">
+            <i class="fas fa-stop-circle mr-2"></i>Detener Escáner
+        </button>
+    </div>
+
+
     <div id="mainContentArea" class="w-full opacity-0 transition-opacity duration-500">
         <main id="inventoryView" class="w-full max-w-4xl mx-auto flex flex-col lg:flex-row gap-6 items-start">
             <div class="w-full lg:w-1/2 flex flex-col items-center text-center">
                 <h1 class="text-4xl sm:text-5xl font-bold text-green-400 neon-text-green mb-3 sm:mb-4">
-                    Bienvenido a <br class="sm:hidden"> MiniMarket POS
+                    Bienvenido a <br class="sm:hidden"> <span id="headerStoreName">MiniMarket POS</span>
                 </h1>
-                <p class="text-base sm:text-lg text-gray-300 mb-8 sm:mb-10">
+                <p class="text-base sm:text-lg text-gray-300 mb-6 sm:mb-8">
                     Sistema de venta y gestión
                 </p>
-                <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-8 sm:mb-10 w-full sm:w-auto">
-                    <button id="clearCartBtn" class="btn-scan flex items-center justify-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-fuchsia-400 border-2 border-fuchsia-400 neon-border-magenta rounded-xl hover:bg-fuchsia-600 hover:text-black hover:border-fuchsia-600 transition-all w-full sm:w-auto">
-                        <i class="fas fa-trash-alt"></i> LIMPIAR CARRITO
+                <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6 sm:mb-8 w-full justify-center items-center">
+                     <button id="viewProductListBtn" class="btn-view-list flex items-center justify-center gap-2 px-5 py-3 text-sm sm:text-base font-semibold text-green-400 border-2 border-green-400 neon-border-green rounded-lg hover:bg-green-600 hover:text-black hover:border-green-600 transition-all w-full sm:w-auto">
+                        <i class="fas fa-list-ul mr-2"></i>VER LISTA
+                    </button>
+                    <button id="startScannerBtn" class="btn-action-magenta flex items-center justify-center gap-2 px-5 py-3 text-sm sm:text-base font-semibold text-fuchsia-400 border-2 border-fuchsia-400 neon-border-magenta rounded-lg hover:bg-fuchsia-600 hover:text-black hover:border-fuchsia-600 transition-all w-full sm:w-auto">
+                        <i class="fas fa-barcode mr-2"></i>ESCANEAR
                     </button>
                 </div>
-                <div class="w-full max-w-md mb-6">
+
+                <div class="w-full max-w-md mb-2">
                     <form id="scanForm">
                         <input type="text" id="barcodeScannerInput" placeholder="Escanear o ingresar ID de producto..." class="w-full px-5 py-3 sm:py-4 bg-neutral-800 border-2 border-green-400 neon-border-green rounded-full text-gray-200 placeholder-gray-500 focus:outline-none focus:border-green-300 focus:ring-1 focus:ring-green-300 transition-all text-sm sm:text-base">
                     </form>
                 </div>
-                 <div id="productListModal" class="hidden fixed inset-0 modal flex items-center justify-center z-30 p-4">
+                <div class="w-full max-w-md mb-6 mt-4">
+                     <button id="clearCartBtn" class="w-full btn-action-magenta flex items-center justify-center gap-2 sm:gap-3 px-6 py-3 text-base sm:text-lg font-semibold text-fuchsia-400 border-2 border-fuchsia-400 neon-border-magenta rounded-xl hover:bg-fuchsia-600 hover:text-black hover:border-fuchsia-600 transition-all">
+                        <i class="fas fa-trash-alt"></i> LIMPIAR CARRITO
+                    </button>
+                </div>
+
+                <div id="productListModal" class="hidden fixed inset-0 modal flex items-center justify-center z-30 p-4">
                     <div class="bg-neutral-900 p-4 sm:p-6 rounded-lg shadow-xl max-w-xl w-full max-h-[90vh] flex flex-col border-2 border-fuchsia-500 neon-border-magenta">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-2xl font-bold text-green-400 neon-text-green">Inventario de Productos</h3>
@@ -185,8 +258,9 @@
                                 <i class="fas fa-times-circle"></i>
                             </button>
                         </div>
+                        <input type="text" id="searchProductListInput" placeholder="Buscar por nombre o ID..." class="w-full input-field mb-4">
                         <div id="demoProductList" class="text-left overflow-y-auto flex-grow pr-2">
-                            </div>
+                        </div>
                         <button id="closeProductListModalBottom" class="mt-4 bg-fuchsia-500 text-white px-6 py-2 rounded-lg hover:bg-fuchsia-600 transition-colors w-full sm:w-auto mx-auto block">Cerrar</button>
                     </div>
                 </div>
@@ -211,13 +285,23 @@
 
         <section id="reportView" class="hidden w-full max-w-3xl mx-auto mt-10 p-6 bg-neutral-800 rounded-lg border-2 border-green-500 neon-border-green">
             <h1 class="text-3xl sm:text-4xl font-bold text-green-400 neon-text-green mb-6 text-center">Resumen Diario de Ventas</h1>
-            <div class="space-y-4 text-lg">
+            <div class="space-y-4 text-lg mb-6">
                 <p><strong>Fecha del Reporte:</strong> <span id="reportDate" class="text-gray-300"></span></p>
                 <p><strong>Total Recaudado del Día:</strong> <span id="dailyTotalRevenue" class="text-green-400 font-bold"></span></p>
                 <p><strong>Cantidad de Productos Vendidos:</strong> <span id="dailyTotalProductsSold" class="text-fuchsia-400 font-bold"></span></p>
                 <p><strong>Cantidad de Ventas Realizadas:</strong> <span id="dailyTotalSalesCount" class="text-fuchsia-400 font-bold"></span></p>
             </div>
-            <div class="mt-8 text-center">
+            <div class="mb-6">
+                <h3 class="text-xl text-fuchsia-400 mb-2">Detalle de Ventas del Día:</h3>
+                <div id="dailySalesDetails" class="max-h-96 overflow-y-auto space-y-3 pr-2">
+                </div>
+            </div>
+            <div class="mb-8">
+                <h3 class="text-xl text-fuchsia-400 mb-2">Productos Más Vendidos Hoy:</h3>
+                <div id="topSellingProducts" class="space-y-1 text-sm">
+                </div>
+            </div>
+            <div class="text-center">
                 <button id="downloadReportPdfBtn" class="bg-fuchsia-500 hover:bg-fuchsia-600 text-white font-bold py-3 px-6 rounded-lg text-lg transition-all">
                     <i class="fas fa-file-pdf mr-2"></i> Descargar Reporte PDF
                 </button>
@@ -230,8 +314,8 @@
         <section id="manageProductsView" class="hidden w-full max-w-3xl mx-auto mt-10 p-6 bg-neutral-800 rounded-lg border-2 border-green-500 neon-border-green">
             <h1 class="text-3xl sm:text-4xl font-bold text-green-400 neon-text-green mb-6 text-center">Gestionar Productos</h1>
             <div class="mb-6">
-                <h3 class="text-xl text-fuchsia-400 mb-2">Añadir Nuevo Producto</h3>
-                <form id="addProductForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                <h3 id="formProductTitle" class="text-xl text-fuchsia-400 mb-2">Añadir Nuevo Producto</h3>
+                <form id="addProductForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
                     <div>
                         <label for="newProductName" class="block text-sm font-medium text-gray-300 mb-1">Nombre:</label>
                         <input type="text" id="newProductName" required class="w-full input-field">
@@ -248,20 +332,56 @@
                         <label for="newProductUnit" class="block text-sm font-medium text-gray-300 mb-1">Unidad (Ej: 500ml, 1kg, und):</label>
                         <input type="text" id="newProductUnit" required class="w-full input-field">
                     </div>
-                    <div class="sm:col-span-2">
+                    <div>
                         <label for="newProductPrice" class="block text-sm font-medium text-gray-300 mb-1">Precio ($):</label>
                         <input type="number" id="newProductPrice" step="0.01" min="0" required class="w-full input-field">
                     </div>
-                    <button type="submit" class="sm:col-span-2 bg-green-500 hover:bg-green-600 text-black font-bold py-2.5 px-4 rounded-lg transition-all h-fit">
+                    <div>
+                        <label for="newProductStock" class="block text-sm font-medium text-gray-300 mb-1">Stock (Cantidad):</label>
+                        <input type="number" id="newProductStock" step="1" min="0" required class="w-full input-field">
+                    </div>
+                    <button type="submit" id="submitProductFormBtn" class="sm:col-span-2 bg-green-500 hover:bg-green-600 text-black font-bold py-2.5 px-4 rounded-lg transition-all h-fit mt-4">
                         <i class="fas fa-plus-circle mr-2"></i>Añadir Producto
+                    </button>
+                    <button type="button" id="cancelEditBtn" class="hidden sm:col-span-2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2.5 px-4 rounded-lg transition-all h-fit mt-2">
+                        Cancelar Edición
                     </button>
                 </form>
             </div>
             <div>
                 <h3 class="text-xl text-fuchsia-400 mb-2">Lista de Productos Actuales</h3>
+                <input type="text" id="searchCurrentProductsInput" placeholder="Buscar por nombre o ID..." class="w-full input-field mb-4">
                 <div id="currentProductsList" class="max-h-96 overflow-y-auto pr-2 space-y-2">
                     <p class="text-gray-400">Cargando productos...</p>
                 </div>
+            </div>
+        </section>
+
+        <section id="configuracionView" class="hidden w-full max-w-xl mx-auto mt-10 p-6 bg-neutral-800 rounded-lg border-2 border-green-500 neon-border-green">
+            <h1 class="text-3xl sm:text-4xl font-bold text-green-400 neon-text-green mb-6 text-center">Configuración de la Tienda</h1>
+            <form id="storeConfigForm" class="space-y-4">
+                <div>
+                    <label for="storeNameInput" class="block text-sm font-medium text-gray-300 mb-1">Nombre de la Tienda:</label>
+                    <input type="text" id="storeNameInput" class="w-full input-field" placeholder="Mi MiniMarket">
+                </div>
+                <div>
+                    <label for="storeAddressInput" class="block text-sm font-medium text-gray-300 mb-1">Dirección:</label>
+                    <input type="text" id="storeAddressInput" class="w-full input-field" placeholder="Calle Falsa 123, Ciudad">
+                </div>
+                <div>
+                    <label for="storeRucInput" class="block text-sm font-medium text-gray-300 mb-1">RUC / CI:</label>
+                    <input type="text" id="storeRucInput" class="w-full input-field" placeholder="9999999999001">
+                </div>
+                <button type="submit" class="w-full bg-fuchsia-500 hover:bg-fuchsia-600 text-white font-bold py-2.5 px-4 rounded-lg transition-all">
+                    <i class="fas fa-save mr-2"></i>Guardar Configuración
+                </button>
+            </form>
+            <div class="mt-8 pt-6 border-t border-neutral-700">
+                <h3 class="text-xl text-red-500 mb-2">Zona Peligrosa</h3>
+                <button id="clearAllDataBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-lg transition-all">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Limpiar Todos los Datos de la Aplicación
+                </button>
+                <p class="text-xs text-gray-400 mt-2">Esto eliminará todos los productos, historial de ventas y configuraciones guardadas. Esta acción no se puede deshacer.</p>
             </div>
         </section>
     </div>
@@ -269,10 +389,20 @@
     <div id="paymentModal" class="hidden fixed inset-0 modal flex items-center justify-center z-30 p-4">
         <div class="bg-neutral-800 p-6 rounded-lg shadow-xl max-w-md w-full">
             <h3 class="text-2xl font-bold text-green-400 neon-text-green mb-4">Procesar Pago</h3>
-            <p class="text-lg mb-2">Total a Pagar: <span id="paymentModalTotal" class="font-bold text-green-400"></span></p>
+            <p class="text-xl mb-2">Total a Pagar: <span id="paymentModalTotal" class="font-bold text-green-400"></span></p>
+            
+            <div class="mb-4">
+                <label for="paymentMethodSelect" class="block text-sm font-medium text-gray-300 mb-1">Método de Pago:</label>
+                <select id="paymentMethodSelect" class="w-full input-field">
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Tarjeta">Tarjeta</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+
             <div class="mb-4">
                 <label for="amountPaidInput" class="block text-sm font-medium text-gray-300 mb-1">Monto Pagado por Cliente:</label>
-                <input type="number" id="amountPaidInput" step="0.01" class="w-full px-4 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white focus:ring-green-500 focus:border-green-500" placeholder="0.00">
+                <input type="number" id="amountPaidInput" step="0.01" class="w-full input-field" placeholder="0.00">
             </div>
             <p class="text-lg mb-4">Cambio: <span id="changeDue" class="font-bold text-fuchsia-400">$0.00</span></p>
             <div class="flex justify-end gap-4">
@@ -283,7 +413,7 @@
     </div>
 
     <footer class="w-full text-center text-gray-500 text-xs sm:text-sm py-6 mt-auto">
-        &copy; <span id="currentYear"></span> MiniMarket | Creado y desarrollado por Jonathan Tuquerrez
+        &copy; <span id="currentYear"></span> <span id="footerStoreName">MiniMarket</span> | Creado y desarrollado por Jonathan Tuquerrez
     </footer>
 
     <script>
@@ -291,89 +421,275 @@
         let synth;
 
         let mockProducts = JSON.parse(localStorage.getItem('mockProducts')) || [
-            // Confiteria
-            { id: "P001", name: "Aldor Play Gusanos Gomitas Saborizadas", unit: "55g", price: 1.00, category: "Confiteria" },
-            { id: "P002", name: "Arcor El Chavo Chupetes Saborizados", unit: "11g", price: 0.15, category: "Confiteria" },
-            { id: "P003", name: "Arcor El Chavo Chupetes Pack", unit: "528g", price: 4.00, category: "Confiteria" },
-            { id: "P004", name: "Colombina Bon Bon Bum Chupetes Fresa Pack x24", unit: "480g", price: 3.70, category: "Confiteria" },
-            { id: "P005", name: "Colombina Bon Bon Bum Chupete Sabor Fresa x u", unit: "20g", price: 0.15, category: "Confiteria" },
-            { id: "P006", name: "Colombina Bon Bon Bum Chupetes Surtido Pack x24", unit: "480g", price: 3.70, category: "Confiteria" },
-            { id: "P007", name: "Confiteca Plop Chupetes Surtidos x u", unit: "20g", price: 0.15, category: "Confiteria" },
-            { id: "P008", name: "Confiteca Plop Chupetes Fresa Ácida Pack x24", unit: "480g", price: 2.70, category: "Confiteria" },
-            { id: "P009", name: "Confiteca Plop Chupete Fresa Ácida x u", unit: "20g", price: 0.15, category: "Confiteria" },
-            // Jabonería Protex
-            { id: "P010", name: "Protex Fresh Jabón de Tocador Antibacterial Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex" },
-            { id: "P011", name: "Protex Herbal Jabón Antibacterial x u", unit: "110g", price: 1.25, category: "Jabonería Protex" },
-            { id: "P012", name: "Protex Herbal Jabón de Tocador Antibacterial Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex" },
-            { id: "P013", name: "Protex Jabón Aceite de Macadamia", unit: "110g", price: 1.25, category: "Jabonería Protex" },
-            { id: "P014", name: "Protex Jabón Antibacterial Omega 3", unit: "110g", price: 1.25, category: "Jabonería Protex" },
-            { id: "P015", name: "Protex Jabón Limpieza Profunda Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex" },
-            { id: "P016", name: "Protex Jabón Omega 3 Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex" },
-            // Bebidas y Energizantes
-            { id: "P017", name: "Aje Sporade Bebida Hidratante Cereza", unit: "500 ml", price: 0.55, category: "Bebidas y Energizantes" },
-            { id: "P018", name: "Aje Sporade Bebida Hidratante Tropical", unit: "1200 ml", price: 1.00, category: "Bebidas y Energizantes" },
-            { id: "P019", name: "Aje Sporade Bebida Hidratante Uva", unit: "500 ml", price: 0.55, category: "Bebidas y Energizantes" },
-            { id: "P020", name: "Aje Sporade Bebida Hidratante Manzana", unit: "1.2 lt", price: 1.00, category: "Bebidas y Energizantes" },
-            { id: "P021", name: "Aje Volt Bebida Energizante Frambuesa Ginseng", unit: "650 ml", price: 1.00, category: "Bebidas y Energizantes" },
-            { id: "P022", name: "Aje Volt Bebida Energizante Maca Arándano", unit: "400 ml", price: 0.50, category: "Bebidas y Energizantes" },
-            { id: "P023", name: "Aje Volt Bebida Energizante Uva Colágeno Aloe Vera", unit: "400 ml", price: 0.50, category: "Bebidas y Energizantes" },
-            { id: "P024", name: "Aroma Melis Té de Hierba Luisa Pack 20u", unit: "24 g", price: 1.15, category: "Bebidas y Energizantes" },
-            { id: "P025", name: "Aroma Melis Té de Hierbas Aromáticas Horchata Pack 20u", unit: "24 g", price: 1.15, category: "Bebidas y Energizantes" },
-            // Yogures
-            { id: "P026", name: "Alpina Regeneris Yogurt con Frutas Trozos de Frutilla", unit: "150 g", price: 0.70, category: "Yogures" },
-            { id: "P027", name: "Alpina Regeneris Yogurt con Frutas Trozos de Mora", unit: "150 g", price: 0.70, category: "Yogures" },
-            { id: "P028", name: "Alpina Regeneris Yogurt con Frutas Trozos de Durazno", unit: "150 g", price: 0.70, category: "Yogures" },
-            { id: "P029", name: "Chivería Yogurt Mix Sin Azúcar Vainilla Granola", unit: "170 g", price: 1.00, category: "Yogures" },
-            { id: "P030", name: "Kiosko Premio Sorpresa Yogurt Bebible Frutilla", unit: "180 g", price: 0.75, category: "Yogures" },
-            { id: "P031", name: "Toni Yogurt Bebible Natural Sin Azúcar", unit: "950 g", price: 3.15, category: "Yogures" },
-            { id: "P032", name: "Toni Yogurt en Postre Natural Griego Semidescremado", unit: "150 g", price: 1.45, category: "Yogures" },
-            { id: "P033", name: "Toni Yogurt Mix con Cereal Durazno", unit: "190 g", price: 0.85, category: "Yogures" },
-            { id: "P034", name: "Toni Yogurt Mix con Cereal Frutilla", unit: "190 g", price: 0.85, category: "Yogures" },
-            // Productos PRONACA y alimentos básicos
-            { id: "P035", name: "Pasta de Tomate 250g", unit: "1 und", price: 1.82, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P036", name: "Salsa Pizza 490g", unit: "1 und", price: 2.68, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P037", name: "Salsa Spaghetti 490g", unit: "1 und", price: 2.77, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P038", name: "Salsa Spaghetti Napolitana 500g", unit: "1 und", price: 3.65, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P039", name: "Ají Indio Bravo 100ml", unit: "1 und", price: 0.66, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P040", name: "Fritada Funda", unit: "1 kg", price: 6.31, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P041", name: "Cuero en Rollos", unit: "1 kg", price: 4.85, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P042", name: "Chuletas Bandeja 4 Unidades", unit: "1 kg", price: 10.95, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P043", name: "Chuletas Funda Marinadas 4 unidades", unit: "1 kg", price: 5.50, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P044", name: "Jamón Sanduchero Fritz", unit: "200 g", price: 3.00, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P045", name: "Jamón Light Pechuga de Pavo Fritz", unit: "200 g", price: 3.60, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P046", name: "Chuleta de Chancho Ahumada a Pork", unit: "500 g", price: 18.67, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P047", name: "Longaniza Fritz", unit: "300 g", price: 4.00, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P048", name: "Chorizo Fritz", unit: "300 g", price: 2.61, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P049", name: "Ranchera Desayuno Fritz", unit: "1 und", price: 3.34, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P050", name: "Jamón Mr Pollo", unit: "200 g", price: 3.49, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P051", name: "Salchicha Salchipollo", unit: "1 und", price: 1.52, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P052", name: "Salchicha Vienesa x 1", unit: "1 und", price: 0.65, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P053", name: "Tocineta Ahumada Rebanada 2x2", unit: "1 und", price: 14.98, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P054", name: "Jamón de Espaldazo", unit: "1 und", price: 9.55, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P055", name: "Jamón Línea Diaria 85 g", unit: "1 und", price: 1.00, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P056", name: "Salchichas Frankfurt x 5", unit: "1 und", price: 2.50, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P057", name: "Chorizo de Pollo 500 g", unit: "1 und", price: 3.20, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P058", name: "Chorizo Línea Diaria 130 g", unit: "1 und", price: 1.00, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P059", name: "Pepperoni Plumrose", unit: "1 und", price: 3.00, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P060", name: "Jamón de Pierna 200 g", unit: "1 und", price: 3.84, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P061", name: "Chorizo Argentino 300 g", unit: "1 und", price: 4.50, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P062", name: "Avena YA", unit: "1 kg", price: 1.82, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P063", name: "Fideos Cayambe Broca", unit: "400 g", price: 1.00, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P064", name: "Fideos Cayambe Cabello de Ángel", unit: "400 g", price: 1.00, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P065", name: "Fideos Cayambe Tallarín", unit: "400 g", price: 1.00, category: "Productos PRONACA y alimentos básicos" },
-            { id: "P066", name: "Harina YA", unit: "1 kg", price: 2.85, category: "Productos PRONACA y alimentos básicos" },
+            // ... (lista de productos extensa omitida por brevedad, pero está en el código completo con 'stock') ...
+            { id: "P001", name: "Aldor Play Gusanos Gomitas Saborizadas", unit: "55g", price: 1.00, category: "Confiteria", stock: 20 },
+            { id: "P002", name: "Arcor El Chavo Chupetes Saborizados", unit: "11g", price: 0.15, category: "Confiteria", stock: 50 },
+            { id: "P003", name: "Arcor El Chavo Chupetes Pack", unit: "528g", price: 4.00, category: "Confiteria", stock: 10 },
+            { id: "P004", name: "Colombina Bon Bon Bum Chupetes Fresa Pack x24", unit: "480g", price: 3.70, category: "Confiteria", stock: 15 },
+            { id: "P005", name: "Colombina Bon Bon Bum Chupete Sabor Fresa x u", unit: "20g", price: 0.15, category: "Confiteria", stock: 100 },
+            { id: "P006", name: "Colombina Bon Bon Bum Chupetes Surtido Pack x24", unit: "480g", price: 3.70, category: "Confiteria", stock: 12 },
+            { id: "P007", name: "Confiteca Plop Chupetes Surtidos x u", unit: "20g", price: 0.15, category: "Confiteria", stock: 80 },
+            { id: "P008", name: "Confiteca Plop Chupetes Fresa Ácida Pack x24", unit: "480g", price: 2.70, category: "Confiteria", stock: 10 },
+            { id: "P009", name: "Confiteca Plop Chupete Fresa Ácida x u", unit: "20g", price: 0.15, category: "Confiteria", stock: 70 },
+            { id: "P067", name: "Nestlé Galleta Amor Rellena Vainilla", unit: "Paquete 6und", price: 0.75, category: "Confiteria", stock: 30},
+            { id: "P068", name: "Chicle Trident Menta Individual", unit: "1 und", price: 0.10, category: "Confiteria", stock: 200},
+            { id: "P010", name: "Protex Fresh Jabón de Tocador Antibacterial Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex", stock: 10 },
+            { id: "P011", name: "Protex Herbal Jabón Antibacterial x u", unit: "110g", price: 1.25, category: "Jabonería Protex", stock: 25 },
+            { id: "P012", name: "Protex Herbal Jabón de Tocador Antibacterial Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex", stock: 8 },
+            { id: "P013", name: "Protex Jabón Aceite de Macadamia", unit: "110g", price: 1.25, category: "Jabonería Protex", stock: 22 },
+            { id: "P014", name: "Protex Jabón Antibacterial Omega 3", unit: "110g", price: 1.25, category: "Jabonería Protex", stock: 18 },
+            { id: "P015", name: "Protex Jabón Limpieza Profunda Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex", stock: 9 },
+            { id: "P016", name: "Protex Jabón Omega 3 Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex", stock: 7 },
+            { id: "P017", name: "Aje Sporade Bebida Hidratante Cereza", unit: "500 ml", price: 0.55, category: "Hidratación", stock: 40 }, 
+            { id: "P018", name: "Aje Sporade Bebida Hidratante Tropical", unit: "1200 ml", price: 1.00, category: "Hidratación", stock: 20 }, 
+            { id: "P019", name: "Aje Sporade Bebida Hidratante Uva", unit: "500 ml", price: 0.55, category: "Hidratación", stock: 35 }, 
+            { id: "P020", name: "Aje Sporade Bebida Hidratante Manzana", unit: "1.2 lt", price: 1.00, category: "Hidratación", stock: 18 }, 
+            { id: "P021", name: "Aje Volt Bebida Energizante Frambuesa Ginseng", unit: "650 ml", price: 1.00, category: "Energizantes", stock: 20 }, 
+            { id: "P022", name: "Aje Volt Bebida Energizante Maca Arándano", unit: "400 ml", price: 0.50, category: "Energizantes", stock: 30 }, 
+            { id: "P023", name: "Aje Volt Bebida Energizante Uva Colágeno Aloe Vera", unit: "400 ml", price: 0.50, category: "Energizantes", stock: 28 }, 
+            { id: "P024", name: "Aroma Melis Té de Hierba Luisa Pack 20u", unit: "24 g", price: 1.15, category: "Jugos y Té", stock: 15 }, 
+            { id: "P025", name: "Aroma Melis Té de Hierbas Aromáticas Horchata Pack 20u", unit: "24 g", price: 1.15, category: "Jugos y Té", stock: 12 }, 
+            { id: "P069", name: "Coca-Cola Sabor Original", unit: "500 ml", price: 0.75, category: "Gaseosas", stock: 60},
+            { id: "P070", name: "Agua Dasani Sin Gas", unit: "600 ml", price: 0.50, category: "Hidratación", stock: 50}, 
+            { id: "P071", name: "Red Bull Energy Drink", unit: "250 ml", price: 2.50, category: "Energizantes", stock: 25},
+            { id: "P026", name: "Alpina Regeneris Yogurt con Frutas Trozos de Frutilla", unit: "150 g", price: 0.70, category: "Lácteos", stock: 20 },
+            { id: "P027", name: "Alpina Regeneris Yogurt con Frutas Trozos de Mora", unit: "150 g", price: 0.70, category: "Lácteos", stock: 18 },
+            { id: "P028", name: "Alpina Regeneris Yogurt con Frutas Trozos de Durazno", unit: "150 g", price: 0.70, category: "Lácteos", stock: 22 },
+            { id: "P029", name: "Chivería Yogurt Mix Sin Azúcar Vainilla Granola", unit: "170 g", price: 1.00, category: "Lácteos", stock: 15 },
+            { id: "P030", name: "Kiosko Premio Sorpresa Yogurt Bebible Frutilla", unit: "180 g", price: 0.75, category: "Lácteos", stock: 30 },
+            { id: "P031", name: "Toni Yogurt Bebible Natural Sin Azúcar", unit: "950 g", price: 3.15, category: "Lácteos", stock: 10 },
+            { id: "P032", name: "Toni Yogurt en Postre Natural Griego Semidescremado", unit: "150 g", price: 1.45, category: "Lácteos", stock: 25 },
+            { id: "P033", name: "Toni Yogurt Mix con Cereal Durazno", unit: "190 g", price: 0.85, category: "Lácteos", stock: 30 },
+            { id: "P034", name: "Toni Yogurt Mix con Cereal Frutilla", unit: "190 g", price: 0.85, category: "Lácteos", stock: 32 },
+            { id: "P035", name: "Pasta de Tomate Pronaca", unit: "250g", price: 1.82, category: "Despensa", stock: 20 }, 
+            { id: "P036", name: "Salsa Pizza Pronaca", unit: "490g", price: 2.68, category: "Despensa", stock: 15 },
+            { id: "P037", name: "Salsa Spaghetti Pronaca", unit: "490g", price: 2.77, category: "Despensa", stock: 16 },
+            { id: "P038", name: "Salsa Spaghetti Napolitana Pronaca", unit: "500g", price: 3.65, category: "Despensa", stock: 10 },
+            { id: "P039", name: "Ají Indio Bravo", unit: "100ml", price: 0.66, category: "Despensa", stock: 40 },
+            { id: "P040", name: "Fritada Funda Pronaca", unit: "1 kg", price: 6.31, category: "Carnes y Embutidos", stock: 5 }, 
+            { id: "P041", name: "Cuero en Rollos Pronaca", unit: "1 kg", price: 4.85, category: "Carnes y Embutidos", stock: 6 },
+            { id: "P042", name: "Chuletas Bandeja 4 Unidades Pronaca", unit: "1 kg", price: 10.95, category: "Carnes y Embutidos", stock: 4 },
+            { id: "P043", name: "Chuletas Funda Marinadas 4 unidades Pronaca", unit: "1 kg", price: 5.50, category: "Carnes y Embutidos", stock: 7 },
+            { id: "P044", name: "Jamón Sanduchero Fritz", unit: "200 g", price: 3.00, category: "Carnes y Embutidos", stock: 15 },
+            { id: "P045", name: "Jamón Light Pechuga de Pavo Fritz", unit: "200 g", price: 3.60, category: "Carnes y Embutidos", stock: 12 },
+            { id: "P046", name: "Chuleta de Chancho Ahumada a Pork", unit: "500 g", price: 18.67, category: "Carnes y Embutidos", stock: 3 },
+            { id: "P047", name: "Longaniza Fritz", unit: "300 g", price: 4.00, category: "Carnes y Embutidos", stock: 10 },
+            { id: "P048", name: "Chorizo Fritz", unit: "300 g", price: 2.61, category: "Carnes y Embutidos", stock: 14 },
+            { id: "P049", name: "Ranchera Desayuno Fritz", unit: "1 und", price: 3.34, category: "Carnes y Embutidos", stock: 18 },
+            { id: "P050", name: "Jamón Mr Pollo", unit: "200 g", price: 3.49, category: "Carnes y Embutidos", stock: 16 },
+            { id: "P051", name: "Salchicha Salchipollo", unit: "1 und", price: 1.52, category: "Carnes y Embutidos", stock: 25 },
+            { id: "P052", name: "Salchicha Vienesa x 1", unit: "1 und", price: 0.65, category: "Carnes y Embutidos", stock: 50 },
+            { id: "P053", name: "Tocineta Ahumada Rebanada 2x2", unit: "1 und", price: 14.98, category: "Carnes y Embutidos", stock: 8 },
+            { id: "P054", name: "Jamón de Espaldazo", unit: "1 und", price: 9.55, category: "Carnes y Embutidos", stock: 9 },
+            { id: "P055", name: "Jamón Línea Diaria 85 g", unit: "1 und", price: 1.00, category: "Carnes y Embutidos", stock: 30 },
+            { id: "P056", name: "Salchichas Frankfurt x 5", unit: "1 und", price: 2.50, category: "Carnes y Embutidos", stock: 20 },
+            { id: "P057", name: "Chorizo de Pollo 500 g", unit: "1 und", price: 3.20, category: "Carnes y Embutidos", stock: 12 },
+            { id: "P058", name: "Chorizo Línea Diaria 130 g", unit: "1 und", price: 1.00, category: "Carnes y Embutidos", stock: 28 },
+            { id: "P059", name: "Pepperoni Plumrose", unit: "1 und", price: 3.00, category: "Carnes y Embutidos", stock: 10 },
+            { id: "P060", name: "Jamón de Pierna 200 g", unit: "1 und", price: 3.84, category: "Carnes y Embutidos", stock: 13 },
+            { id: "P061", name: "Chorizo Argentino 300 g", unit: "1 und", price: 4.50, category: "Carnes y Embutidos", stock: 9 },
+            { id: "P062", name: "Avena YA", unit: "1 kg", price: 1.82, category: "Despensa", stock: 25 },
+            { id: "P063", name: "Fideos Cayambe Broca", unit: "400 g", price: 1.00, category: "Despensa", stock: 40 },
+            { id: "P064", name: "Fideos Cayambe Cabello de Ángel", unit: "400 g", price: 1.00, category: "Despensa", stock: 38 },
+            { id: "P065", name: "Fideos Cayambe Tallarín", unit: "400 g", price: 1.00, category: "Despensa", stock: 35 },
+            { id: "P066", name: "Harina YA", unit: "1 kg", price: 2.85, category: "Despensa", stock: 20 },
+            { id: "P072", name: "Arroz Flor", unit: "1 kg", price: 1.50, category: "Despensa", stock: 50},
+            { id: "P073", name: "Azúcar Blanca San Carlos", unit: "1 kg", price: 1.20, category: "Despensa", stock: 60},
+            { id: "P074", name: "Aceite Girasol", unit: "1 lt", price: 2.80, category: "Despensa", stock: 30},
+            { id: "P075", name: "Colgate Triple Acción Pasta Dental", unit: "75 ml", price: 1.80, category: "Cuidado Personal", stock: 25},
+            { id: "P076", name: "Shampoo Head & Shoulders Limpieza Renovadora", unit: "375 ml", price: 4.50, category: "Cuidado Personal", stock: 15},
+            { id: "P077", name: "Desodorante Rexona Men V8 Roll-on", unit: "50 ml", price: 2.20, category: "Cuidado Personal", stock: 30},
+            { id: "P078", name: "Papel Higiénico Familia Acolchamax", unit: "Paquete 4 rollos", price: 2.00, category: "Cuidado Personal", stock: 40},
+            { id: "P079", name: "Papas Fritas Ruffles Queso", unit: "40g", price: 0.50, category: "Snacks", stock: 70},
+            { id: "P080", name: "Doritos Nacho Queso", unit: "45g", price: 0.60, category: "Snacks", stock: 65},
+            { id: "P081", name: "Cheetos Horneados Queso", unit: "30g", price: 0.45, category: "Snacks", stock: 75},
+            { id: "P082", name: "Maní Salado Universal", unit: "100g", price: 0.70, category: "Snacks", stock: 50},
+            { id: "P083", name: "Coca-Cola Sabor Original 1250 ML Retornable UIO", unit: "1250 ML", price: 1.00, category: "Gaseosas", stock: 20 },
+            { id: "P084", name: "Coca-Cola Sabor Original 2000 ML Retornable", unit: "2000 ML", price: 1.60, category: "Gaseosas", stock: 15 },
+            { id: "P085", name: "Coca-Cola Sabor Original 300 ML Retornable", unit: "300 ML", price: 0.30, category: "Gaseosas", stock: 50 },
+            { id: "P086", name: "Coca-Cola Sin Azucar 1000 ML Retornable", unit: "1000 ML", price: 0.50, category: "Gaseosas", stock: 18 },
+            { id: "P087", name: "Coca-Cola Sin Azúcar 2000 ML Retornable", unit: "2000 ML", price: 1.10, category: "Gaseosas", stock: 12 },
+            { id: "P088", name: "Coca-Cola Sin Azúcar 300 ML Retornable", unit: "300 ML", price: 0.30, category: "Gaseosas", stock: 45 },
+            { id: "P089", name: "Fanta Naranja 2000 ML Retornable", unit: "2000 ML", price: 1.10, category: "Gaseosas", stock: 10 },
+            { id: "P090", name: "Fanta Naranja 300 ML Retornable", unit: "300 ML", price: 0.30, category: "Gaseosas", stock: 40 },
+            { id: "P091", name: "Fioravanti Fresa 2000 ML Retornable", unit: "2000 ML", price: 1.10, category: "Gaseosas", stock: 9 },
+            { id: "P092", name: "Fioravanti Fresa 300 ML Retornable", unit: "300 ML", price: 0.30, category: "Gaseosas", stock: 38 },
+            { id: "P093", name: "Fioravanti Manzana 300 ML Retornable", unit: "300 ML", price: 0.30, category: "Gaseosas", stock: 35 },
+            { id: "P094", name: "Inca Kola 300 ML Retornable", unit: "300 ML", price: 0.30, category: "Gaseosas", stock: 30 },
+            { id: "P095", name: "Sprite 1000 ML Retornable", unit: "1000 ML", price: 0.50, category: "Gaseosas", stock: 14 },
+            { id: "P096", name: "Sprite Limon 2000 ML Retornable", unit: "2000 ML", price: 1.10, category: "Gaseosas", stock: 11 },
+            { id: "P097", name: "Sprite Limon 300 ML Retornable", unit: "300 ML", price: 0.30, category: "Gaseosas", stock: 33 },
+            { id: "P098", name: "Coca-Cola Sabor Original 1250 ML", unit: "1250 ML", price: 1.50, category: "Gaseosas", stock: 22 },
+            { id: "P101", name: "Coca-Cola Sabor Ligero 2000 ML", unit: "2000 ML", price: 2.20, category: "Gaseosas", stock: 8 },
+            { id: "P102", name: "Coca-Cola Sabor Ligero 500 ML", unit: "500 ML", price: 0.75, category: "Gaseosas", stock: 28 },
+            { id: "P103", name: "Coca-Cola Sabor Original 1000 ML", unit: "1000 ML", price: 1.20, category: "Gaseosas", stock: 25 },
+            { id: "P104", name: "Coca-Cola Sabor Original 1350 ML", unit: "1350 ML", price: 1.50, category: "Gaseosas", stock: 18 },
+            { id: "P105", name: "Coca-Cola Sabor Original 2000 ML", unit: "2000 ML", price: 2.20, category: "Gaseosas", stock: 20 }, 
+            { id: "P106", name: "Coca-Cola Sabor Original 300 ML", unit: "300 ML", price: 0.50, category: "Gaseosas", stock: 55 }, 
+            { id: "P107", name: "Coca-Cola Sabor Original 3000 ML", unit: "3000 ML", price: 3.10, category: "Gaseosas", stock: 10 },
+            { id: "P108", name: "Coca-Cola Sabor Original 350 ML Lata", unit: "350 ML", price: 1.30, category: "Gaseosas", stock: 40 },
+            { id: "P109", name: "Coca-Cola Sin Azúcar 1000 ML", unit: "1000 ML", price: 0.75, category: "Gaseosas", stock: 22 }, 
+            { id: "P110", name: "Coca-Cola Sin Azúcar 1600ml", unit: "1600ml", price: 1.00, category: "Gaseosas", stock: 15 },
+            { id: "P111", name: "Coca-Cola Sin Azúcar 2750 ML", unit: "2750 ML", price: 1.75, category: "Gaseosas", stock: 12 },
+            { id: "P112", name: "Coca-Cola Sin Azúcar 410ml", unit: "410ml", price: 0.40, category: "Gaseosas", stock: 30 },
+            { id: "P113", name: "Coca-Cola Sin azúcar 350 ML Lata", unit: "350 ML", price: 1.30, category: "Gaseosas", stock: 35 },
+            { id: "P114", name: "Fanta 350Ml Lata", unit: "350 ML", price: 1.30, category: "Gaseosas", stock: 30 },
+            { id: "P115", name: "Fanta Naranja 1350 ML", unit: "1350 ML", price: 1.15, category: "Gaseosas", stock: 15 },
+            { id: "P116", name: "Fanta Naranja 250 ML", unit: "250 ML", price: 0.30, category: "Gaseosas", stock: 50 },
+            { id: "P117", name: "Fanta Naranja 3000 ML", unit: "3000 ML", price: 3.10, category: "Gaseosas", stock: 8 },
+            { id: "P118", name: "Fanta Naranja 500 ML", unit: "500 ML", price: 0.60, category: "Gaseosas", stock: 40 },
+            { id: "P119", name: "Fioravanti Fresa 1000 ML", unit: "1000 ML", price: 0.65, category: "Gaseosas", stock: 20 },
+            { id: "P120", name: "Fioravanti Fresa 1350 ML", unit: "1350 ML", price: 1.15, category: "Gaseosas", stock: 14 },
+            { id: "P121", name: "Fioravanti Fresa 2000 ML", unit: "2000 ML", price: 1.60, category: "Gaseosas", stock: 18 }, 
+            { id: "P122", name: "Fioravanti Fresa 250 ML", unit: "250 ML", price: 0.30, category: "Gaseosas", stock: 45 },
+            { id: "P123", name: "Fioravanti Fresa 3000 ML", unit: "3000 ML", price: 3.10, category: "Gaseosas", stock: 7 },
+            { id: "P124", name: "Fioravanti Fresa 500 ML", unit: "500 ML", price: 0.60, category: "Gaseosas", stock: 38 },
+            { id: "P125", name: "Fioravanti Manzana 250 ML", unit: "250 ML", price: 0.30, category: "Gaseosas", stock: 42 },
+            { id: "P126", name: "Fioravanti Manzana 3000 ML", unit: "3000 ML", price: 3.10, category: "Gaseosas", stock: 6 },
+            { id: "P127", name: "Inca Kola 1000 ML", unit: "1000 ML", price: 0.60, category: "Gaseosas", stock: 22 },
+            { id: "P128", name: "Inca Kola 1350 ML", unit: "1350 ML", price: 1.15, category: "Gaseosas", stock: 16 },
+            { id: "P129", name: "Inca Kola 2000 ML", unit: "2000 ML", price: 1.25, category: "Gaseosas", stock: 19 },
+            { id: "P130", name: "Inca Kola 250 ML", unit: "250 ML", price: 0.30, category: "Gaseosas", stock: 48 },
+            { id: "P131", name: "Inca Kola 3000 ML", unit: "3000 ML", price: 3.10, category: "Gaseosas", stock: 5 },
+            { id: "P132", name: "Inca Kola 500 ML", unit: "500 ML", price: 0.60, category: "Gaseosas", stock: 36 },
+            { id: "P133", name: "Sprite 350ML Lata", unit: "350 ML", price: 1.30, category: "Gaseosas", stock: 28 },
+            { id: "P134", name: "Sprite Limon 1000 ML", unit: "1000 ML", price: 0.65, category: "Gaseosas", stock: 20 }, 
+            { id: "P135", name: "Sprite Limon 1350 ML", unit: "1350 ML", price: 1.15, category: "Gaseosas", stock: 13 },
+            { id: "P136", name: "Sprite Limon 250 ML", unit: "250 ML", price: 0.30, category: "Gaseosas", stock: 44 },
+            { id: "P137", name: "Sprite Limon 3000 ML", unit: "3000 ML", price: 3.10, category: "Gaseosas", stock: 4 },
+            { id: "P219", name: "Toni de Almendra Vainilla 1lt", unit: "1 L", price: 4.10, category: "Lácteos", stock: 6 },
+            { id: "P220", name: "Toni de Almendra Natural 750ml", unit: "750 ml", price: 2.50, category: "Lácteos", stock: 7 },
+            { id: "P221", name: "Toni de Almendra Vainilla 750ml", unit: "750 ml", price: 2.50, category: "Lácteos", stock: 8 },
+            { id: "P222", name: "Yogurt Toni Griego Frutilla 150G", unit: "150g", price: 1.65, category: "Lácteos", stock: 20 },
+            { id: "P223", name: "Yogurt Toni Griego Limoncoco 150G", unit: "150g", price: 1.65, category: "Lácteos", stock: 18 },
+            { id: "P224", name: "Yogur Durazno Toni 110 GR", unit: "110 GR", price: 0.50, category: "Lácteos", stock: 40 },
+            { id: "P225", name: "Yogur Frutilla Toni 110 GR", unit: "110 GR", price: 0.50, category: "Lácteos", stock: 42 },
+            { id: "P226", name: "Yogur Mora Toni 110 GR", unit: "110 GR", price: 0.50, category: "Lácteos", stock: 38 },
+            { id: "P227", name: "Yogur Bebible Durazno Toni 1700ML", unit: "1700 ML", price: 5.40, category: "Lácteos", stock: 5 }, 
+            { id: "P228", name: "Yogur Bebible Frutilla Toni 1700ML", unit: "1700 ML", price: 5.40, category: "Lácteos", stock: 6 },
+            { id: "P229", name: "Yogur Bebible Mora Toni 1700ML", unit: "1700 ML", price: 5.40, category: "Lácteos", stock: 4 },
+            { id: "P230", name: "Yogur Mix Frootloops Vainilla Toni 175G", unit: "175g", price: 0.90, category: "Lácteos", stock: 25 },
+            { id: "P231", name: "Yogur Mix Zucaritas Mora Toni 175G", unit: "175g", price: 0.90, category: "Lácteos", stock: 22 }, 
+            { id: "P232", name: "Yogurt Cremoso Trozos Durazno Toni 150 GR", unit: "150 GR", price: 0.90, category: "Lácteos", stock: 20 },
+            { id: "P233", name: "Yogurt Cremoso Trozos Frutilla Toni 150 GR", unit: "150 GR", price: 0.90, category: "Lácteos", stock: 18 },
+            { id: "P234", name: "Yogurt Durazno Toni 190 GR", unit: "190 GR", price: 1.00, category: "Lácteos", stock: 30 },
+            { id: "P235", name: "Yogurt Durazno Toni 950 GR", unit: "950 GR", price: 3.45, category: "Lácteos", stock: 10 },
+            { id: "P236", name: "Yogurt Frush Frutos Amarillos Toni 900 ML", unit: "900 ML", price: 1.40, category: "Lácteos", stock: 12 },
+            { id: "P237", name: "Yogurt Frush Frutos Rojos Toni 900 ML", unit: "900 ML", price: 1.40, category: "Lácteos", stock: 14 },
+            { id: "P238", name: "Yogurt Frush Frutos Verdes Toni 900 ML", unit: "900 ML", price: 1.40, category: "Lácteos", stock: 13 },
+            { id: "P239", name: "Yogurt Frutilla Toni 190 GR", unit: "190 GR", price: 1.00, category: "Lácteos", stock: 28 },
+            { id: "P240", name: "Yogurt Frutilla Toni 950 GR", unit: "950 GR", price: 3.20, category: "Lácteos", stock: 9 },
+            { id: "P241", name: "Yogurt Light Durazno Toni 950 GR", unit: "950 GR", price: 3.45, category: "Lácteos", stock: 7 },
+            { id: "P242", name: "Yogurt Light Frutilla Toni 950 GR", unit: "950 GR", price: 3.45, category: "Lácteos", stock: 8 },
+            { id: "P243", name: "Yogurt Light Mora Toni 950 GR", unit: "950 GR", price: 3.45, category: "Lácteos", stock: 6 },
+            { id: "P244", name: "Yogurt Light Vainilla Toni 950 GR", unit: "950 GR", price: 3.45, category: "Lácteos", stock: 5 },
+            { id: "P245", name: "Yogurt Mix Bolitas Chocolate Toni 180 ML", unit: "180 ML", price: 1.00, category: "Lácteos", stock: 25 },
+            { id: "P246", name: "Yogurt Mix Bolitas Vainilla Toni 180 ML", unit: "180 ML", price: 1.00, category: "Lácteos", stock: 23 },
+            { id: "P247", name: "Yogurt Mix Chiqui Hojuelas Durazno Toni 92G", unit: "92g", price: 0.50, category: "Lácteos", stock: 35 },
+            { id: "P248", name: "Yogurt Mix Chiqui Arroz Crocante Toni 97 GR", unit: "97 GR", price: 0.50, category: "Lácteos", stock: 33 },
+            { id: "P249", name: "Yogurt Mix Chiqui Hojuelas Toni 97 GR", unit: "97 GR", price: 0.50, category: "Lácteos", stock: 36 },
+            { id: "P250", name: "Yogurt Mix Chiqui-Bolitas Toni 97 GR", unit: "97 GR", price: 0.50, category: "Lácteos", stock: 32 },
+            { id: "P251", name: "Yogurt Mix Chiqui-Galletas Chocolate Toni 97 GR", unit: "97 GR", price: 0.50, category: "Lácteos", stock: 30 },
+            { id: "P252", name: "Yogurt Mix Choco Chispa Toni 175 GR", unit: "175 GR", price: 1.00, category: "Lácteos", stock: 20 },
+            { id: "P253", name: "Yogurt Mix Durazno Toni 180 ML", unit: "180 ML", price: 1.00, category: "Lácteos", stock: 22 },
+            { id: "P254", name: "Yogurt Mix Frutilla Toni 180 ML", unit: "180 ML", price: 1.00, category: "Lácteos", stock: 24 },
+            { id: "P255", name: "Yogurt Mix Vainilla Toni 180 ML", unit: "180 ML", price: 1.00, category: "Lácteos", stock: 18 },
+            { id: "P256", name: "Yogurt Mora Toni 190 GR", unit: "190 GR", price: 1.00, category: "Lácteos", stock: 26 },
+            { id: "P257", name: "Yogurt Mora Toni 950 GR", unit: "950 GR", price: 3.20, category: "Lácteos", stock: 11 },
+            { id: "P258", name: "Yogurt Trozo de Frutas Toni 950ml", unit: "950ml", price: 3.20, category: "Lácteos", stock: 10 },
+            { id: "P259", name: "Yogurt Toni Griego Frutos Rojos 150 GR", unit: "150 GR", price: 1.65, category: "Lácteos", stock: 19 },
+            { id: "P260", name: "Yogurt Toni Griego Mora 150 GR", unit: "150 GR", price: 1.65, category: "Lácteos", stock: 17 },
+            { id: "P261", name: "Yogurt Toni Griego Natural 150 GR", unit: "150 GR", price: 1.65, category: "Lácteos", stock: 21 },
+            { id: "P262", name: "Yogurt Toni Griego Mango 150G", unit: "150g", price: 1.65, category: "Lácteos", stock: 16 },
+            { id: "P263", name: "Yogurt Toni Griego Maracuya 150G", unit: "150g", price: 1.65, category: "Lácteos", stock: 14 },
+            { id: "P264", name: "Atun Real 180 GR", unit: "180 GR", price: 2.02, category: "Despensa", stock: 20 },
+            { id: "P265", name: "Atún Lomito en aceite 80 GR", unit: "80 GR", price: 3.30, category: "Despensa", stock: 15 },
+            { id: "P266", name: "Atún Lomito en agua 80GR", unit: "80 GR", price: 3.33, category: "Despensa", stock: 16 },
+            { id: "P267", name: "Azucar Morena 1KG", unit: "1 KG", price: 1.30, category: "Despensa", stock: 30 },
+            { id: "P268", name: "Azucar San Carlos 2K", unit: "2 KG", price: 2.40, category: "Despensa", stock: 15 },
+            { id: "P269", name: "Bizcotelas Vainilla 150GR", unit: "150 GR", price: 2.50, category: "Snacks", stock: 20 }, 
+            { id: "P270", name: "Bizcotelas Vainilla 75GR", unit: "75 GR", price: 1.70, category: "Snacks", stock: 25 },
+            { id: "P271", name: "Bony Manjar 50GR", unit: "50 GR", price: 0.60, category: "Snacks", stock: 40 }, 
+            { id: "P272", name: "CanguiPop Mantequilla 134G", unit: "134g", price: 1.50, category: "Snacks", stock: 18 },
+            { id: "P273", name: "Chicharrones Original 100GR", unit: "100 GR", price: 2.20, category: "Snacks", stock: 22 },
+            { id: "P274", name: "Chicharrones Original 30GR", unit: "30 GR", price: 1.00, category: "Snacks", stock: 35 },
+            { id: "P275", name: "Chicharrones Picante 100GR", unit: "100 GR", price: 2.20, category: "Snacks", stock: 20 },
+            { id: "P276", name: "Chicharrones Picante 30GR", unit: "30 GR", price: 1.00, category: "Snacks", stock: 33 },
+            { id: "P277", name: "Chococake 100 GR", unit: "100 GR", price: 1.00, category: "Snacks", stock: 28 }, 
+            { id: "P278", name: "Chococake Red Velvet 50G", unit: "50g", price: 0.50, category: "Snacks", stock: 32 },
+            { id: "P279", name: "Inacake Gemelo 80 GR", unit: "80 GR", price: 0.75, category: "Snacks", stock: 26 },
+            { id: "P280", name: "Inacake Mini Chocolate 55Gr", unit: "55 Gr", price: 0.50, category: "Snacks", stock: 38 },
+            { id: "P281", name: "Inacake Mini Vainilla 55G", unit: "55g", price: 0.50, category: "Snacks", stock: 36 },
+            { id: "P282", name: "Lonchys Camaron 64 GR", unit: "64 GR", price: 0.95, category: "Snacks", stock: 24 },
+            { id: "P283", name: "Lonchys Carne Res 64 GR", unit: "64 GR", price: 0.95, category: "Snacks", stock: 23 },
+            { id: "P284", name: "Lonchys Pollo 64 GR", unit: "64 GR", price: 0.95, category: "Snacks", stock: 25 },
+            { id: "P287", name: "Mama Fanny Tortillas De Trigo 250GR", unit: "250 GR", price: 2.15, category: "Despensa", stock: 12 },
+            { id: "P288", name: "Mama Fanny Tortillas De Trigo 400GR", unit: "400 GR", price: 2.70, category: "Despensa", stock: 10 },
+            { id: "P289", name: "Mayonesa 200GR", unit: "200 GR", price: 1.28, category: "Despensa", stock: 30 },
+            { id: "P291", name: "Mostaza 200GR", unit: "200 GR", price: 1.00, category: "Despensa", stock: 28 },
+            { id: "P292", name: "Nachos Queso 300GR", unit: "300 GR", price: 2.85, category: "Snacks", stock: 15 },
+            { id: "P293", name: "Oreo Mini 54 GR", unit: "54 GR", price: 0.52, category: "Snacks", stock: 50 }, 
+            { id: "P294", name: "Panchito Natural 170G", unit: "170g", price: 0.75, category: "Snacks", stock: 30 },
+            { id: "P295", name: "Panchito Pican 163G", unit: "163g", price: 0.75, category: "Snacks", stock: 28 }, 
+            { id: "P296", name: "Pringles Cebolla 124 GR", unit: "124 GR", price: 5.13, category: "Snacks", stock: 10 },
+            { id: "P297", name: "Pringles Original 124 GR", unit: "124 GR", price: 5.13, category: "Snacks", stock: 12 },
+            { id: "P298", name: "Pringles Queso 124 GR", unit: "124 GR", price: 5.13, category: "Snacks", stock: 11 },
+            { id: "P299", name: "Rebanada Chocolate/Vainilla 80GR", unit: "80 GR", price: 0.75, category: "Snacks", stock: 20 }, 
+            { id: "P300", name: "Rebanada Vainilla 80GR", unit: "80 GR", price: 0.75, category: "Snacks", stock: 22 },
+            { id: "P301", name: "Relleno De Vainilla 100 GR", unit: "100 GR", price: 1.00, category: "Snacks", stock: 18 }, 
+            { id: "P302", name: "Ritz Taco 67G", unit: "67g", price: 0.45, category: "Snacks", stock: 40 }, 
+            { id: "P303", name: "Ronditos 150GR", unit: "150 GR", price: 1.75, category: "Snacks", stock: 20 },
+            { id: "P304", name: "Ronditos Fiesta 300 GR", unit: "300 GR", price: 2.85, category: "Snacks", stock: 12 },
+            { id: "P305", name: "Rosquita Natural 34 G", unit: "34g", price: 0.25, category: "Snacks", stock: 60 },
+            { id: "P306", name: "Rosquita Picantitos 40 G", unit: "40g", price: 0.25, category: "Snacks", stock: 55 },
+            { id: "P307", name: "Ryskos Queso 50 GR", unit: "50 GR", price: 0.60, category: "Snacks", stock: 45 },
+            { id: "P308", name: "Ryskos Queso Fiesta 350GR", unit: "350 GR", price: 2.80, category: "Snacks", stock: 14 },
+            { id: "P309", name: "Sal Ecuasal 1K", unit: "1 KG", price: 0.58, category: "Despensa", stock: 50 },
+            { id: "P310", name: "Sal Ecuasal 2K", unit: "2 KG", price: 0.92, category: "Despensa", stock: 25 },
+            { id: "P311", name: "Salsa de Tomate 200GR", unit: "200 GR", price: 1.05, category: "Despensa", stock: 30 },
+            { id: "P312", name: "Sardina 425GR", unit: "425 GR", price: 2.28, category: "Despensa", stock: 18 }, 
+            { id: "P313", name: "Sarita Rizada Cebolla 100GR", unit: "100 GR", price: 1.50, category: "Snacks", stock: 20 },
+            { id: "P314", name: "Sarita Rizada Cebolla 300 GR", unit: "300 GR", price: 3.50, category: "Snacks", stock: 10 },
+            { id: "P315", name: "Sarita Rizada Natural 100GR", unit: "100 GR", price: 1.50, category: "Snacks", stock: 22 },
+            { id: "P316", name: "Sarita Rizada Natural 300GR", unit: "300 GR", price: 3.50, category: "Snacks", stock: 11 },
+            { id: "P317", name: "Sarita Rizadas Natural 30 GR", unit: "30 GR", price: 0.50, category: "Snacks", stock: 40 },
+            { id: "P318", name: "Tigreton Chocolate 50 GR", unit: "50 GR", price: 0.75, category: "Snacks", stock: 30 }, 
+            { id: "P319", name: "Tortolines 45 GR", unit: "45 GR", price: 0.60, category: "Snacks", stock: 35 },
+            { id: "P320", name: "Tortolines Familiar 300 GR", unit: "300 GR", price: 2.60, category: "Snacks", stock: 14 },
+            { id: "P321", name: "Tortolines Picantes 300GR", unit: "300 GR", price: 2.60, category: "Snacks", stock: 13 },
+            { id: "P322", name: "Tortolines Picantes 45Gr", unit: "45 Gr", price: 0.55, category: "Snacks", stock: 33 },
+            { id: "P323", name: "Tostachos Picante 100GR", unit: "100 GR", price: 2.05, category: "Snacks", stock: 16 },
+            { id: "P324", name: "Tostachos Picante 180GR", unit: "180 GR", price: 2.50, category: "Snacks", stock: 10 },
+            { id: "P325", name: "Tostitos 300 GR", unit: "300 GR", price: 2.85, category: "Snacks", stock: 12 },
+            { id: "P326", name: "Tostitos 45 GR", unit: "45 GR", price: 0.60, category: "Snacks", stock: 30 },
+            { id: "P327", name: "Tostitos Jalapeños 150Gr", unit: "150 Gr", price: 1.75, category: "Snacks", stock: 18 },
+            { id: "P328", name: "Tostitos Jalapeños 45Gr", unit: "45 Gr", price: 0.55, category: "Snacks", stock: 28 }
         ];
+
+        let storeInfo = JSON.parse(localStorage.getItem('storeInfo')) || {
+            name: 'MiniMarket POS',
+            address: 'Tu Dirección Aquí',
+            ruc: '0000000000000'
+        };
+
         function saveProductsToLocalStorage() {
             localStorage.setItem('mockProducts', JSON.stringify(mockProducts));
         }
-        if (!localStorage.getItem('mockProductsDefaultLoaded_v2')) {
+        function saveStoreInfoToLocalStorage() {
+            localStorage.setItem('storeInfo', JSON.stringify(storeInfo));
+        }
+        
+        if (!localStorage.getItem('mockProductsDefaultLoaded_v6')) {
              localStorage.setItem('mockProducts', JSON.stringify(mockProducts));
-             localStorage.setItem('mockProductsDefaultLoaded_v2', 'true');
+             localStorage.setItem('storeInfo', JSON.stringify(storeInfo));
+             localStorage.setItem('mockProductsDefaultLoaded_v6', 'true');
         }
 
 
         let cart = [];
         let salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
+        let editingProductId = null;
+        let quaggaRunning = false;
 
         const preloader = document.getElementById('preloader');
         const mainContentArea = document.getElementById('mainContentArea');
@@ -387,9 +703,15 @@
         const finalizeSaleBtn = document.getElementById('finalizeSaleBtn');
         const clearCartBtn = document.getElementById('clearCartBtn');
         const addProductManuallyBtn = document.getElementById('addProductManuallyBtn');
+        const viewProductListBtn = document.getElementById('viewProductListBtn');
+        const startScannerBtn = document.getElementById('startScannerBtn');
+        const scannerContainer = document.getElementById('scanner-container');
+        const stopScannerBtn = document.getElementById('stopScannerBtn');
+        const scannerMessage = document.getElementById('scanner-message');
         
         const paymentModal = document.getElementById('paymentModal');
         const paymentModalTotal = document.getElementById('paymentModalTotal');
+        const paymentMethodSelect = document.getElementById('paymentMethodSelect');
         const amountPaidInput = document.getElementById('amountPaidInput');
         const changeDue = document.getElementById('changeDue');
         const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
@@ -398,22 +720,27 @@
         const inventoryView = document.getElementById('inventoryView');
         const reportView = document.getElementById('reportView');
         const manageProductsView = document.getElementById('manageProductsView');
-        const linkInventario = document.getElementById('linkInventario');
+        const configuracionView = document.getElementById('configuracionView');
+        const linkPOSView = document.getElementById('linkPOSView');
         const linkVerInventario = document.getElementById('linkVerInventario');
         const linkReporte = document.getElementById('linkReporte');
         const linkManageProducts = document.getElementById('linkManageProducts');
+        const linkConfiguracion = document.getElementById('linkConfiguracion');
 
         const reportDate = document.getElementById('reportDate');
         const dailyTotalRevenue = document.getElementById('dailyTotalRevenue');
         const dailyTotalProductsSold = document.getElementById('dailyTotalProductsSold');
         const dailyTotalSalesCount = document.getElementById('dailyTotalSalesCount');
         const downloadReportPdfBtn = document.getElementById('downloadReportPdfBtn');
+        const dailySalesDetails = document.getElementById('dailySalesDetails');
+        const topSellingProducts = document.getElementById('topSellingProducts');
+
 
         const productListModal = document.getElementById('productListModal');
         const demoProductList = document.getElementById('demoProductList');
         const closeProductListModal = document.getElementById('closeProductListModal');
         const closeProductListModalBottom = document.getElementById('closeProductListModalBottom');
-
+        const searchProductListInput = document.getElementById('searchProductListInput');
 
         const addProductForm = document.getElementById('addProductForm');
         const currentProductsList = document.getElementById('currentProductsList');
@@ -422,15 +749,29 @@
         const newProductPriceInput = document.getElementById('newProductPrice');
         const newProductCategoryInput = document.getElementById('newProductCategory');
         const newProductUnitInput = document.getElementById('newProductUnit');
+        const newProductStockInput = document.getElementById('newProductStock');
+        const submitProductFormBtn = document.getElementById('submitProductFormBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const formProductTitle = document.getElementById('formProductTitle');
+        const searchCurrentProductsInput = document.getElementById('searchCurrentProductsInput');
+
+        const storeConfigForm = document.getElementById('storeConfigForm');
+        const storeNameInput = document.getElementById('storeNameInput');
+        const storeAddressInput = document.getElementById('storeAddressInput');
+        const storeRucInput = document.getElementById('storeRucInput');
+        const clearAllDataBtn = document.getElementById('clearAllDataBtn');
+        const footerStoreName = document.getElementById('footerStoreName');
+        const headerStoreName = document.getElementById('headerStoreName');
 
 
         document.getElementById('currentYear').textContent = new Date().getFullYear();
-
+        
         window.addEventListener('load', () => {
             setTimeout(() => {
                 preloader.classList.add('hidden');
                 mainContentArea.style.opacity = '1';
             }, 500);
+            loadStoreInfo();
         });
 
         function initializeAudio() {
@@ -446,15 +787,145 @@
                 catch (error) { console.error("Error al reproducir sonido:", error); }
             }
         }
+        function playSuccessSound() {
+            if(synth) {
+                try { synth.triggerAttackRelease("G5", "8n"); }
+                catch (e) { console.error("Error al reproducir sonido de éxito:", e); }
+            }
+        }
+        function playErrorSound() {
+             if(synth) {
+                try { synth.triggerAttackRelease("A2", "8n"); }
+                catch (e) { console.error("Error al reproducir sonido de error:", e); }
+            }
+        }
 
-        function displayCurrentProducts() {
+        function startLiveScanner() {
+            if (quaggaRunning) {
+                console.log("Quagga ya está corriendo.");
+                return;
+            }
+            scannerContainer.classList.remove('hidden');
+            mainContentArea.classList.add('hidden'); // Ocultar contenido principal
+            scannerMessage.textContent = "Iniciando cámara...";
+
+            Quagga.init({
+                inputStream : {
+                    name : "Live",
+                    type : "LiveStream",
+                    target: document.querySelector('#interactive'),
+                    constraints: {
+                        width: {min: 640, ideal: 1280, max: 1920},
+                        height: {min: 480, ideal: 720, max: 1080},
+                        aspectRatio: {ideal: 1.7777777778}, // 16:9
+                        facingMode: "environment" 
+                    },
+                },
+                decoder : {
+                    readers : ["ean_reader", "code_128_reader", "upc_reader", "ean_8_reader", "code_39_reader"],
+                    debug: {
+                        drawBoundingBox: true,
+                        showFrequency: false, // Menos verboso en consola
+                        drawScanline: true,
+                        showPattern: false // Menos verboso en consola
+                    },
+                    multiple: false
+                },
+                locate: true,
+                locator: {
+                    patchSize: "medium",
+                    halfSample: true
+                },
+                numOfWorkers: navigator.hardwareConcurrency || 2,
+            }, function(err) {
+                if (err) {
+                    console.error("Error al inicializar Quagga:", err);
+                    scannerMessage.textContent = "Error al iniciar cámara. Asegúrate de tener permisos y que la cámara no esté en uso.";
+                    playErrorSound();
+                    // No ocultar scannerContainer aquí para que el mensaje de error sea visible
+                    // Podríamos añadir un botón para reintentar o cerrar aquí si la inicialización falla.
+                    return;
+                }
+                console.log("QuaggaJS inicializado correctamente.");
+                Quagga.start();
+                quaggaRunning = true;
+                scannerMessage.textContent = "Apunte la cámara al código de barras...";
+            });
+
+            Quagga.onProcessed(function(result) {
+                var drawingCtx = Quagga.canvas.ctx.overlay,
+                    drawingCanvas = Quagga.canvas.dom.overlay;
+
+                if (result) {
+                    if (result.boxes) {
+                        drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute("width")), parseInt(drawingCanvas.getAttribute("height")));
+                        result.boxes.filter(function (box) {
+                            return box !== result.box;
+                        }).forEach(function (box) {
+                            Quagga.ImageDebug.drawPath(box, {x: 0, y: 1}, drawingCtx, {color: "green", lineWidth: 2});
+                        });
+                    }
+
+                    if (result.box) {
+                        Quagga.ImageDebug.drawPath(result.box, {x: 0, y: 1}, drawingCtx, {color: "#00F", lineWidth: 2});
+                    }
+                }
+            });
+
+            Quagga.onDetected(function(result) {
+                const code = result.codeResult.code;
+                console.log("Código detectado:", code);
+                scannerMessage.textContent = `Detectado: ${code}. Añadido. Escanee otro o Detenga.`;
+                playSuccessSound();
+                
+                addProductToCart(code); 
+                // El escáner sigue activo para el siguiente producto
+            });
+        }
+
+        function stopLiveScanner() {
+            if (quaggaRunning) {
+                Quagga.stop();
+                quaggaRunning = false;
+                console.log("QuaggaJS detenido.");
+            }
+            scannerContainer.classList.add('hidden');
+            mainContentArea.classList.remove('hidden'); // Mostrar contenido principal de nuevo
+        }
+
+        if(startScannerBtn) {
+            startScannerBtn.addEventListener('click', () => {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then((stream) => {
+                    stream.getTracks().forEach(track => track.stop()); 
+                    startLiveScanner();
+                })
+                .catch((err) => {
+                    console.error("Error al obtener acceso a la cámara:", err);
+                    alert("No se pudo acceder a la cámara. Por favor, verifica los permisos en tu navegador.\nEsta función podría requerir HTTPS.");
+                    playErrorSound();
+                });
+            });
+        }
+        if(stopScannerBtn) {
+            stopScannerBtn.addEventListener('click', stopLiveScanner);
+        }
+
+
+        function displayCurrentProducts(searchTerm = '') {
             currentProductsList.innerHTML = '';
-            if (mockProducts.length === 0) {
-                currentProductsList.innerHTML = '<p class="text-gray-400">No hay productos registrados.</p>';
+            const lowerSearchTerm = searchTerm.toLowerCase();
+            const filteredProducts = mockProducts.filter(p => 
+                p.name.toLowerCase().includes(lowerSearchTerm) || 
+                p.id.toLowerCase().includes(lowerSearchTerm)
+            );
+
+            if (filteredProducts.length === 0) {
+                currentProductsList.innerHTML = `<p class="text-gray-400">No se encontraron productos ${searchTerm ? 'con ese criterio' : 'registrados'}.</p>`;
                 return;
             }
             
-            const grouped = mockProducts.reduce((acc, product) => {
+            const grouped = filteredProducts.reduce((acc, product) => {
                 acc[product.category] = acc[product.category] || [];
                 acc[product.category].push(product);
                 return acc;
@@ -462,45 +933,87 @@
 
             Object.keys(grouped).sort().forEach(category => {
                 const categoryHeader = document.createElement('h4');
-                categoryHeader.className = 'text-lg font-semibold text-fuchsia-300 mt-3 mb-1';
+                categoryHeader.className = 'category-title';
                 categoryHeader.textContent = category;
                 currentProductsList.appendChild(categoryHeader);
 
-                grouped[category].sort((a,b) => a.name.localeCompare(b.name)).forEach((p, index) => {
-                    const originalProductIndex = mockProducts.findIndex(mp => mp.id === p.id);
-
+                grouped[category].sort((a,b) => a.name.localeCompare(b.name)).forEach((p) => {
                     const productElement = document.createElement('div');
-                    productElement.classList.add('p-3', 'bg-neutral-700', 'rounded-md', 'flex', 'justify-between', 'items-center');
+                    productElement.classList.add('product-entry', 'p-3', 'bg-neutral-700', 'rounded-md', 'flex', 'justify-between', 'items-center');
+                    const stockClass = p.stock <= 0 ? 'out-of-stock' : (p.stock < 5 ? 'text-orange-400' : 'text-green-400');
                     productElement.innerHTML = `
                         <div>
-                            <p class="font-semibold">${p.name} (ID: ${p.id})</p>
-                            <p class="text-sm text-gray-400">Unidad: ${p.unit} - Categoría: ${p.category}</p>
+                            <p class="font-semibold product-name">${p.name} (ID: ${p.id})</p>
+                            <p class="text-sm text-gray-400 product-details">Unidad: ${p.unit} - Categoría: ${p.category}</p>
+                            <p class="text-sm stock-info ${stockClass}">Stock: ${p.stock}</p> 
                             <p class="text-sm text-green-400">$${p.price.toFixed(2)}</p>
                         </div>
-                        <button class="text-red-500 hover:text-red-400 remove-product-btn" data-id="${p.id}" title="Eliminar Producto">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <div>
+                            <button class="text-blue-400 hover:text-blue-300 mr-2 edit-product-btn" data-id="${p.id}" title="Editar Producto">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="text-red-500 hover:text-red-400 remove-product-btn" data-id="${p.id}" title="Eliminar Producto">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     `;
                     currentProductsList.appendChild(productElement);
                 });
             });
 
-
+            document.querySelectorAll('.edit-product-btn').forEach(button => {
+                button.addEventListener('click', handleEditProduct);
+            });
             document.querySelectorAll('.remove-product-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const productIdToRemove = e.currentTarget.dataset.id;
-                    const productIndex = mockProducts.findIndex(p => p.id === productIdToRemove);
-                    if (productIndex > -1) {
-                        if (confirm(`¿Seguro que quieres eliminar "${mockProducts[productIndex].name}"?`)) {
-                            mockProducts.splice(productIndex, 1);
-                            saveProductsToLocalStorage();
-                            displayCurrentProducts();
-                            alert("Producto eliminado.");
-                        }
-                    }
-                });
+                button.addEventListener('click', handleRemoveProduct);
             });
         }
+        
+        searchCurrentProductsInput.addEventListener('input', (e) => {
+            displayCurrentProducts(e.target.value);
+        });
+
+        function handleEditProduct(e) {
+            const productIdToEdit = e.currentTarget.dataset.id;
+            const product = mockProducts.find(p => p.id === productIdToEdit);
+            if (product) {
+                editingProductId = productIdToEdit;
+                newProductNameInput.value = product.name;
+                newProductIdInput.value = product.id;
+                newProductIdInput.setAttribute('readonly', true);
+                newProductCategoryInput.value = product.category;
+                newProductUnitInput.value = product.unit;
+                newProductPriceInput.value = product.price.toFixed(2);
+                newProductStockInput.value = product.stock;
+
+                formProductTitle.textContent = "Editar Producto";
+                submitProductFormBtn.innerHTML = '<i class="fas fa-save mr-2"></i>Guardar Cambios';
+                cancelEditBtn.classList.remove('hidden');
+                window.scrollTo(0, addProductForm.offsetTop - 20);
+            }
+        }
+
+        function handleRemoveProduct(e) {
+            const productIdToRemove = e.currentTarget.dataset.id;
+            const productIndex = mockProducts.findIndex(p => p.id === productIdToRemove);
+            if (productIndex > -1) {
+                if (confirm(`¿Seguro que quieres eliminar "${mockProducts[productIndex].name}"?`)) {
+                    mockProducts.splice(productIndex, 1);
+                    saveProductsToLocalStorage();
+                    displayCurrentProducts(searchCurrentProductsInput.value);
+                    alert("Producto eliminado.");
+                }
+            }
+        }
+        
+        cancelEditBtn.addEventListener('click', () => {
+            editingProductId = null;
+            addProductForm.reset();
+            newProductIdInput.removeAttribute('readonly');
+            formProductTitle.textContent = "Añadir Nuevo Producto";
+            submitProductFormBtn.innerHTML = '<i class="fas fa-plus-circle mr-2"></i>Añadir Producto';
+            cancelEditBtn.classList.add('hidden');
+        });
 
         addProductForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -509,21 +1022,88 @@
             const price = parseFloat(newProductPriceInput.value);
             const category = newProductCategoryInput.value.trim() || "General";
             const unit = newProductUnitInput.value.trim() || "und";
+            const stock = parseInt(newProductStockInput.value, 10);
 
-            if (mockProducts.find(p => p.id === id)) {
-                alert("Error: Ya existe un producto con ese ID.");
-                return;
-            }
-            if (name && id && unit && category && !isNaN(price) && price >= 0) {
-                mockProducts.push({ id, name, price, category, unit });
-                saveProductsToLocalStorage();
-                displayCurrentProducts();
-                addProductForm.reset();
-                alert("Producto añadido exitosamente.");
+            if (editingProductId) {
+                const productIndex = mockProducts.findIndex(p => p.id === editingProductId);
+                if (productIndex > -1) {
+                    if (name && unit && category && !isNaN(price) && price >= 0 && !isNaN(stock) && stock >= 0) {
+                        mockProducts[productIndex] = { ...mockProducts[productIndex], name, price, category, unit, stock };
+                        saveProductsToLocalStorage();
+                        displayCurrentProducts(searchCurrentProductsInput.value);
+                        alert("Producto actualizado exitosamente.");
+                        cancelEditBtn.click();
+                    } else {
+                        alert("Por favor, completa todos los campos correctamente para actualizar (incluyendo stock válido).");
+                    }
+                }
             } else {
-                alert("Por favor, completa todos los campos correctamente.");
+                if (mockProducts.find(p => p.id === id)) {
+                    alert("Error: Ya existe un producto con ese ID.");
+                    return;
+                }
+                if (name && id && unit && category && !isNaN(price) && price >= 0 && !isNaN(stock) && stock >= 0) {
+                    mockProducts.push({ id, name, price, category, unit, stock });
+                    saveProductsToLocalStorage();
+                    displayCurrentProducts(searchCurrentProductsInput.value);
+                    addProductForm.reset();
+                    alert("Producto añadido exitosamente.");
+                } else {
+                    alert("Por favor, completa todos los campos correctamente para añadir (incluyendo stock válido).");
+                }
             }
         });
+
+
+        function openProductListModal(searchTerm = '') {
+            demoProductList.innerHTML = ''; 
+            const lowerSearchTerm = searchTerm.toLowerCase();
+            const filteredProducts = mockProducts.filter(p => 
+                p.name.toLowerCase().includes(lowerSearchTerm) || 
+                p.id.toLowerCase().includes(lowerSearchTerm)
+            );
+
+            const groupedProducts = filteredProducts.reduce((acc, product) => {
+                const category = product.category || "Sin Categoría";
+                acc[category] = acc[category] || [];
+                acc[category].push(product);
+                return acc;
+            }, {});
+
+            const sortedCategories = Object.keys(groupedProducts).sort();
+
+            if (sortedCategories.length === 0) {
+                demoProductList.innerHTML = `<p class="text-gray-400">No se encontraron productos ${searchTerm ? 'con ese criterio' : 'definidos'}.</p>`;
+            } else {
+                sortedCategories.forEach(category => {
+                    const categoryTitle = document.createElement('h4');
+                    categoryTitle.className = 'category-title';
+                    categoryTitle.textContent = category;
+                    demoProductList.appendChild(categoryTitle);
+
+                    groupedProducts[category].sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
+                        const pElement = document.createElement('div');
+                        pElement.className = 'product-entry';
+                        const stockClass = p.stock <= 0 ? 'out-of-stock' : (p.stock < 5 ? 'text-orange-400' : 'text-green-400');
+                        pElement.innerHTML = `
+                            <strong class="product-name">${p.name}</strong> (ID: ${p.id})
+                            <br>
+                            <span class="product-details">Unidad: ${p.unit} - Precio: $${p.price.toFixed(2)}</span>
+                            <br>
+                            <span class="product-details stock-info ${stockClass}">Stock: ${p.stock > 0 ? p.stock : 'Agotado'}</span>
+                        `;
+                        demoProductList.appendChild(pElement);
+                    });
+                });
+            }
+            productListModal.classList.remove('hidden');
+            if (isDropdownOpen) toggleDropdown();
+        }
+
+        searchProductListInput.addEventListener('input', (e) => {
+            openProductListModal(e.target.value);
+        });
+        
 
         function findProductById(id) {
             return mockProducts.find(p => p.id.toLowerCase() === id.toLowerCase());
@@ -533,10 +1113,25 @@
             const product = findProductById(productId);
             if (!product) {
                 alert("Producto no encontrado. Verifica el ID.");
+                playErrorSound();
                 return;
             }
-            playBeepSound();
+
             const existingCartItem = cart.find(item => item.product.id === productId);
+            const currentQuantityInCart = existingCartItem ? existingCartItem.quantity : 0;
+
+            if (product.stock <= currentQuantityInCart) {
+                alert(`¡Stock insuficiente para "${product.name}"! Disponible: ${product.stock}, en carrito: ${currentQuantityInCart}.`);
+                playErrorSound();
+                return;
+            }
+            
+            // No reproducir beep aquí si el escáner ya lo hizo. 
+            // Si se añade manualmente, sí.
+            if (!quaggaRunning) { // Solo reproducir si no es desde el escáner (que ya tiene su propio beep)
+                 playBeepSound();
+            }
+
             if (existingCartItem) {
                 existingCartItem.quantity++;
             } else {
@@ -576,10 +1171,10 @@
                     });
                 });
             }
-            calculateTotal();
+            calculateAndDisplayTotals();
         }
 
-        function calculateTotal() {
+        function calculateAndDisplayTotals() {
             const total = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
             cartTotalElement.textContent = `$${total.toFixed(2)}`;
             return total;
@@ -591,8 +1186,9 @@
         }
         
         function openPaymentModal() {
-            const total = calculateTotal();
+            const total = calculateAndDisplayTotals();
             paymentModalTotal.textContent = `$${total.toFixed(2)}`;
+            
             amountPaidInput.value = '';
             changeDue.textContent = '$0.00';
             confirmPaymentBtn.disabled = true;
@@ -605,7 +1201,7 @@
         }
 
         amountPaidInput.addEventListener('input', () => {
-            const total = calculateTotal();
+            const total = parseFloat(paymentModalTotal.textContent.replace('$', ''));
             const paid = parseFloat(amountPaidInput.value) || 0;
             const change = paid - total;
             changeDue.textContent = `$${change >= 0 ? change.toFixed(2) : '0.00'}`;
@@ -613,14 +1209,33 @@
         });
 
         function finalizeSale() {
-            const total = calculateTotal();
+            const total = parseFloat(paymentModalTotal.textContent.replace('$', ''));
             const amountPaid = parseFloat(amountPaidInput.value);
             const change = amountPaid - total;
+            const paymentMethod = paymentMethodSelect.value;
 
             if (amountPaid < total) {
                 alert("El monto pagado es insuficiente.");
+                playErrorSound();
                 return;
             }
+
+            for (const cartItem of cart) {
+                const productInDb = mockProducts.find(p => p.id === cartItem.product.id);
+                if (!productInDb || productInDb.stock < cartItem.quantity) {
+                    alert(`¡Stock insuficiente para "${cartItem.product.name}" al momento de finalizar! Disponible: ${productInDb ? productInDb.stock : 0}. Venta cancelada.`);
+                    playErrorSound();
+                    return;
+                }
+            }
+
+            cart.forEach(cartItem => {
+                const productIndex = mockProducts.findIndex(p => p.id === cartItem.product.id);
+                if (productIndex > -1) {
+                    mockProducts[productIndex].stock -= cartItem.quantity;
+                }
+            });
+            saveProductsToLocalStorage();
 
             const saleData = {
                 id: `VEN-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
@@ -628,14 +1243,17 @@
                 totalAmount: total,
                 amountPaid: amountPaid,
                 changeGiven: change,
+                paymentMethod: paymentMethod,
                 timestamp: new Date().toISOString()
             };
 
             generateInvoicePDF(saleData);
             saveSaleToHistory(saleData);
-            alert(`Venta completada!\nTotal: $${total.toFixed(2)}\nPagado: $${amountPaid.toFixed(2)}\nCambio: $${change.toFixed(2)}`);
+            playSuccessSound();
+            alert(`Venta completada!\nTotal: $${total.toFixed(2)}\nPagado: $${amountPaid.toFixed(2)}\nCambio: $${change.toFixed(2)}\nMétodo: ${paymentMethod}`);
             clearCart();
             closePaymentModal();
+            displayCurrentProducts(searchCurrentProductsInput.value);
         }
 
         function saveSaleToHistory(saleData) {
@@ -644,58 +1262,122 @@
         }
 
         function generateInvoicePDF(saleData) {
-            const pdf = new jsPDF();
-            const now = new Date(saleData.timestamp);
-            const formattedDate = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
-            const fileName = `Factura-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}${now.getSeconds().toString().padStart(2,'0')}.pdf`;
+            const receiptWidthMm = 80; 
+            const leftMarginMm = 5;
+            const rightMarginMm = 5;
+            const contentWidthMm = receiptWidthMm - leftMarginMm - rightMarginMm;
+            const lineSpacing = 4.5; 
+            let yPos = 10; 
 
-            pdf.setFontSize(18);
-            pdf.text("Factura MiniMarket", 105, 20, null, null, "center");
-            pdf.setFontSize(10);
-            pdf.text(`Fecha y Hora: ${formattedDate}`, 10, 30);
-            pdf.text(`ID Venta: ${saleData.id}`, 10, 35);
-            pdf.setFontSize(12);
-            pdf.text("Productos:", 10, 45);
-            let yPos = 50;
-            saleData.items.forEach(item => {
-                pdf.setFontSize(10);
-                pdf.text(`${item.quantity}x ${item.name} (@ $${item.price.toFixed(2)})`, 15, yPos);
-                pdf.text(`$${item.subtotal.toFixed(2)}`, 180, yPos, null, null, "right");
-                yPos += 7;
-                if (yPos > 270) { pdf.addPage(); yPos = 20; }
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: [receiptWidthMm, 297] 
             });
-            yPos += 5;
-            pdf.setLineWidth(0.5);
-            pdf.line(10, yPos, 200, yPos);
-            yPos += 7;
-            pdf.setFontSize(12);
+
+            function addText(text, x, y, options = {}, isBold = false) {
+                if (isBold) pdf.setFont(undefined, 'bold');
+                pdf.text(text, x, y, options);
+                if (isBold) pdf.setFont(undefined, 'normal');
+            }
+            
+            pdf.setFontSize(10); 
             pdf.setFont(undefined, 'bold');
-            pdf.text("Total:", 150, yPos, null, null, "right");
-            pdf.text(`$${saleData.totalAmount.toFixed(2)}`, 180, yPos, null, null, "right");
-            yPos += 7;
+            addText(storeInfo.name || "MiniMarket POS", receiptWidthMm / 2, yPos, { align: 'center' }, true);
+            yPos += lineSpacing -1;
+            
+            pdf.setFontSize(7);
             pdf.setFont(undefined, 'normal');
-            pdf.text("Monto Pagado:", 150, yPos, null, null, "right");
-            pdf.text(`$${saleData.amountPaid.toFixed(2)}`, 180, yPos, null, null, "right");
-            yPos += 7;
-            pdf.text("Cambio:", 150, yPos, null, null, "right");
-            pdf.text(`$${saleData.changeGiven.toFixed(2)}`, 180, yPos, null, null, "right");
-            yPos += 15;
-            pdf.setFontSize(10);
-            pdf.text("¡Gracias por su compra!", 105, yPos, null, null, "center");
+            const addressLines = pdf.splitTextToSize(storeInfo.address || "Dirección no especificada", contentWidthMm);
+            addText(addressLines, receiptWidthMm / 2, yPos, { align: 'center', maxWidth: contentWidthMm });
+            yPos += (addressLines.length * (lineSpacing - 2));
+
+            addText(`RUC/CI: ${storeInfo.ruc || "No especificado"}`, receiptWidthMm / 2, yPos, { align: 'center' });
+            yPos += lineSpacing -1;
+            pdf.line(leftMarginMm, yPos, receiptWidthMm - rightMarginMm, yPos);
+            yPos += lineSpacing - 2;
+
+            const now = new Date(saleData.timestamp);
+            const formattedDate = `${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            addText(`Fecha: ${formattedDate}`, leftMarginMm, yPos);
+            yPos += lineSpacing - 2;
+            addText(`Venta ID: ${saleData.id}`, leftMarginMm, yPos);
+            yPos += lineSpacing - 2;
+            addText(`Método: ${saleData.paymentMethod}`, leftMarginMm, yPos);
+            yPos += lineSpacing -1;
+            pdf.line(leftMarginMm, yPos, receiptWidthMm - rightMarginMm, yPos);
+            yPos += lineSpacing - 2;
+
+            pdf.setFont(undefined, 'bold');
+            addText("Cant. Descripción", leftMarginMm, yPos, {}, true);
+            addText("Total", receiptWidthMm - rightMarginMm, yPos, { align: 'right' }, true);
+            pdf.setFont(undefined, 'normal');
+            yPos += lineSpacing -1;
+             pdf.line(leftMarginMm, yPos, receiptWidthMm - rightMarginMm, yPos);
+            yPos += lineSpacing - 2;
+
+            pdf.setFontSize(7);
+            saleData.items.forEach(item => {
+                if (yPos > 270) { 
+                    pdf.addPage();
+                    yPos = 10; 
+                }
+                const productNameMaxWidth = contentWidthMm - 20; 
+                const productText = `${item.quantity}x ${item.name}`;
+                const productLines = pdf.splitTextToSize(productText, productNameMaxWidth);
+                
+                addText(productLines.join('\n'), leftMarginMm, yPos);
+                addText(`$${item.subtotal.toFixed(2)}`, receiptWidthMm - rightMarginMm, yPos, { align: 'right' });
+                yPos += (productLines.length * (lineSpacing - 2.5));
+                 yPos += 1; 
+            });
+            yPos += lineSpacing - 3;
+            pdf.line(leftMarginMm, yPos, receiptWidthMm - rightMarginMm, yPos);
+            yPos += lineSpacing - 2;
+
+            pdf.setFontSize(8);
+            addText("TOTAL:", leftMarginMm, yPos, {}, true);
+            addText(`$${saleData.totalAmount.toFixed(2)}`, receiptWidthMm - rightMarginMm, yPos, { align: 'right' }, true);
+            yPos += lineSpacing -1;
+
+            pdf.setFontSize(7);
+            addText("Pagado:", leftMarginMm, yPos);
+            addText(`$${saleData.amountPaid.toFixed(2)}`, receiptWidthMm - rightMarginMm, yPos, { align: 'right' });
+            yPos += lineSpacing - 2;
+
+            addText("Cambio:", leftMarginMm, yPos);
+            addText(`$${saleData.changeGiven.toFixed(2)}`, receiptWidthMm - rightMarginMm, yPos, { align: 'right' });
+            yPos += lineSpacing;
+
+            pdf.setFontSize(8);
+            addText("¡Gracias por su compra!", receiptWidthMm / 2, yPos, { align: 'center' }, true);
+            yPos += lineSpacing - 2;
+            addText((storeInfo.name || "MiniMarket POS"), receiptWidthMm / 2, yPos, { align: 'center' });
+
+
+            const fileName = `Ticket-${storeInfo.name.replace(/\s+/g, '_')}-${saleData.id.substring(0,8)}.pdf`;
             pdf.save(fileName);
         }
 
+
         function showView(viewToShow) {
-            [inventoryView, reportView, manageProductsView].forEach(view => view.classList.add('hidden'));
+            [inventoryView, reportView, manageProductsView, configuracionView].forEach(view => view.classList.add('hidden'));
             viewToShow.classList.remove('hidden');
             dropdownMenu.classList.add('hidden');
             isDropdownOpen = false;
 
             if (viewToShow === manageProductsView) {
-                displayCurrentProducts();
+                displayCurrentProducts(); 
+                searchCurrentProductsInput.value = ''; 
             }
             if (viewToShow === reportView) {
                 loadAndDisplayDailyReport();
+            }
+            if (viewToShow === inventoryView) {
+                searchProductListInput.value = ''; 
+            }
+            if (viewToShow === configuracionView) {
+                loadStoreInfoToForm();
             }
         }
         
@@ -703,41 +1385,180 @@
             const today = new Date().toLocaleDateString();
             reportDate.textContent = today;
             const todaySales = salesHistory.filter(sale => new Date(sale.timestamp).toLocaleDateString() === today);
-            const totalRevenue = todaySales.reduce((sum, sale) => sum + sale.totalAmount, 0);
-            const totalProducts = todaySales.reduce((sum, sale) => sum + sale.items.reduce((itemSum, item) => itemSum + item.quantity, 0), 0);
-            const totalSalesCount = todaySales.length;
+            
+            let totalRevenue = 0;
+            let totalProductsSold = 0;
+            const productQuantities = {};
+
+            dailySalesDetails.innerHTML = ''; 
+
+            if (todaySales.length === 0) {
+                dailySalesDetails.innerHTML = '<p class="text-gray-400">No hay ventas registradas hoy.</p>';
+            }
+
+            todaySales.forEach(sale => {
+                totalRevenue += sale.totalAmount;
+                
+                const saleDetailDiv = document.createElement('div');
+                saleDetailDiv.className = 'report-sale-item';
+                let saleItemsHtml = `<strong>Venta ID: ${sale.id.substring(0,8)} (${new Date(sale.timestamp).toLocaleTimeString()})</strong><br>
+                                     Total: $${sale.totalAmount.toFixed(2)} | Pagado con: ${sale.paymentMethod}
+                                     <ul>`;
+                sale.items.forEach(item => {
+                    totalProductsSold += item.quantity;
+                    productQuantities[item.name] = (productQuantities[item.name] || 0) + item.quantity;
+                    saleItemsHtml += `<li>${item.quantity} x ${item.name} ($${item.price.toFixed(2)} c/u) = $${item.subtotal.toFixed(2)}</li>`;
+                });
+                saleItemsHtml += '</ul>';
+                saleDetailDiv.innerHTML = saleItemsHtml;
+                dailySalesDetails.appendChild(saleDetailDiv);
+            });
+
             dailyTotalRevenue.textContent = `$${totalRevenue.toFixed(2)}`;
-            dailyTotalProductsSold.textContent = totalProducts;
-            dailyTotalSalesCount.textContent = totalSalesCount;
+            dailyTotalProductsSold.textContent = totalProductsSold;
+            dailyTotalSalesCount.textContent = todaySales.length;
+
+            topSellingProducts.innerHTML = '';
+            const sortedTopProducts = Object.entries(productQuantities)
+                .sort(([,a],[,b]) => b-a)
+                .slice(0, 5);
+
+            if (sortedTopProducts.length === 0) {
+                topSellingProducts.innerHTML = '<p class="text-gray-400">No hay productos vendidos hoy.</p>';
+            } else {
+                sortedTopProducts.forEach(([name, quantity]) => {
+                    const p = document.createElement('p');
+                    p.textContent = `${name}: ${quantity} unidades`;
+                    topSellingProducts.appendChild(p);
+                });
+            }
         }
         
         function generateDailyReportPDF() {
             const pdf = new jsPDF();
             const now = new Date();
             const formattedDate = now.toLocaleDateString();
-            const fileName = `ReporteDiario-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}.pdf`;
-            pdf.setFontSize(18);
-            pdf.text("Reporte Diario de Ventas - MiniMarket", 105, 20, null, null, "center");
-            pdf.setFontSize(12);
-            pdf.text(`Fecha del Reporte: ${formattedDate}`, 10, 35);
-            pdf.text(`Total Recaudado del Día: $${dailyTotalRevenue.textContent.replace('$', '')}`, 10, 50);
-            pdf.text(`Cantidad de Productos Vendidos: ${dailyTotalProductsSold.textContent}`, 10, 60);
-            pdf.text(`Cantidad de Ventas Realizadas: ${dailyTotalSalesCount.textContent}`, 10, 70);
+            const fileName = `ReporteDiario-${storeInfo.name.replace(/\s+/g, '_')}-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}.pdf`;
+            
+            pdf.setFontSize(16);
+            pdf.setFont(undefined, 'bold');
+            pdf.text(storeInfo.name || "MiniMarket POS", 105, 15, null, null, "center");
             pdf.setFontSize(10);
-            pdf.text("Detalle de Ventas del Día:", 10, 85);
-            let yPos = 90;
+            pdf.setFont(undefined, 'normal');
+            pdf.text(storeInfo.address || "Dirección no especificada", 105, 22, null, null, "center");
+            pdf.text(`RUC/CI: ${storeInfo.ruc || "No especificado"}`, 105, 29, null, null, "center");
+
+            pdf.setFontSize(18);
+            pdf.setFont(undefined, 'bold');
+            pdf.text("Reporte Diario de Ventas", 105, 40, null, null, "center");
+            pdf.setFontSize(12);
+            pdf.setFont(undefined, 'normal');
+            pdf.text(`Fecha del Reporte: ${formattedDate}`, 10, 50);
+            pdf.text(`Total Recaudado del Día: ${dailyTotalRevenue.textContent}`, 10, 60);
+            pdf.text(`Cantidad de Productos Vendidos: ${dailyTotalProductsSold.textContent}`, 10, 67);
+            pdf.text(`Cantidad de Ventas Realizadas: ${dailyTotalSalesCount.textContent}`, 10, 74);
+            
+            pdf.setFontSize(11);
+            pdf.setFont(undefined, 'bold');
+            pdf.text("Detalle de Ventas del Día:", 10, 88);
+            let yPos = 93;
             const todaySales = salesHistory.filter(sale => new Date(sale.timestamp).toLocaleDateString() === formattedDate);
             if (todaySales.length === 0) {
+                pdf.setFont(undefined, 'normal');
                 pdf.text("No se registraron ventas hoy.", 15, yPos);
+                yPos += 10;
             } else {
                 todaySales.forEach(sale => {
-                    pdf.text(`ID: ${sale.id} - Hora: ${new Date(sale.timestamp).toLocaleTimeString()} - Total: $${sale.totalAmount.toFixed(2)}`, 15, yPos);
-                    yPos += 7;
-                     if (yPos > 270) { pdf.addPage(); yPos = 20; }
+                    if (yPos > 260) { pdf.addPage(); yPos = 20; }
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text(`Venta ID: ${sale.id.substring(0,8)} (${new Date(sale.timestamp).toLocaleTimeString()}) - Total: $${sale.totalAmount.toFixed(2)} (Pagado con: ${sale.paymentMethod})`, 15, yPos);
+                    yPos += 6;
+                    pdf.setFont(undefined, 'normal');
+                    sale.items.forEach(item => {
+                        if (yPos > 270) { pdf.addPage(); yPos = 20; }
+                        pdf.text(`  - ${item.quantity}x ${item.name} ($${item.subtotal.toFixed(2)})`, 20, yPos);
+                        yPos += 5;
+                    });
+                    yPos += 3;
+                });
+            }
+
+            if (yPos > 250) { pdf.addPage(); yPos = 20; }
+            pdf.setFontSize(11);
+            pdf.setFont(undefined, 'bold');
+            pdf.text("Productos Más Vendidos Hoy:", 10, yPos);
+            yPos += 6;
+            pdf.setFont(undefined, 'normal');
+            const productQuantities = {};
+            todaySales.forEach(sale => {
+                sale.items.forEach(item => {
+                    productQuantities[item.name] = (productQuantities[item.name] || 0) + item.quantity;
+                });
+            });
+            const sortedTopProducts = Object.entries(productQuantities)
+                .sort(([,a],[,b]) => b-a)
+                .slice(0, 5);
+
+            if (sortedTopProducts.length === 0) {
+                pdf.text("No hay productos vendidos hoy.", 15, yPos);
+            } else {
+                sortedTopProducts.forEach(([name, quantity]) => {
+                    if (yPos > 270) { pdf.addPage(); yPos = 20; }
+                    pdf.text(`- ${name}: ${quantity} unidades`, 15, yPos);
+                    yPos += 5;
                 });
             }
             pdf.save(fileName);
         }
+
+        function loadStoreInfoToForm() {
+            storeNameInput.value = storeInfo.name;
+            storeAddressInput.value = storeInfo.address;
+            storeRucInput.value = storeInfo.ruc;
+        }
+
+        function loadStoreInfo() {
+            const savedInfo = localStorage.getItem('storeInfo');
+            if (savedInfo) {
+                storeInfo = JSON.parse(savedInfo);
+            }
+            footerStoreName.textContent = storeInfo.name;
+            headerStoreName.textContent = storeInfo.name;
+        }
+
+        storeConfigForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            storeInfo.name = storeNameInput.value.trim() || "MiniMarket POS";
+            storeInfo.address = storeAddressInput.value.trim() || "Dirección no especificada";
+            storeInfo.ruc = storeRucInput.value.trim() || "0000000000000";
+            saveStoreInfoToLocalStorage();
+            footerStoreName.textContent = storeInfo.name;
+            headerStoreName.textContent = storeInfo.name;
+            alert("Configuración guardada exitosamente.");
+        });
+
+        clearAllDataBtn.addEventListener('click', () => {
+            if (confirm("¿ESTÁS ABSOLUTAMENTE SEGURO de que quieres borrar TODOS los datos? (Productos, Ventas, Configuración). Esta acción es IRREVERSIBLE.")) {
+                if (confirm("ÚLTIMA ADVERTENCIA: ¿Realmente quieres proceder? Todos los datos se perderán.")) {
+                    localStorage.removeItem('mockProducts');
+                    localStorage.removeItem('salesHistory');
+                    localStorage.removeItem('storeInfo');
+                    localStorage.removeItem('mockProductsDefaultLoaded_v6'); 
+                    
+                    mockProducts = []; 
+                    salesHistory = [];
+                    storeInfo = { name: 'MiniMarket POS', address: 'Tu Dirección Aquí', ruc: '0000000000000' };
+                    cart = [];
+                    
+                    showView(inventoryView);
+                    updateCartDisplay();
+                    loadStoreInfo(); 
+                    alert("Todos los datos de la aplicación han sido eliminados. La página se recargará para aplicar los cambios por defecto.");
+                    location.reload();
+                }
+            }
+        });
+
 
         let isDropdownOpen = false;
         function toggleDropdown() {
@@ -764,66 +1585,66 @@
 
         finalizeSaleBtn.addEventListener('click', openPaymentModal);
         clearCartBtn.addEventListener('click', () => {
+            if (cart.length === 0) {
+                alert("El carrito ya está vacío.");
+                return;
+            }
             if (confirm("¿Estás seguro de que quieres limpiar el carrito?")) {
                 clearCart();
+                alert("Carrito limpiado.");
             }
         });
         
+        if(startScannerBtn) {
+            startScannerBtn.addEventListener('click', () => {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then((stream) => {
+                    stream.getTracks().forEach(track => track.stop()); 
+                    startLiveScanner();
+                })
+                .catch((err) => {
+                    console.error("Error al obtener acceso a la cámara:", err);
+                    alert("No se pudo acceder a la cámara. Por favor, verifica los permisos en tu navegador.\nEsta función podría requerir HTTPS.");
+                    playErrorSound();
+                });
+            });
+        }
+
         confirmPaymentBtn.addEventListener('click', finalizeSale);
         cancelPaymentBtn.addEventListener('click', closePaymentModal);
 
+        linkPOSView.addEventListener('click', (e) => { e.preventDefault(); showView(inventoryView); });
         linkReporte.addEventListener('click', (e) => { e.preventDefault(); showView(reportView); });
-        linkInventario.addEventListener('click', (e) => { e.preventDefault(); showView(inventoryView); });
         linkManageProducts.addEventListener('click', (e) => { e.preventDefault(); showView(manageProductsView); });
+        linkConfiguracion.addEventListener('click', (e) => { e.preventDefault(); showView(configuracionView); });
         downloadReportPdfBtn.addEventListener('click', generateDailyReportPDF);
 
         addProductManuallyBtn.addEventListener('click', () => {
             if (mockProducts.length > 0) {
-                const randomProduct = mockProducts[Math.floor(Math.random() * mockProducts.length)];
-                addProductToCart(randomProduct.id);
+                const availableProducts = mockProducts.filter(p => p.stock > 0);
+                if (availableProducts.length > 0) {
+                    const randomProduct = availableProducts[Math.floor(Math.random() * availableProducts.length)];
+                    addProductToCart(randomProduct.id);
+                } else {
+                    alert("Todos los productos están agotados. Repón el stock en 'Gestionar Productos'.");
+                }
             } else {
                 alert("No hay productos en el inventario para añadir. Por favor, añade productos en 'Gestionar Productos'.");
             }
         });
         
-        function openProductListModal() {
-            demoProductList.innerHTML = ''; 
-            const groupedProducts = mockProducts.reduce((acc, product) => {
-                const category = product.category || "Sin Categoría";
-                acc[category] = acc[category] || [];
-                acc[category].push(product);
-                return acc;
-            }, {});
-
-            const sortedCategories = Object.keys(groupedProducts).sort();
-
-            if (sortedCategories.length === 0) {
-                demoProductList.innerHTML = '<p class="text-gray-400">No hay productos definidos. Añádelos en "Gestionar Productos".</p>';
-            } else {
-                sortedCategories.forEach(category => {
-                    const categoryTitle = document.createElement('h4');
-                    categoryTitle.className = 'category-title';
-                    categoryTitle.textContent = category;
-                    demoProductList.appendChild(categoryTitle);
-
-                    groupedProducts[category].sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
-                        const pElement = document.createElement('div');
-                        pElement.className = 'product-entry';
-                        pElement.innerHTML = `
-                            <strong class="product-name">${p.name}</strong> (ID: ${p.id})
-                            <br>
-                            <span class="product-details">Unidad: ${p.unit} - Precio: $${p.price.toFixed(2)}</span>`;
-                        demoProductList.appendChild(pElement);
-                    });
-                });
-            }
-            productListModal.classList.remove('hidden');
-            if (isDropdownOpen) toggleDropdown();
+        if(viewProductListBtn) {
+            viewProductListBtn.addEventListener('click', () => { 
+                openProductListModal(); 
+                searchProductListInput.value = ''; 
+            });
         }
+
 
         linkVerInventario.addEventListener('click', (e) => {
             e.preventDefault();
-            openProductListModal();
+            openProductListModal(); 
+            searchProductListInput.value = ''; 
         });
 
         closeProductListModal.addEventListener('click', () => productListModal.classList.add('hidden'));
@@ -833,7 +1654,8 @@
         updateCartDisplay();
         showView(inventoryView);
         
-        console.log("MiniMarket POS App Inicializada. Loader de GitHub configurado.");
+        console.log("MiniMarket POS App Inicializada con escáner de cámara manual y ticket mejorado.");
     </script>
 </body>
-</html>
+                    </html>
+    
