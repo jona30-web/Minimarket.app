@@ -1,336 +1,176 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MiniMarket</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MiniMarket – Inventario y Escáner</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; text-align: center; }
+    header { background: #0074D9; color: #fff; padding: 1rem 0; }
+    h1 { margin: 0; }
+    .hidden { display: none; }
+    #toggle-view { margin: 1rem; padding: 0.6rem 1.2rem; background: #0074D9; color: #fff; border: none; border-radius: 5px; cursor: pointer; transition: background .2s; }
+    #toggle-view:hover { background: #005fa3; }
+    .section { padding: 1rem; }
+    #video { width: 100%; max-width: 400px; margin: 1rem auto; border-radius: 8px; display: none; }
+    #resultadoBusqueda { margin-top: 1rem; }
+    .container { display: grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap: 1rem; padding: 1rem; justify-items: center; }
+    .card { background: #fff; border-radius: 8px; padding: 0.8rem; box-shadow: 0 2px 6px rgba(0,0,0,0.1); width:100%; max-width:240px; text-align:left; }
+    .card h4 { margin:0 0 .4rem; }
+    .card p { margin:.2rem 0; font-size:.9rem; }
+    .card button { margin-top:.5rem; padding:.4rem .8rem; background:#0074D9; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+    .card button:hover { background:#005fa3; }
+    .info-off { margin-top:.5rem; font-size:.85rem; }
+    @media(max-width:600px){ .container{grid-template-columns:1fr;} }
+  </style>
 </head>
 <body>
+  <header><h1>MiniMarket</h1></header>
+  <button id="toggle-view">Ver Inventario</button>
 
-  <!-- Encabezado -->
-  <header>
-    <h1>MiniMarket</h1>
-  </header>
-
-  <!-- Botón para mostrar/ocultar inventario -->
-  <section class="controls">
-    <button id="toggle-inventory">Ver Inventario</button>
+  <!-- Sección: Escáner -->
+  <section id="scanner-section" class="section">
+    <button onclick="iniciarEscaneo()">Escanear con Cámara</button>
+    <video id="video"></video>
+    <div id="resultadoBusqueda"></div>
   </section>
 
-  <!-- Sección de inventario (inicialmente oculta) -->
-  <section id="inventory-section" class="hidden">
-    <!-- 1: Confitería -->
-    <div class="card">
-      <h4>Aldor Play Gusanos Gomitas Saborizadas</h4>
-      <p><strong>Unidad:</strong> 55g</p>
-      <p><strong>Precio:</strong> $1.00</p>
-    </div>
-    <div class="card">
-      <h4>Arcor El Chavo Chupetes Saborizados</h4>
-      <p><strong>Unidad:</strong> 11g</p>
-      <p><strong>Precio:</strong> $0.15</p>
-    </div>
-    <div class="card">
-      <h4>Arcor El Chavo Chupetes Pack</h4>
-      <p><strong>Unidad:</strong> 528g</p>
-      <p><strong>Precio:</strong> $4.00</p>
-    </div>
-    <div class="card">
-      <h4>Colombina Bon Bon Bum Pack x24</h4>
-      <p><strong>Unidad:</strong> 480g</p>
-      <p><strong>Precio:</strong> $3.70</p>
-    </div>
-    <div class="card">
-      <h4>Colombina Bon Bon Bum Fresa x u</h4>
-      <p><strong>Unidad:</strong> 20g</p>
-      <p><strong>Precio:</strong> $0.15</p>
-    </div>
-    <div class="card">
-      <h4>Confiteca Plop Fresa Ácida Pack x24</h4>
-      <p><strong>Unidad:</strong> 480g</p>
-      <p><strong>Precio:</strong> $2.70</p>
-    </div>
-    <div class="card">
-      <h4>Confiteca Plop Fresa Ácida x u</h4>
-      <p><strong>Unidad:</strong> 20g</p>
-      <p><strong>Precio:</strong> $0.15</p>
-    </div>
-
-    <!-- 2: Jabonería Protex -->
-    <div class="card">
-      <h4>Protex Fresh Pack x3u</h4>
-      <p><strong>Unidad:</strong> 330g</p>
-      <p><strong>Precio:</strong> $3.45</p>
-    </div>
-    <div class="card">
-      <h4>Protex Herbal x u</h4>
-      <p><strong>Unidad:</strong> 110g</p>
-      <p><strong>Precio:</strong> $1.25</p>
-    </div>
-    <div class="card">
-      <h4>Protex Macadamia</h4>
-      <p><strong>Unidad:</strong> 110g</p>
-      <p><strong>Precio:</strong> $1.25</p>
-    </div>
-    <div class="card">
-      <h4>Protex Omega 3</h4>
-      <p><strong>Unidad:</strong> 110g</p>
-      <p><strong>Precio:</strong> $1.25</p>
-    </div>
-    <div class="card">
-      <h4>Protex Limpieza Profunda Pack x3u</h4>
-      <p><strong>Unidad:</strong> 330g</p>
-      <p><strong>Precio:</strong> $3.45</p>
-    </div>
-
-    <!-- 3: Bebidas y Energizantes -->
-    <div class="card">
-      <h4>Sporade Cereza</h4>
-      <p><strong>Unidad:</strong> 500ml</p>
-      <p><strong>Precio:</strong> $0.55</p>
-    </div>
-    <div class="card">
-      <h4>Sporade Tropical</h4>
-      <p><strong>Unidad:</strong> 1200ml</p>
-      <p><strong>Precio:</strong> $1.00</p>
-    </div>
-    <div class="card">
-      <h4>Sporade Uva</h4>
-      <p><strong>Unidad:</strong> 500ml</p>
-      <p><strong>Precio:</strong> $0.55</p>
-    </div>
-    <div class="card">
-      <h4>Sporade Manzana</h4>
-      <p><strong>Unidad:</strong> 1.2L</p>
-      <p><strong>Precio:</strong> $1.00</p>
-    </div>
-    <div class="card">
-      <h4>Volt Frambuesa Ginseng</h4>
-      <p><strong>Unidad:</strong> 650ml</p>
-      <p><strong>Precio:</strong> $1.00</p>
-    </div>
-    <div class="card">
-      <h4>Volt Maca Arándano</h4>
-      <p><strong>Unidad:</strong> 400ml</p>
-      <p><strong>Precio:</strong> $0.50</p>
-    </div>
-    <div class="card">
-      <h4>Volt Uva Aloe</h4>
-      <p><strong>Unidad:</strong> 400ml</p>
-      <p><strong>Precio:</strong> $0.50</p>
-    </div>
-    <div class="card">
-      <h4>Té Hierba Luisa Pack 20u</h4>
-      <p><strong>Unidad:</strong> 24g</p>
-      <p><strong>Precio:</strong> $1.15</p>
-    </div>
-    <div class="card">
-      <h4>Té Horchata Pack 20u</h4>
-      <p><strong>Unidad:</strong> 24g</p>
-      <p><strong>Precio:</strong> $1.15</p>
-    </div>
-    <div class="card">
-      <h4>COLA BIG Negra</h4>
-      <p><strong>Unidad:</strong> 300ml</p>
-      <p><strong>Precio:</strong> $0.25</p>
-    </div>
-    <div class="card">
-      <h4>COLA BIG Fresa</h4>
-      <p><strong>Unidad:</strong> 300ml</p>
-      <p><strong>Precio:</strong> $0.25</p>
-    </div>
-    <div class="card">
-      <h4>COLA BIG Naranja</h4>
-      <p><strong>Unidad:</strong> 300ml</p>
-      <p><strong>Precio:</strong> $0.25</p>
-    </div>
-    <div class="card">
-      <h4>COLA BIG Limón</h4>
-      <p><strong>Unidad:</strong> 300ml</p>
-      <p><strong>Precio:</strong> $0.25</p>
-    </div>
-
-    <!-- 4: Yogures -->
-    <div class="card">
-      <h4>Alpina Frutilla</h4>
-      <p><strong>Unidad:</strong> 150g</p>
-      <p><strong>Precio:</strong> $0.70</p>
-    </div>
-    <div class="card">
-      <h4>Alpina Mora</h4>
-      <p><strong>Unidad:</strong> 150g</p>
-      <p><strong>Precio:</strong> $0.70</p>
-    </div>
-    <div class="card">
-      <h4>Alpina Durazno</h4>
-      <p><strong>Unidad:</strong> 150g</p>
-      <p><strong>Precio:</strong> $0.70</p>
-    </div>
-    <div class="card">
-      <h4>Chivería Mix Vainilla Granola</h4>
-      <p><strong>Unidad:</strong> 170g</p>
-      <p><strong>Precio:</strong> $1.00</p>
-    </div>
-    <div class="card">
-      <h4>Kiosko Bebible Frutilla</h4>
-      <p><strong>Unidad:</strong> 180g</p>
-      <p><strong>Precio:</strong> $0.75</p>
-    </div>
-    <div class="card">
-      <h4>Toni Yogurt Natural</h4>
-      <p><strong>Unidad:</strong> 950g</p>
-      <p><strong>Precio:</strong> $3.15</p>
-    </div>
-    <div class="card">
-      <h4>Toni Yogurt Griego</h4>
-      <p><strong>Unidad:</strong> 150g</p>
-      <p><strong>Precio:</strong> $1.45</p>
-    </div>
-    <div class="card">
-      <h4>Toni Mix Durazno</h4>
-      <p><strong>Unidad:</strong> 190g</p>
-      <p><strong>Precio:</strong> $0.85</p>
-    </div>
-    <div class="card">
-      <h4>Toni Mix Frutilla</h4>
-      <p><strong>Unidad:</strong> 190g</p>
-      <p><strong>Precio:</strong> $0.85</p>
-    </div>
-
-    <!-- 5: Pronaca y Alimentos Básicos -->
-    <div class="card">
-      <h4>Pasta de Tomate</h4>
-      <p><strong>Unidad:</strong> 250g</p>
-      <p><strong>Precio:</strong> $1.82</p>
-    </div>
-    <div class="card">
-      <h4>Salsa Pizza</h4>
-      <p><strong>Unidad:</strong> 490g</p>
-      <p><strong>Precio:</strong> $2.68</p>
-    </div>
-    <div class="card">
-      <h4>Salsa Spaghetti</h4>
-      <p><strong>Unidad:</strong> 490g</p>
-      <p><strong>Precio:</strong> $2.77</p>
-    </div>
-    <div class="card">
-      <h4>Salsa Spaghetti Napolitana</h4>
-      <p><strong>Unidad:</strong> 500g</p>
-      <p><strong>Precio:</strong> $3.65</p>
-    </div>
-    <div class="card">
-      <h4>Ají Indio Bravo</h4>
-      <p><strong>Unidad:</strong> 100ml</p>
-      <p><strong>Precio:</strong> $0.66</p>
-    </div>
-    <div class="card">
-      <h4>Fritada Funda</h4>
-      <p><strong>Unidad:</strong> 1kg</p>
-      <p><strong>Precio:</strong> $6.31</p>
-    </div>
-    <div class="card">
-      <h4>Cuero en Rollos</h4>
-      <p><strong>Unidad:</strong> 1kg</p>
-      <p><strong>Precio:</strong> $4.85</p>
-    </div>
-    <div class="card">
-      <h4>Chuletas Bandeja 4u</h4>
-      <p><strong>Unidad:</strong> 1kg</p>
-      <p><strong>Precio:</strong> $10.95</p>
-    </div>
-    <div class="card">
-      <h4>Chuletas Marinadas</h4>
-      <p><strong>Unidad:</strong> 1kg</p>
-      <p><strong>Precio:</strong> $5.50</p>
-    </div>
-    <div class="card">
-      <h4>Jamón Sanduchero Fritz</h4>
-      <p><strong>Unidad:</strong> 200g</p>
-      <p><strong>Precio:</strong> $3.00</p>
-    </div>
-    <div class="card">
-      <h4>Jamón Mr Pollo</h4>
-      <p><strong>Unidad:</strong> 200g</p>
-      <p><strong>Precio:</strong> $3.49</p>
-    </div>
-    <div class="card">
-      <h4>Salchicha Vienesa x1</h4>
-      <p><strong>Unidad:</strong> 1 und</p>
-      <p><strong>Precio:</strong> $0.65</p>
-    </div>
-    <div class="card">
-      <h4>Tocineta Rebanada 2x2</h4>
-      <p><strong>Unidad:</strong> 1 und</p>
-      <p><strong>Precio:</strong> $14.98</p>
-    </div>
-    <div class="card">
-      <h4>Jamón Espaldazo</h4>
-      <p><strong>Unidad:</strong> 1 und</p>
-      <p><strong>Precio:</strong> $9.55</p>
-    </div>
-    <div class="card">
-      <h4>Jamón Línea Diaria 85g</h4>
-      <p><strong>Unidad:</strong> 85g</p>
-      <p><strong>Precio:</strong> $1.00</p>
-    </div>
-    <div class="card">
-      <h4>Chorizo Línea Diaria 130g</h4>
-      <p><strong>Unidad:</strong> 130g</p>
-      <p><strong>Precio:</strong> $1.00</p>
-    </div>
-    <div class="card">
-      <h4>Pepperoni Plumrose</h4>
-      <p><strong>Unidad:</strong> 300g</p>
-      <p><strong>Precio:</strong> $3.00</p>
-    </div>
-    <div class="card">
-      <h4>Jamón Pierna 200g</h4>
-      <p><strong>Unidad:</strong> 200g</p>
-      <p><strong>Precio:</strong> $3.84</p>
-    </div>
-    <div class="card">
-      <h4>Chorizo Argentino 300g</h4>
-      <p><strong>Unidad:</strong> 300g</p>
-      <p><strong>Precio:</strong> $4.50</p>
-    </div>
-    <div class="card">
-      <h4>Avena YA</h4>
-      <p><strong>Unidad:</strong> 1kg</p>
-      <p><strong>Precio:</strong> $1.82</p>
-    </div>
-    <div class="card">
-      <h4>Fideos Cayambe Tallarín</h4>
-      <p><strong>Unidad:</strong> 400g</p>
-      <p><strong>Precio:</strong> $1.00</p>
-    </div>
-    <div class="card">
-      <h4>Fideos Cayambe Broca</h4>
-      <p><strong>Unidad:</strong> 400g</p>
-      <p><strong>Precio:</strong> $1.00</p>
-    </div>
-    <div class="card">
-      <h4>Fideos Cayambe Cabello de Ángel</h4>
-      <p><strong>Unidad:</strong> 400g</p>
-      <p><strong>Precio:</strong> $1.00</p>
-    </div>
-    <div class="card">
-      <h4>Harina YA</h4>
-      <p><strong>Unidad:</strong> 1kg</p>
-      <p><strong>Precio:</strong> $2.85</p>
-    </div>
+  <!-- Sección: Inventario -->
+  <section id="inventory-section" class="section hidden">
+    <div class="container" id="inventory-container"></div>
   </section>
 
-  <script>
-    const btn = document.getElementById('toggle-inventory');
-    const inv = document.getElementById('inventory-section');
-    btn.addEventListener('click', () => {
-      inv.classList.toggle('hidden');
-      btn.textContent = inv.classList.contains('hidden')
-        ? 'Ver Inventario'
-        : 'Ocultar Inventario';
+  <script type="module">
+    import { BrowserMultiFormatReader } from 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.0.10/+esm';
+    const codeReader = new BrowserMultiFormatReader();
+    const video = document.getElementById('video');
+    const resultado = document.getElementById('resultadoBusqueda');
+    const scanSec = document.getElementById('scanner-section');
+    const invSec  = document.getElementById('inventory-section');
+    const toggle = document.getElementById('toggle-view');
+
+    // Lista completa de productos
+    const productos = [
+      { nombre: 'Aldor Play Gusanos Gomitas Saborizadas', unidad: '55g', precio: 1.00 },
+      { nombre: 'Arcor El Chavo Chupetes Saborizados', unidad: '11g', precio: 0.15 },
+      { nombre: 'Arcor El Chavo Chupetes Pack', unidad: '528g', precio: 4.00 },
+      { nombre: 'Colombina Bon Bon Bum Pack x24', unidad: '480g', precio: 3.70 },
+      { nombre: 'Colombina Bon Bon Bum Fresa x u', unidad: '20g', precio: 0.15 },
+      { nombre: 'Confiteca Plop Fresa Ácida Pack x24', unidad: '480g', precio: 2.70 },
+      { nombre: 'Confiteca Plop Fresa Ácida x u', unidad: '20g', precio: 0.15 },
+      { nombre: 'Protex Fresh Pack x3u', unidad: '330g', precio: 3.45 },
+      { nombre: 'Protex Herbal x u', unidad: '110g', precio: 1.25 },
+      { nombre: 'Protex Macadamia', unidad: '110g', precio: 1.25 },
+      { nombre: 'Protex Omega 3', unidad: '110g', precio: 1.25 },
+      { nombre: 'Protex Limpieza Profunda Pack x3u', unidad: '330g', precio: 3.45 },
+      { nombre: 'Sporade Cereza', unidad: '500ml', precio: 0.55 },
+      { nombre: 'Sporade Tropical', unidad: '1200ml', precio: 1.00 },
+      { nombre: 'Sporade Uva', unidad: '500ml', precio: 0.55 },
+      { nombre: 'Sporade Manzana', unidad: '1.2L', precio: 1.00 },
+      { nombre: 'Volt Frambuesa Ginseng', unidad: '650ml', precio: 1.00 },
+      { nombre: 'Volt Maca Arándano', unidad: '400ml', precio: 0.50 },
+      { nombre: 'Volt Uva Aloe', unidad: '400ml', precio: 0.50 },
+      { nombre: 'Té Hierba Luisa Pack 20u', unidad: '24g', precio: 1.15 },
+      { nombre: 'Té Horchata Pack 20u', unidad: '24g', precio: 1.15 },
+      { nombre: 'COLA BIG Negra', unidad: '300ml', precio: 0.25 },
+      { nombre: 'COLA BIG Fresa', unidad: '300ml', precio: 0.25 },
+      { nombre: 'COLA BIG Naranja', unidad: '300ml', precio: 0.25 },
+      { nombre: 'COLA BIG Limón', unidad: '300ml', precio: 0.25 },
+      { nombre: 'Alpina Frutilla', unidad: '150g', precio: 0.70 },
+      { nombre: 'Alpina Mora', unidad: '150g', precio: 0.70 },
+      { nombre: 'Alpina Durazno', unidad: '150g', precio: 0.70 },
+      { nombre: 'Chivería Mix Vainilla Granola', unidad: '170g', precio: 1.00 },
+      { nombre: 'Kiosko Bebible Frutilla', unidad: '180g', precio: 0.75 },
+      { nombre: 'Toni Yogurt Natural', unidad: '950g', precio: 3.15 },
+      { nombre: 'Toni Yogurt Griego', unidad: '150g', precio: 1.45 },
+      { nombre: 'Toni Mix Durazno', unidad: '190g', precio: 0.85 },
+      { nombre: 'Toni Mix Frutilla', unidad: '190g', precio: 0.85 },
+      { nombre: 'Pasta de Tomate', unidad: '250g', precio: 1.82 },
+      { nombre: 'Salsa Pizza', unidad: '490g', precio: 2.68 },
+      { nombre: 'Salsa Spaghetti', unidad: '490g', precio: 2.77 },
+      { nombre: 'Salsa Spaghetti Napolitana', unidad: '500g', precio: 3.65 },
+      { nombre: 'Ají Indio Bravo', unidad: '100ml', precio: 0.66 },
+      { nombre: 'Fritada Funda', unidad: '1kg', precio: 6.31 },
+      { nombre: 'Cuero en Rollos', unidad: '1kg', precio: 4.85 },
+      { nombre: 'Chuletas Bandeja 4u', unidad: '1kg', precio: 10.95 },
+      { nombre: 'Chuletas Marinadas', unidad: '1kg', precio: 5.50 },
+      { nombre: 'Jamón Sanduchero Fritz', unidad: '200g', precio: 3.00 },
+      { nombre: 'Jamón Mr Pollo', unidad: '200g', precio: 3.49 },
+      { nombre: 'Salchicha Vienesa x1', unidad: '1 und', precio: 0.65 },
+      { nombre: 'Tocineta Rebanada 2x2', unidad: '1 und', precio: 14.98 },
+      { nombre: 'Jamón Espaldazo', unidad: '1 und', precio: 9.55 },
+      { nombre: 'Jamón Línea Diaria 85g', unidad: '85g', precio: 1.00 },
+      { nombre: 'Chorizo Línea Diaria 130g', unidad: '130g', precio: 1.00 },
+      { nombre: 'Pepperoni Plumrose', unidad: '300g', precio: 3.00 },
+      { nombre: 'Jamón Pierna 200g', unidad: '200g', precio: 3.84 },
+      { nombre: 'Chorizo Argentino 300g', unidad: '300g', precio: 4.50 },
+      { nombre: 'Avena YA', unidad: '1kg', precio: 1.82 },
+      { nombre: 'Fideos Cayambe Tallarín', unidad: '400g', precio: 1.00 },
+      { nombre: 'Fideos Cayambe Broca', unidad: '400g', precio: 1.00 },
+      { nombre: 'Fideos Cayambe Cabello de Ángel', unidad: '400g', precio: 1.00 },
+      { nombre: 'Harina YA', unidad: '1kg', precio: 2.85 }
+    ];
+
+    // Generar tarjetas dinámicamente
+    const invContainer = document.getElementById('inventory-container');
+    productos.forEach(prod => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <h4>${prod.nombre}</h4>
+        <p><strong>Unidad:</strong> ${prod.unidad}</p>
+        <p><strong>Precio:</strong> $${prod.precio.toFixed(2)}</p>
+        <button onclick="buscarProducto('${prod.nombre}', this)">Ver Info Nutricional</button>
+        <div class="info-off"></div>
+      `;
+      invContainer.appendChild(card);
     });
-  </script>
 
+    // Toggle views
+    toggle.addEventListener('click', () => {
+      const invVisible = !invSec.classList.contains('hidden');
+      invSec.classList.toggle('hidden');
+      scanSec.classList.toggle('hidden');
+      toggle.textContent = invVisible ? 'Ver Inventario' : 'Volver al Menú';
+    });
+
+    // Escáner y búsqueda OFF (igual que antes)
+    async function iniciarEscaneo() {
+      resultado.textContent = 'Iniciando cámara…';
+      video.style.display = 'block';
+      try {
+        const devices = await codeReader.listVideoInputDevices();
+        const id = devices[0]?.deviceId;
+        if (!id) { resultado.textContent = 'No se encontró cámara.'; return; }
+        await codeReader.decodeFromVideoDevice(id, video, (res, err) => {
+          if (res) { codeReader.reset(); buscarPorCodigo(res.getText()); }
+        });
+      } catch(e) { resultado.textContent='Error al acceder cámara.'; console.error(e); }
+    }
+    async function buscarPorCodigo(codigo) {
+      resultado.innerHTML = `<p>Buscando código: <strong>${codigo}</strong></p>`;
+      const r = await fetch(`https://world.openfoodfacts.org/api/v0/product/${codigo}.json`);
+      const d = await r.json();
+      if (d.status===1) {
+        const p = d.product;
+        resultado.innerHTML = `<h3>${p.product_name||'Sin nombre'}</h3>` +
+          `<p><strong>Marca:</strong> ${p.brands||'N/A'}</p>` +
+          `<p><strong>Nutri-Score:</strong> ${p.nutriscore_grade||'No disp.'}</p>` +
+          `<p><strong>Ingredientes:</strong> ${p.ingredients_text||'No disp.'}</p>`;
+      } else { resultado.innerHTML='<p>Producto no encontrado.</p>'; }
+    }
+    window.buscarProducto = async (nombre, btn) => {
+      const u = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(nombre)}&search_simple=1&action=process&json=1`;
+      const r = await fetch(u); const d = await r.json();
+      const info = btn.parentElement.querySelector('.info-off');
+      if (d.products?.length) {
+        const p = d.products[0];
+        info.innerHTML = `<p><strong>Nombre:</strong> ${p.product_name||'Desconocido'}</p>` +
+                        `<p><strong>Marca:</strong> ${p.brands||'N/A'}</p>` +
+                        `<p><strong>Nutri-Score:</strong> ${p.nutriscore_grade||'No disp.'}</p>` +
+                        `<p><strong>Ingredientes:</strong> ${p.ingredients_text||'No disp.'}</p>`;
+      } else { info.textContent = 'No hay datos en OFF.'; }
+    };
+  </script>
 </body>
 </html>
