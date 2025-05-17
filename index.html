@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MiniMarket UI</title>
+    <title>MiniMarket UI - POS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+
     <style>
-        /* Custom styles for neon effects and specific looks if Tailwind isn't enough */
         body {
-            font-family: 'Arial', sans-serif; /* Matching the font from previous CSS */
+            font-family: 'Arial', sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
@@ -22,14 +24,9 @@
         .neon-border-magenta {
             box-shadow: 0 0 3px #ff00ff, 0 0 5px #ff00ff, 0 0 7px #ff00ff;
         }
-        .btn-explore {
-            background-color: rgba(0, 255, 0, 0.1); /* Slight green background */
-        }
         .btn-scan {
-             background-color: rgba(255, 0, 255, 0.1); /* Slight magenta background */
+             background-color: rgba(255, 0, 255, 0.1);
         }
-
-        /* Custom scrollbar for a more modern look - optional */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -46,115 +43,797 @@
         .dropdown-item-hover:hover {
             background-color: rgba(255, 255, 255, 0.1);
         }
+        .cart-item:hover {
+            background-color: #2d2d2d;
+        }
+        .modal {
+            background-color: rgba(0,0,0,0.7);
+        }
+
+        #preloader {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 99999;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+            visibility: visible;
+            opacity: 1;
+        }
+        #preloader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        #preloader img {
+            width: 150px; /* Ajusta el tamaño del loader según necesites */
+            height: auto;
+            /* Considera añadir una animación de 'spin' si tu loader no es un GIF animado */
+            /* animation: spin 1.5s linear infinite; */
+        }
+        /* @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        } */
+
+        .input-field {
+            background-color: #2d2d2d;
+            border: 1px solid #4a4a4a;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem; /* rounded-md */
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .input-field:focus {
+            border-color: #00ff00;
+            box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.3);
+            outline: none;
+        }
+        #demoProductList .category-title {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600; /* font-semibold */
+            color: #f0abfc; 
+            margin-top: 1rem; /* mt-4 */
+            margin-bottom: 0.5rem; /* mb-2 */
+            padding-bottom: 0.25rem; /* pb-1 */
+            border-bottom: 1px solid #4a4a4a;
+        }
+         #demoProductList .product-entry {
+            padding: 0.5rem; /* p-2 */
+            border-bottom: 1px solid #3a3a3a; /* border-neutral-700 */
+        }
+        #demoProductList .product-entry:last-child {
+            border-bottom: none;
+        }
+        #demoProductList .product-name {
+            font-weight: 600; /* font-semibold */
+        }
+        #demoProductList .product-details {
+            font-size: 0.875rem; /* text-sm */
+            color: #a0aec0; /* text-gray-400 */
+        }
+
     </style>
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col items-center pt-4 sm:pt-8 px-4">
 
+    <div id="preloader">
+        <img src="https://raw.githubusercontent.com/jona30-web/Minimarket.app/032d691df1461e1c933efb7be1a82ed963380606/loader.png.jpg" alt="Cargando..." onerror="this.src='https://placehold.co/150x150/000000/FFFFFF?text=Error+Loader+URL'; console.error('Error al cargar el loader desde GitHub.')"/>
+    </div>
+
     <header class="w-full max-w-4xl flex justify-between items-center mb-8 sm:mb-12">
-        <button class="p-2 sm:p-3 border-2 border-fuchsia-500 neon-border-magenta rounded-lg text-fuchsia-500 hover:bg-fuchsia-700 hover:text-white transition-all">
+        <button id="addProductManuallyBtn" class="p-2 sm:p-3 border-2 border-fuchsia-500 neon-border-magenta rounded-lg text-fuchsia-500 hover:bg-fuchsia-700 hover:text-white transition-all" title="Añadir Producto Aleatorio (Demo)">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 sm:w-6 sm:h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
         </button>
-
-        <div class="text-center">
-            <img src="https://placehold.co/100x40/000000/ff00ff?text=LOGO&font=arial" alt="MiniMarket Logo" class="h-8 sm:h-10 opacity-70" onerror="this.src='https://placehold.co/100x40/000000/808080?text=Logo+Error'"/>
-        </div>
-
+        <img src="https://raw.githubusercontent.com/jona30-web/Minimarket.app/032d691df1461e1c933efb7be1a82ed963380606/logosinfondo.png.png" alt="MiniMarket Logo" id="appLogo" class="h-12 sm:h-14 object-contain" onerror="this.src='https://placehold.co/120x50/000000/808080?text=Error+Logo+URL'; console.error('Error al cargar el logo desde GitHub.')"/>
         <div class="relative">
             <button id="menuButton" class="p-2 sm:p-3 border-2 border-fuchsia-500 neon-border-magenta rounded-lg text-fuchsia-500 hover:bg-fuchsia-700 hover:text-white transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 sm:w-6 sm:h-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                 </svg>
             </button>
-
             <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-64 sm:w-72 bg-neutral-900 border-2 border-fuchsia-500 neon-border-magenta rounded-lg shadow-xl z-20 overflow-hidden">
-                <a href="#" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
-                    <i class="fas fa-box w-5 h-5 mr-3 text-fuchsia-400"></i> Inventario
+                <a href="#" id="linkInventario" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
+                    <i class="fas fa-cash-register w-5 h-5 mr-3 text-fuchsia-400"></i> Modo Venta (POS)
                 </a>
-                <a href="#" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
-                    <i class="fas fa-shopping-cart w-5 h-5 mr-3 text-fuchsia-400"></i> Ventas
+                <a href="#" id="linkVerInventario" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
+                    <i class="fas fa-eye w-5 h-5 mr-3 text-fuchsia-400"></i> Ver Inventario
                 </a>
-                <a href="#" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
-                    <i class="fas fa-list-alt w-5 h-5 mr-3 text-fuchsia-400"></i> Historial
+                <a href="#" id="linkReporte" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
+                    <i class="fas fa-chart-line w-5 h-5 mr-3 text-fuchsia-400"></i> Reporte Diario
                 </a>
-                <a href="#" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
-                    <i class="fas fa-chart-bar w-5 h-5 mr-3 text-fuchsia-400"></i> Estadísticas
+                 <a href="#" id="linkManageProducts" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
+                    <i class="fas fa-box w-5 h-5 mr-3 text-fuchsia-400"></i> Gestionar Productos
                 </a>
-                <a href="#" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
+                <a href="#" id="linkConfiguracion" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
                     <i class="fas fa-cog w-5 h-5 mr-3 text-fuchsia-400"></i> Configuración
                 </a>
             </div>
         </div>
     </header>
 
-    <main class="w-full max-w-2xl flex flex-col items-center text-center mt-6 sm:mt-10">
-        <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold text-green-400 neon-text-green mb-3 sm:mb-4">
-            Bienvenido a <br class="sm:hidden"> MiniMarket
-        </h1>
-        <p class="text-base sm:text-lg text-gray-300 mb-10 sm:mb-12">
-            Tu sistema de gestión rápido y sencillo
-        </p>
+    <div id="mainContentArea" class="w-full opacity-0 transition-opacity duration-500">
+        <main id="inventoryView" class="w-full max-w-4xl mx-auto flex flex-col lg:flex-row gap-6 items-start">
+            <div class="w-full lg:w-1/2 flex flex-col items-center text-center">
+                <h1 class="text-4xl sm:text-5xl font-bold text-green-400 neon-text-green mb-3 sm:mb-4">
+                    Bienvenido a <br class="sm:hidden"> MiniMarket POS
+                </h1>
+                <p class="text-base sm:text-lg text-gray-300 mb-8 sm:mb-10">
+                    Sistema de venta y gestión
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-8 sm:mb-10 w-full sm:w-auto">
+                    <button id="clearCartBtn" class="btn-scan flex items-center justify-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-fuchsia-400 border-2 border-fuchsia-400 neon-border-magenta rounded-xl hover:bg-fuchsia-600 hover:text-black hover:border-fuchsia-600 transition-all w-full sm:w-auto">
+                        <i class="fas fa-trash-alt"></i> LIMPIAR CARRITO
+                    </button>
+                </div>
+                <div class="w-full max-w-md mb-6">
+                    <form id="scanForm">
+                        <input type="text" id="barcodeScannerInput" placeholder="Escanear o ingresar ID de producto..." class="w-full px-5 py-3 sm:py-4 bg-neutral-800 border-2 border-green-400 neon-border-green rounded-full text-gray-200 placeholder-gray-500 focus:outline-none focus:border-green-300 focus:ring-1 focus:ring-green-300 transition-all text-sm sm:text-base">
+                    </form>
+                </div>
+                 <div id="productListModal" class="hidden fixed inset-0 modal flex items-center justify-center z-30 p-4">
+                    <div class="bg-neutral-900 p-4 sm:p-6 rounded-lg shadow-xl max-w-xl w-full max-h-[90vh] flex flex-col border-2 border-fuchsia-500 neon-border-magenta">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-2xl font-bold text-green-400 neon-text-green">Inventario de Productos</h3>
+                            <button id="closeProductListModal" class="text-fuchsia-400 hover:text-fuchsia-300 text-2xl">
+                                <i class="fas fa-times-circle"></i>
+                            </button>
+                        </div>
+                        <div id="demoProductList" class="text-left overflow-y-auto flex-grow pr-2">
+                            </div>
+                        <button id="closeProductListModalBottom" class="mt-4 bg-fuchsia-500 text-white px-6 py-2 rounded-lg hover:bg-fuchsia-600 transition-colors w-full sm:w-auto mx-auto block">Cerrar</button>
+                    </div>
+                </div>
+            </div>
 
-        <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-10 sm:mb-12 w-full sm:w-auto">
-            <button class="btn-explore flex items-center justify-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-green-400 border-2 border-green-400 neon-border-green rounded-xl hover:bg-green-600 hover:text-black hover:border-green-600 transition-all w-full sm:w-auto">
-                <i class="fas fa-shopping-basket"></i>
-                EXPLORAR PRODUCTOS
-            </button>
-            <button class="btn-scan flex items-center justify-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-fuchsia-400 border-2 border-fuchsia-400 neon-border-magenta rounded-xl hover:bg-fuchsia-600 hover:text-black hover:border-fuchsia-600 transition-all w-full sm:w-auto">
-                <i class="fas fa-camera"></i>
-                ESCÁNER
-            </button>
-        </div>
+            <div class="w-full lg:w-1/2 bg-neutral-800 p-4 sm:p-6 rounded-lg border-2 border-fuchsia-500 neon-border-magenta">
+                <h2 class="text-2xl sm:text-3xl font-bold text-fuchsia-400 neon-text-green mb-4 text-center">Carrito de Compras</h2>
+                <div id="cartItemsContainer" class="max-h-64 sm:max-h-80 overflow-y-auto mb-4 pr-2">
+                    <p id="emptyCartMessage" class="text-gray-400 text-center">El carrito está vacío.</p>
+                </div>
+                <div class="border-t-2 border-fuchsia-400 pt-4">
+                    <div class="flex justify-between items-center text-xl sm:text-2xl font-bold mb-4">
+                        <span class="text-green-400">TOTAL:</span>
+                        <span id="cartTotal" class="text-green-400">$0.00</span>
+                    </div>
+                    <button id="finalizeSaleBtn" class="w-full bg-green-500 hover:bg-green-600 text-black font-bold py-3 sm:py-4 rounded-lg text-lg sm:text-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fas fa-check-circle mr-2"></i> FINALIZAR VENTA
+                    </button>
+                </div>
+            </div>
+        </main>
 
-        <div class="w-full max-w-md mb-10 sm:mb-16">
-            <input type="text" placeholder="Buscar productos..." class="w-full px-5 py-3 sm:py-4 bg-neutral-800 border-2 border-green-400 neon-border-green rounded-full text-gray-200 placeholder-gray-500 focus:outline-none focus:border-green-300 focus:ring-1 focus:ring-green-300 transition-all text-sm sm:text-base">
+        <section id="reportView" class="hidden w-full max-w-3xl mx-auto mt-10 p-6 bg-neutral-800 rounded-lg border-2 border-green-500 neon-border-green">
+            <h1 class="text-3xl sm:text-4xl font-bold text-green-400 neon-text-green mb-6 text-center">Resumen Diario de Ventas</h1>
+            <div class="space-y-4 text-lg">
+                <p><strong>Fecha del Reporte:</strong> <span id="reportDate" class="text-gray-300"></span></p>
+                <p><strong>Total Recaudado del Día:</strong> <span id="dailyTotalRevenue" class="text-green-400 font-bold"></span></p>
+                <p><strong>Cantidad de Productos Vendidos:</strong> <span id="dailyTotalProductsSold" class="text-fuchsia-400 font-bold"></span></p>
+                <p><strong>Cantidad de Ventas Realizadas:</strong> <span id="dailyTotalSalesCount" class="text-fuchsia-400 font-bold"></span></p>
+            </div>
+            <div class="mt-8 text-center">
+                <button id="downloadReportPdfBtn" class="bg-fuchsia-500 hover:bg-fuchsia-600 text-white font-bold py-3 px-6 rounded-lg text-lg transition-all">
+                    <i class="fas fa-file-pdf mr-2"></i> Descargar Reporte PDF
+                </button>
+            </div>
+             <div class="mt-6 text-sm text-gray-400">
+                <p>Nota: Este reporte se basa en las ventas registradas hoy en el almacenamiento local del navegador.</p>
+            </div>
+        </section>
+
+        <section id="manageProductsView" class="hidden w-full max-w-3xl mx-auto mt-10 p-6 bg-neutral-800 rounded-lg border-2 border-green-500 neon-border-green">
+            <h1 class="text-3xl sm:text-4xl font-bold text-green-400 neon-text-green mb-6 text-center">Gestionar Productos</h1>
+            <div class="mb-6">
+                <h3 class="text-xl text-fuchsia-400 mb-2">Añadir Nuevo Producto</h3>
+                <form id="addProductForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                    <div>
+                        <label for="newProductName" class="block text-sm font-medium text-gray-300 mb-1">Nombre:</label>
+                        <input type="text" id="newProductName" required class="w-full input-field">
+                    </div>
+                    <div>
+                        <label for="newProductId" class="block text-sm font-medium text-gray-300 mb-1">ID (Código de Barras):</label>
+                        <input type="text" id="newProductId" required class="w-full input-field">
+                    </div>
+                     <div>
+                        <label for="newProductCategory" class="block text-sm font-medium text-gray-300 mb-1">Categoría:</label>
+                        <input type="text" id="newProductCategory" required class="w-full input-field" placeholder="Ej: Bebidas, Confiteria">
+                    </div>
+                    <div>
+                        <label for="newProductUnit" class="block text-sm font-medium text-gray-300 mb-1">Unidad (Ej: 500ml, 1kg, und):</label>
+                        <input type="text" id="newProductUnit" required class="w-full input-field">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="newProductPrice" class="block text-sm font-medium text-gray-300 mb-1">Precio ($):</label>
+                        <input type="number" id="newProductPrice" step="0.01" min="0" required class="w-full input-field">
+                    </div>
+                    <button type="submit" class="sm:col-span-2 bg-green-500 hover:bg-green-600 text-black font-bold py-2.5 px-4 rounded-lg transition-all h-fit">
+                        <i class="fas fa-plus-circle mr-2"></i>Añadir Producto
+                    </button>
+                </form>
+            </div>
+            <div>
+                <h3 class="text-xl text-fuchsia-400 mb-2">Lista de Productos Actuales</h3>
+                <div id="currentProductsList" class="max-h-96 overflow-y-auto pr-2 space-y-2">
+                    <p class="text-gray-400">Cargando productos...</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="paymentModal" class="hidden fixed inset-0 modal flex items-center justify-center z-30 p-4">
+        <div class="bg-neutral-800 p-6 rounded-lg shadow-xl max-w-md w-full">
+            <h3 class="text-2xl font-bold text-green-400 neon-text-green mb-4">Procesar Pago</h3>
+            <p class="text-lg mb-2">Total a Pagar: <span id="paymentModalTotal" class="font-bold text-green-400"></span></p>
+            <div class="mb-4">
+                <label for="amountPaidInput" class="block text-sm font-medium text-gray-300 mb-1">Monto Pagado por Cliente:</label>
+                <input type="number" id="amountPaidInput" step="0.01" class="w-full px-4 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white focus:ring-green-500 focus:border-green-500" placeholder="0.00">
+            </div>
+            <p class="text-lg mb-4">Cambio: <span id="changeDue" class="font-bold text-fuchsia-400">$0.00</span></p>
+            <div class="flex justify-end gap-4">
+                <button id="cancelPaymentBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors">Cancelar</button>
+                <button id="confirmPaymentBtn" class="bg-green-500 hover:bg-green-600 text-black px-6 py-2 rounded-lg transition-colors disabled:opacity-50" disabled>Confirmar Pago</button>
+            </div>
         </div>
-    </main>
+    </div>
 
     <footer class="w-full text-center text-gray-500 text-xs sm:text-sm py-6 mt-auto">
-        &copy; 2025 MiniMarket | Creado y desarrollado por Jonathan Tuquerrez
+        &copy; <span id="currentYear"></span> MiniMarket | Creado y desarrollado por Jonathan Tuquerrez
     </footer>
 
     <script>
-        // JavaScript for Dropdown Menu
+        const { jsPDF } = window.jspdf;
+        let synth;
+
+        let mockProducts = JSON.parse(localStorage.getItem('mockProducts')) || [
+            // Confiteria
+            { id: "P001", name: "Aldor Play Gusanos Gomitas Saborizadas", unit: "55g", price: 1.00, category: "Confiteria" },
+            { id: "P002", name: "Arcor El Chavo Chupetes Saborizados", unit: "11g", price: 0.15, category: "Confiteria" },
+            { id: "P003", name: "Arcor El Chavo Chupetes Pack", unit: "528g", price: 4.00, category: "Confiteria" },
+            { id: "P004", name: "Colombina Bon Bon Bum Chupetes Fresa Pack x24", unit: "480g", price: 3.70, category: "Confiteria" },
+            { id: "P005", name: "Colombina Bon Bon Bum Chupete Sabor Fresa x u", unit: "20g", price: 0.15, category: "Confiteria" },
+            { id: "P006", name: "Colombina Bon Bon Bum Chupetes Surtido Pack x24", unit: "480g", price: 3.70, category: "Confiteria" },
+            { id: "P007", name: "Confiteca Plop Chupetes Surtidos x u", unit: "20g", price: 0.15, category: "Confiteria" },
+            { id: "P008", name: "Confiteca Plop Chupetes Fresa Ácida Pack x24", unit: "480g", price: 2.70, category: "Confiteria" },
+            { id: "P009", name: "Confiteca Plop Chupete Fresa Ácida x u", unit: "20g", price: 0.15, category: "Confiteria" },
+            // Jabonería Protex
+            { id: "P010", name: "Protex Fresh Jabón de Tocador Antibacterial Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex" },
+            { id: "P011", name: "Protex Herbal Jabón Antibacterial x u", unit: "110g", price: 1.25, category: "Jabonería Protex" },
+            { id: "P012", name: "Protex Herbal Jabón de Tocador Antibacterial Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex" },
+            { id: "P013", name: "Protex Jabón Aceite de Macadamia", unit: "110g", price: 1.25, category: "Jabonería Protex" },
+            { id: "P014", name: "Protex Jabón Antibacterial Omega 3", unit: "110g", price: 1.25, category: "Jabonería Protex" },
+            { id: "P015", name: "Protex Jabón Limpieza Profunda Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex" },
+            { id: "P016", name: "Protex Jabón Omega 3 Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex" },
+            // Bebidas y Energizantes
+            { id: "P017", name: "Aje Sporade Bebida Hidratante Cereza", unit: "500 ml", price: 0.55, category: "Bebidas y Energizantes" },
+            { id: "P018", name: "Aje Sporade Bebida Hidratante Tropical", unit: "1200 ml", price: 1.00, category: "Bebidas y Energizantes" },
+            { id: "P019", name: "Aje Sporade Bebida Hidratante Uva", unit: "500 ml", price: 0.55, category: "Bebidas y Energizantes" },
+            { id: "P020", name: "Aje Sporade Bebida Hidratante Manzana", unit: "1.2 lt", price: 1.00, category: "Bebidas y Energizantes" },
+            { id: "P021", name: "Aje Volt Bebida Energizante Frambuesa Ginseng", unit: "650 ml", price: 1.00, category: "Bebidas y Energizantes" },
+            { id: "P022", name: "Aje Volt Bebida Energizante Maca Arándano", unit: "400 ml", price: 0.50, category: "Bebidas y Energizantes" },
+            { id: "P023", name: "Aje Volt Bebida Energizante Uva Colágeno Aloe Vera", unit: "400 ml", price: 0.50, category: "Bebidas y Energizantes" },
+            { id: "P024", name: "Aroma Melis Té de Hierba Luisa Pack 20u", unit: "24 g", price: 1.15, category: "Bebidas y Energizantes" },
+            { id: "P025", name: "Aroma Melis Té de Hierbas Aromáticas Horchata Pack 20u", unit: "24 g", price: 1.15, category: "Bebidas y Energizantes" },
+            // Yogures
+            { id: "P026", name: "Alpina Regeneris Yogurt con Frutas Trozos de Frutilla", unit: "150 g", price: 0.70, category: "Yogures" },
+            { id: "P027", name: "Alpina Regeneris Yogurt con Frutas Trozos de Mora", unit: "150 g", price: 0.70, category: "Yogures" },
+            { id: "P028", name: "Alpina Regeneris Yogurt con Frutas Trozos de Durazno", unit: "150 g", price: 0.70, category: "Yogures" },
+            { id: "P029", name: "Chivería Yogurt Mix Sin Azúcar Vainilla Granola", unit: "170 g", price: 1.00, category: "Yogures" },
+            { id: "P030", name: "Kiosko Premio Sorpresa Yogurt Bebible Frutilla", unit: "180 g", price: 0.75, category: "Yogures" },
+            { id: "P031", name: "Toni Yogurt Bebible Natural Sin Azúcar", unit: "950 g", price: 3.15, category: "Yogures" },
+            { id: "P032", name: "Toni Yogurt en Postre Natural Griego Semidescremado", unit: "150 g", price: 1.45, category: "Yogures" },
+            { id: "P033", name: "Toni Yogurt Mix con Cereal Durazno", unit: "190 g", price: 0.85, category: "Yogures" },
+            { id: "P034", name: "Toni Yogurt Mix con Cereal Frutilla", unit: "190 g", price: 0.85, category: "Yogures" },
+            // Productos PRONACA y alimentos básicos
+            { id: "P035", name: "Pasta de Tomate 250g", unit: "1 und", price: 1.82, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P036", name: "Salsa Pizza 490g", unit: "1 und", price: 2.68, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P037", name: "Salsa Spaghetti 490g", unit: "1 und", price: 2.77, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P038", name: "Salsa Spaghetti Napolitana 500g", unit: "1 und", price: 3.65, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P039", name: "Ají Indio Bravo 100ml", unit: "1 und", price: 0.66, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P040", name: "Fritada Funda", unit: "1 kg", price: 6.31, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P041", name: "Cuero en Rollos", unit: "1 kg", price: 4.85, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P042", name: "Chuletas Bandeja 4 Unidades", unit: "1 kg", price: 10.95, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P043", name: "Chuletas Funda Marinadas 4 unidades", unit: "1 kg", price: 5.50, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P044", name: "Jamón Sanduchero Fritz", unit: "200 g", price: 3.00, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P045", name: "Jamón Light Pechuga de Pavo Fritz", unit: "200 g", price: 3.60, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P046", name: "Chuleta de Chancho Ahumada a Pork", unit: "500 g", price: 18.67, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P047", name: "Longaniza Fritz", unit: "300 g", price: 4.00, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P048", name: "Chorizo Fritz", unit: "300 g", price: 2.61, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P049", name: "Ranchera Desayuno Fritz", unit: "1 und", price: 3.34, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P050", name: "Jamón Mr Pollo", unit: "200 g", price: 3.49, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P051", name: "Salchicha Salchipollo", unit: "1 und", price: 1.52, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P052", name: "Salchicha Vienesa x 1", unit: "1 und", price: 0.65, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P053", name: "Tocineta Ahumada Rebanada 2x2", unit: "1 und", price: 14.98, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P054", name: "Jamón de Espaldazo", unit: "1 und", price: 9.55, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P055", name: "Jamón Línea Diaria 85 g", unit: "1 und", price: 1.00, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P056", name: "Salchichas Frankfurt x 5", unit: "1 und", price: 2.50, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P057", name: "Chorizo de Pollo 500 g", unit: "1 und", price: 3.20, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P058", name: "Chorizo Línea Diaria 130 g", unit: "1 und", price: 1.00, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P059", name: "Pepperoni Plumrose", unit: "1 und", price: 3.00, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P060", name: "Jamón de Pierna 200 g", unit: "1 und", price: 3.84, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P061", name: "Chorizo Argentino 300 g", unit: "1 und", price: 4.50, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P062", name: "Avena YA", unit: "1 kg", price: 1.82, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P063", name: "Fideos Cayambe Broca", unit: "400 g", price: 1.00, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P064", name: "Fideos Cayambe Cabello de Ángel", unit: "400 g", price: 1.00, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P065", name: "Fideos Cayambe Tallarín", unit: "400 g", price: 1.00, category: "Productos PRONACA y alimentos básicos" },
+            { id: "P066", name: "Harina YA", unit: "1 kg", price: 2.85, category: "Productos PRONACA y alimentos básicos" },
+        ];
+        function saveProductsToLocalStorage() {
+            localStorage.setItem('mockProducts', JSON.stringify(mockProducts));
+        }
+        if (!localStorage.getItem('mockProductsDefaultLoaded_v2')) {
+             localStorage.setItem('mockProducts', JSON.stringify(mockProducts));
+             localStorage.setItem('mockProductsDefaultLoaded_v2', 'true');
+        }
+
+
+        let cart = [];
+        let salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
+
+        const preloader = document.getElementById('preloader');
+        const mainContentArea = document.getElementById('mainContentArea');
         const menuButton = document.getElementById('menuButton');
         const dropdownMenu = document.getElementById('dropdownMenu');
-        let isDropdownOpen = false;
+        const barcodeScannerInput = document.getElementById('barcodeScannerInput');
+        const scanForm = document.getElementById('scanForm');
+        const cartItemsContainer = document.getElementById('cartItemsContainer');
+        const cartTotalElement = document.getElementById('cartTotal');
+        const emptyCartMessage = document.getElementById('emptyCartMessage');
+        const finalizeSaleBtn = document.getElementById('finalizeSaleBtn');
+        const clearCartBtn = document.getElementById('clearCartBtn');
+        const addProductManuallyBtn = document.getElementById('addProductManuallyBtn');
+        
+        const paymentModal = document.getElementById('paymentModal');
+        const paymentModalTotal = document.getElementById('paymentModalTotal');
+        const amountPaidInput = document.getElementById('amountPaidInput');
+        const changeDue = document.getElementById('changeDue');
+        const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+        const cancelPaymentBtn = document.getElementById('cancelPaymentBtn');
 
-        // Function to toggle dropdown visibility
-        function toggleDropdown() {
-            isDropdownOpen = !isDropdownOpen;
-            if (isDropdownOpen) {
-                dropdownMenu.classList.remove('hidden');
-                // Optional: Add animation class if you have one
-                // dropdownMenu.classList.add('animate-fadeIn'); 
-            } else {
-                dropdownMenu.classList.add('hidden');
-                // Optional: Add animation class if you have one
-                // dropdownMenu.classList.remove('animate-fadeIn');
+        const inventoryView = document.getElementById('inventoryView');
+        const reportView = document.getElementById('reportView');
+        const manageProductsView = document.getElementById('manageProductsView');
+        const linkInventario = document.getElementById('linkInventario');
+        const linkVerInventario = document.getElementById('linkVerInventario');
+        const linkReporte = document.getElementById('linkReporte');
+        const linkManageProducts = document.getElementById('linkManageProducts');
+
+        const reportDate = document.getElementById('reportDate');
+        const dailyTotalRevenue = document.getElementById('dailyTotalRevenue');
+        const dailyTotalProductsSold = document.getElementById('dailyTotalProductsSold');
+        const dailyTotalSalesCount = document.getElementById('dailyTotalSalesCount');
+        const downloadReportPdfBtn = document.getElementById('downloadReportPdfBtn');
+
+        const productListModal = document.getElementById('productListModal');
+        const demoProductList = document.getElementById('demoProductList');
+        const closeProductListModal = document.getElementById('closeProductListModal');
+        const closeProductListModalBottom = document.getElementById('closeProductListModalBottom');
+
+
+        const addProductForm = document.getElementById('addProductForm');
+        const currentProductsList = document.getElementById('currentProductsList');
+        const newProductNameInput = document.getElementById('newProductName');
+        const newProductIdInput = document.getElementById('newProductId');
+        const newProductPriceInput = document.getElementById('newProductPrice');
+        const newProductCategoryInput = document.getElementById('newProductCategory');
+        const newProductUnitInput = document.getElementById('newProductUnit');
+
+
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                preloader.classList.add('hidden');
+                mainContentArea.style.opacity = '1';
+            }, 500);
+        });
+
+        function initializeAudio() {
+            if (!synth && window.Tone) {
+                synth = new Tone.Synth().toDestination();
+            }
+        }
+        document.body.addEventListener('click', initializeAudio, { once: true });
+        
+        function playBeepSound() {
+            if (synth) {
+                try { synth.triggerAttackRelease("C5", "8n"); }
+                catch (error) { console.error("Error al reproducir sonido:", error); }
             }
         }
 
-        menuButton.addEventListener('click', function(event) {
-            event.stopPropagation(); // Prevents click from bubbling up to document
-            toggleDropdown();
-        });
+        function displayCurrentProducts() {
+            currentProductsList.innerHTML = '';
+            if (mockProducts.length === 0) {
+                currentProductsList.innerHTML = '<p class="text-gray-400">No hay productos registrados.</p>';
+                return;
+            }
+            
+            const grouped = mockProducts.reduce((acc, product) => {
+                acc[product.category] = acc[product.category] || [];
+                acc[product.category].push(product);
+                return acc;
+            }, {});
 
-        // Close dropdown if clicked outside
-        document.addEventListener('click', function(event) {
-            if (isDropdownOpen && !dropdownMenu.contains(event.target) && !menuButton.contains(event.target)) {
-                toggleDropdown();
+            Object.keys(grouped).sort().forEach(category => {
+                const categoryHeader = document.createElement('h4');
+                categoryHeader.className = 'text-lg font-semibold text-fuchsia-300 mt-3 mb-1';
+                categoryHeader.textContent = category;
+                currentProductsList.appendChild(categoryHeader);
+
+                grouped[category].sort((a,b) => a.name.localeCompare(b.name)).forEach((p, index) => {
+                    const originalProductIndex = mockProducts.findIndex(mp => mp.id === p.id);
+
+                    const productElement = document.createElement('div');
+                    productElement.classList.add('p-3', 'bg-neutral-700', 'rounded-md', 'flex', 'justify-between', 'items-center');
+                    productElement.innerHTML = `
+                        <div>
+                            <p class="font-semibold">${p.name} (ID: ${p.id})</p>
+                            <p class="text-sm text-gray-400">Unidad: ${p.unit} - Categoría: ${p.category}</p>
+                            <p class="text-sm text-green-400">$${p.price.toFixed(2)}</p>
+                        </div>
+                        <button class="text-red-500 hover:text-red-400 remove-product-btn" data-id="${p.id}" title="Eliminar Producto">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    currentProductsList.appendChild(productElement);
+                });
+            });
+
+
+            document.querySelectorAll('.remove-product-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productIdToRemove = e.currentTarget.dataset.id;
+                    const productIndex = mockProducts.findIndex(p => p.id === productIdToRemove);
+                    if (productIndex > -1) {
+                        if (confirm(`¿Seguro que quieres eliminar "${mockProducts[productIndex].name}"?`)) {
+                            mockProducts.splice(productIndex, 1);
+                            saveProductsToLocalStorage();
+                            displayCurrentProducts();
+                            alert("Producto eliminado.");
+                        }
+                    }
+                });
+            });
+        }
+
+        addProductForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = newProductNameInput.value.trim();
+            const id = newProductIdInput.value.trim();
+            const price = parseFloat(newProductPriceInput.value);
+            const category = newProductCategoryInput.value.trim() || "General";
+            const unit = newProductUnitInput.value.trim() || "und";
+
+            if (mockProducts.find(p => p.id === id)) {
+                alert("Error: Ya existe un producto con ese ID.");
+                return;
+            }
+            if (name && id && unit && category && !isNaN(price) && price >= 0) {
+                mockProducts.push({ id, name, price, category, unit });
+                saveProductsToLocalStorage();
+                displayCurrentProducts();
+                addProductForm.reset();
+                alert("Producto añadido exitosamente.");
+            } else {
+                alert("Por favor, completa todos los campos correctamente.");
             }
         });
 
-        // Close dropdown with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && isDropdownOpen) {
+        function findProductById(id) {
+            return mockProducts.find(p => p.id.toLowerCase() === id.toLowerCase());
+        }
+
+        function addProductToCart(productId) {
+            const product = findProductById(productId);
+            if (!product) {
+                alert("Producto no encontrado. Verifica el ID.");
+                return;
+            }
+            playBeepSound();
+            const existingCartItem = cart.find(item => item.product.id === productId);
+            if (existingCartItem) {
+                existingCartItem.quantity++;
+            } else {
+                cart.push({ product: product, quantity: 1 });
+            }
+            updateCartDisplay();
+        }
+
+        function updateCartDisplay() {
+            cartItemsContainer.innerHTML = '';
+            if (cart.length === 0) {
+                emptyCartMessage.style.display = 'block';
+                finalizeSaleBtn.disabled = true;
+            } else {
+                emptyCartMessage.style.display = 'none';
+                finalizeSaleBtn.disabled = false;
+                cart.forEach((item, index) => {
+                    const itemElement = document.createElement('div');
+                    itemElement.classList.add('cart-item', 'flex', 'justify-between', 'items-center', 'p-2', 'border-b', 'border-neutral-700', 'hover:bg-neutral-700', 'transition-colors', 'rounded');
+                    itemElement.innerHTML = `
+                        <div class="flex-grow">
+                            <span class="font-semibold text-sm">${item.product.name}</span>
+                            <span class="text-xs text-gray-400 block">(${item.quantity} x $${item.product.price.toFixed(2)})</span>
+                        </div>
+                        <span class="font-bold text-green-400 text-sm">$${(item.product.price * item.quantity).toFixed(2)}</span>
+                        <button class="ml-2 text-red-500 hover:text-red-400 remove-item-btn" data-index="${index}" title="Eliminar item">
+                            <i class="fas fa-times-circle"></i>
+                        </button>
+                    `;
+                    cartItemsContainer.appendChild(itemElement);
+                });
+                document.querySelectorAll('.remove-item-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const indexToRemove = parseInt(e.currentTarget.dataset.index);
+                        cart.splice(indexToRemove, 1);
+                        updateCartDisplay();
+                    });
+                });
+            }
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const total = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+            cartTotalElement.textContent = `$${total.toFixed(2)}`;
+            return total;
+        }
+
+        function clearCart() {
+            cart = [];
+            updateCartDisplay();
+        }
+        
+        function openPaymentModal() {
+            const total = calculateTotal();
+            paymentModalTotal.textContent = `$${total.toFixed(2)}`;
+            amountPaidInput.value = '';
+            changeDue.textContent = '$0.00';
+            confirmPaymentBtn.disabled = true;
+            paymentModal.classList.remove('hidden');
+            amountPaidInput.focus();
+        }
+
+        function closePaymentModal() {
+            paymentModal.classList.add('hidden');
+        }
+
+        amountPaidInput.addEventListener('input', () => {
+            const total = calculateTotal();
+            const paid = parseFloat(amountPaidInput.value) || 0;
+            const change = paid - total;
+            changeDue.textContent = `$${change >= 0 ? change.toFixed(2) : '0.00'}`;
+            confirmPaymentBtn.disabled = paid < total;
+        });
+
+        function finalizeSale() {
+            const total = calculateTotal();
+            const amountPaid = parseFloat(amountPaidInput.value);
+            const change = amountPaid - total;
+
+            if (amountPaid < total) {
+                alert("El monto pagado es insuficiente.");
+                return;
+            }
+
+            const saleData = {
+                id: `VEN-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                items: cart.map(item => ({ id: item.product.id, name: item.product.name, quantity: item.quantity, price: item.product.price, subtotal: item.product.price * item.quantity })),
+                totalAmount: total,
+                amountPaid: amountPaid,
+                changeGiven: change,
+                timestamp: new Date().toISOString()
+            };
+
+            generateInvoicePDF(saleData);
+            saveSaleToHistory(saleData);
+            alert(`Venta completada!\nTotal: $${total.toFixed(2)}\nPagado: $${amountPaid.toFixed(2)}\nCambio: $${change.toFixed(2)}`);
+            clearCart();
+            closePaymentModal();
+        }
+
+        function saveSaleToHistory(saleData) {
+            salesHistory.push(saleData);
+            localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
+        }
+
+        function generateInvoicePDF(saleData) {
+            const pdf = new jsPDF();
+            const now = new Date(saleData.timestamp);
+            const formattedDate = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+            const fileName = `Factura-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}${now.getSeconds().toString().padStart(2,'0')}.pdf`;
+
+            pdf.setFontSize(18);
+            pdf.text("Factura MiniMarket", 105, 20, null, null, "center");
+            pdf.setFontSize(10);
+            pdf.text(`Fecha y Hora: ${formattedDate}`, 10, 30);
+            pdf.text(`ID Venta: ${saleData.id}`, 10, 35);
+            pdf.setFontSize(12);
+            pdf.text("Productos:", 10, 45);
+            let yPos = 50;
+            saleData.items.forEach(item => {
+                pdf.setFontSize(10);
+                pdf.text(`${item.quantity}x ${item.name} (@ $${item.price.toFixed(2)})`, 15, yPos);
+                pdf.text(`$${item.subtotal.toFixed(2)}`, 180, yPos, null, null, "right");
+                yPos += 7;
+                if (yPos > 270) { pdf.addPage(); yPos = 20; }
+            });
+            yPos += 5;
+            pdf.setLineWidth(0.5);
+            pdf.line(10, yPos, 200, yPos);
+            yPos += 7;
+            pdf.setFontSize(12);
+            pdf.setFont(undefined, 'bold');
+            pdf.text("Total:", 150, yPos, null, null, "right");
+            pdf.text(`$${saleData.totalAmount.toFixed(2)}`, 180, yPos, null, null, "right");
+            yPos += 7;
+            pdf.setFont(undefined, 'normal');
+            pdf.text("Monto Pagado:", 150, yPos, null, null, "right");
+            pdf.text(`$${saleData.amountPaid.toFixed(2)}`, 180, yPos, null, null, "right");
+            yPos += 7;
+            pdf.text("Cambio:", 150, yPos, null, null, "right");
+            pdf.text(`$${saleData.changeGiven.toFixed(2)}`, 180, yPos, null, null, "right");
+            yPos += 15;
+            pdf.setFontSize(10);
+            pdf.text("¡Gracias por su compra!", 105, yPos, null, null, "center");
+            pdf.save(fileName);
+        }
+
+        function showView(viewToShow) {
+            [inventoryView, reportView, manageProductsView].forEach(view => view.classList.add('hidden'));
+            viewToShow.classList.remove('hidden');
+            dropdownMenu.classList.add('hidden');
+            isDropdownOpen = false;
+
+            if (viewToShow === manageProductsView) {
+                displayCurrentProducts();
+            }
+            if (viewToShow === reportView) {
+                loadAndDisplayDailyReport();
+            }
+        }
+        
+        function loadAndDisplayDailyReport() {
+            const today = new Date().toLocaleDateString();
+            reportDate.textContent = today;
+            const todaySales = salesHistory.filter(sale => new Date(sale.timestamp).toLocaleDateString() === today);
+            const totalRevenue = todaySales.reduce((sum, sale) => sum + sale.totalAmount, 0);
+            const totalProducts = todaySales.reduce((sum, sale) => sum + sale.items.reduce((itemSum, item) => itemSum + item.quantity, 0), 0);
+            const totalSalesCount = todaySales.length;
+            dailyTotalRevenue.textContent = `$${totalRevenue.toFixed(2)}`;
+            dailyTotalProductsSold.textContent = totalProducts;
+            dailyTotalSalesCount.textContent = totalSalesCount;
+        }
+        
+        function generateDailyReportPDF() {
+            const pdf = new jsPDF();
+            const now = new Date();
+            const formattedDate = now.toLocaleDateString();
+            const fileName = `ReporteDiario-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}.pdf`;
+            pdf.setFontSize(18);
+            pdf.text("Reporte Diario de Ventas - MiniMarket", 105, 20, null, null, "center");
+            pdf.setFontSize(12);
+            pdf.text(`Fecha del Reporte: ${formattedDate}`, 10, 35);
+            pdf.text(`Total Recaudado del Día: $${dailyTotalRevenue.textContent.replace('$', '')}`, 10, 50);
+            pdf.text(`Cantidad de Productos Vendidos: ${dailyTotalProductsSold.textContent}`, 10, 60);
+            pdf.text(`Cantidad de Ventas Realizadas: ${dailyTotalSalesCount.textContent}`, 10, 70);
+            pdf.setFontSize(10);
+            pdf.text("Detalle de Ventas del Día:", 10, 85);
+            let yPos = 90;
+            const todaySales = salesHistory.filter(sale => new Date(sale.timestamp).toLocaleDateString() === formattedDate);
+            if (todaySales.length === 0) {
+                pdf.text("No se registraron ventas hoy.", 15, yPos);
+            } else {
+                todaySales.forEach(sale => {
+                    pdf.text(`ID: ${sale.id} - Hora: ${new Date(sale.timestamp).toLocaleTimeString()} - Total: $${sale.totalAmount.toFixed(2)}`, 15, yPos);
+                    yPos += 7;
+                     if (yPos > 270) { pdf.addPage(); yPos = 20; }
+                });
+            }
+            pdf.save(fileName);
+        }
+
+        let isDropdownOpen = false;
+        function toggleDropdown() {
+            isDropdownOpen = !isDropdownOpen;
+            dropdownMenu.classList.toggle('hidden', !isDropdownOpen);
+        }
+        menuButton.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(); });
+        document.addEventListener('click', (e) => {
+            if (isDropdownOpen && !dropdownMenu.contains(e.target) && !menuButton.contains(e.target)) {
                 toggleDropdown();
             }
         });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isDropdownOpen) toggleDropdown(); });
+
+        scanForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const productId = barcodeScannerInput.value.trim();
+            if (productId) {
+                addProductToCart(productId);
+                barcodeScannerInput.value = '';
+                barcodeScannerInput.focus();
+            }
+        });
+
+        finalizeSaleBtn.addEventListener('click', openPaymentModal);
+        clearCartBtn.addEventListener('click', () => {
+            if (confirm("¿Estás seguro de que quieres limpiar el carrito?")) {
+                clearCart();
+            }
+        });
+        
+        confirmPaymentBtn.addEventListener('click', finalizeSale);
+        cancelPaymentBtn.addEventListener('click', closePaymentModal);
+
+        linkReporte.addEventListener('click', (e) => { e.preventDefault(); showView(reportView); });
+        linkInventario.addEventListener('click', (e) => { e.preventDefault(); showView(inventoryView); });
+        linkManageProducts.addEventListener('click', (e) => { e.preventDefault(); showView(manageProductsView); });
+        downloadReportPdfBtn.addEventListener('click', generateDailyReportPDF);
+
+        addProductManuallyBtn.addEventListener('click', () => {
+            if (mockProducts.length > 0) {
+                const randomProduct = mockProducts[Math.floor(Math.random() * mockProducts.length)];
+                addProductToCart(randomProduct.id);
+            } else {
+                alert("No hay productos en el inventario para añadir. Por favor, añade productos en 'Gestionar Productos'.");
+            }
+        });
+        
+        function openProductListModal() {
+            demoProductList.innerHTML = ''; 
+            const groupedProducts = mockProducts.reduce((acc, product) => {
+                const category = product.category || "Sin Categoría";
+                acc[category] = acc[category] || [];
+                acc[category].push(product);
+                return acc;
+            }, {});
+
+            const sortedCategories = Object.keys(groupedProducts).sort();
+
+            if (sortedCategories.length === 0) {
+                demoProductList.innerHTML = '<p class="text-gray-400">No hay productos definidos. Añádelos en "Gestionar Productos".</p>';
+            } else {
+                sortedCategories.forEach(category => {
+                    const categoryTitle = document.createElement('h4');
+                    categoryTitle.className = 'category-title';
+                    categoryTitle.textContent = category;
+                    demoProductList.appendChild(categoryTitle);
+
+                    groupedProducts[category].sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
+                        const pElement = document.createElement('div');
+                        pElement.className = 'product-entry';
+                        pElement.innerHTML = `
+                            <strong class="product-name">${p.name}</strong> (ID: ${p.id})
+                            <br>
+                            <span class="product-details">Unidad: ${p.unit} - Precio: $${p.price.toFixed(2)}</span>`;
+                        demoProductList.appendChild(pElement);
+                    });
+                });
+            }
+            productListModal.classList.remove('hidden');
+            if (isDropdownOpen) toggleDropdown();
+        }
+
+        linkVerInventario.addEventListener('click', (e) => {
+            e.preventDefault();
+            openProductListModal();
+        });
+
+        closeProductListModal.addEventListener('click', () => productListModal.classList.add('hidden'));
+        closeProductListModalBottom.addEventListener('click', () => productListModal.classList.add('hidden'));
+
+
+        updateCartDisplay();
+        showView(inventoryView);
+        
+        console.log("MiniMarket POS App Inicializada. Loader de GitHub configurado.");
     </script>
-
 </body>
 </html>
