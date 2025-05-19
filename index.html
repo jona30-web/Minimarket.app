@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
 
     <style>
         body {
@@ -31,6 +30,23 @@
         .btn-action-magenta {
             background-color: rgba(255, 0, 255, 0.1);
         }
+        .btn-action-blue { 
+            background-color: rgba(59, 130, 246, 0.1); 
+            border-color: #3b82f6; 
+            color: #60a5fa; 
+        }
+        .btn-action-blue:hover {
+            background-color: rgba(59, 130, 246, 0.2);
+        }
+        .btn-special-yellow { 
+            background-color: rgba(234, 179, 8, 0.1); 
+            border-color: #eab308; 
+            color: #facc15; 
+        }
+        .btn-special-yellow:hover {
+             background-color: rgba(234, 179, 8, 0.2);
+        }
+
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -95,6 +111,25 @@
             background-color: #4a4a4a;
             cursor: not-allowed;
         }
+        .input-field:disabled {
+            background-color: #3f3f46; 
+            color: #71717a; 
+            cursor: not-allowed;
+        }
+        .date-input-field {
+            background-color: #2d2d2d;
+            border: 1px solid #4a4a4a;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            color-scheme: dark;
+        }
+        .date-input-field:focus {
+            border-color: #00ff00;
+            box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.3);
+            outline: none;
+        }
+
         #demoProductList .category-title, #currentProductsList .category-title {
             font-size: 1.25rem;
             font-weight: 600;
@@ -137,39 +172,52 @@
             margin-left: 1.5rem;
             font-size: 0.875rem;
         }
-
-        #scanner-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.85);
-            z-index: 100000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        #receiptPreviewContent {
+            font-family: 'Courier New', Courier, monospace;
+            color: #333;
+            font-size: 12px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            max-height: 70vh;
+            overflow-y: auto;
+            border: 1px solid #ccc;
             padding: 10px;
+            background-color: #fdfdfd;
         }
-        #interactive.viewport {
-            width: 100%;
-            max-width: 600px;
-            height: auto;
-            overflow: hidden;
-            border-radius: 8px;
-            border: 2px solid #00ff00;
+        #receiptPreviewContent hr {
+            border: none;
+            border-top: 1px dashed #888;
+            margin: 8px 0;
         }
-        #interactive.viewport video, 
-        #interactive.viewport canvas {
-            width: 100% !important;
-            height: auto !important;
+        #receiptPreviewContent strong {
+            font-weight: bold;
         }
-        #scanner-message {
-            color: white;
-            margin-top: 15px;
-            font-size: 1rem;
+        #receiptPreviewContent .text-center { text-align: center; }
+        #receiptPreviewContent .text-right { text-align: right; }
+        #receiptPreviewContent .item-line { display: flex; justify-content: space-between; }
+        #receiptPreviewContent .item-name { flex-grow: 1; }
+        #receiptPreviewContent .item-price { min-width: 60px; text-align: right; }
+
+
+        .frequent-product-btn {
+            background-color: rgba(0, 128, 0, 0.15);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem; /* text-xs */
             text-align: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .frequent-product-btn:hover {
+            background-color: rgba(0, 255, 0, 0.25);
+        }
+        #appLogo {
+            cursor: pointer;
         }
     </style>
 </head>
@@ -185,7 +233,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
         </button>
-        <img src="https://raw.githubusercontent.com/jona30-web/Minimarket.app/032d691df1461e1c933efb7be1a82ed963380606/logosinfondo.png.png" alt="MiniMarket Logo" id="appLogo" class="h-12 sm:h-14 object-contain" onerror="this.src='https://placehold.co/120x50/000000/808080?text=Error+Logo+URL'; console.error('Error al cargar el logo desde GitHub.')"/>
+        <img src="https://raw.githubusercontent.com/jona30-web/Minimarket.app/032d691df1461e1c933efb7be1a82ed963380606/logosinfondo.png.png" alt="MiniMarket Logo" id="appLogo" class="h-12 sm:h-14 object-contain cursor-pointer" onerror="this.src='https://placehold.co/120x50/000000/808080?text=Error+Logo+URL'; console.error('Error al cargar el logo desde GitHub.')"/>
         <div class="relative">
             <button id="menuButton" class="p-2 sm:p-3 border-2 border-fuchsia-500 neon-border-magenta rounded-lg text-fuchsia-500 hover:bg-fuchsia-700 hover:text-white transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 sm:w-6 sm:h-6">
@@ -200,7 +248,7 @@
                     <i class="fas fa-eye w-5 h-5 mr-3 text-fuchsia-400"></i> Ver Inventario
                 </a>
                 <a href="#" id="linkReporte" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
-                    <i class="fas fa-chart-line w-5 h-5 mr-3 text-fuchsia-400"></i> Reporte Diario
+                    <i class="fas fa-chart-line w-5 h-5 mr-3 text-fuchsia-400"></i> Reporte de Ventas
                 </a>
                  <a href="#" id="linkManageProducts" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
                     <i class="fas fa-box w-5 h-5 mr-3 text-fuchsia-400"></i> Gestionar Productos
@@ -212,15 +260,6 @@
         </div>
     </header>
 
-    <div id="scanner-container" class="hidden">
-        <div id="interactive" class="viewport"></div>
-        <p id="scanner-message" class="text-white mt-4">Apunte la cámara al código de barras...</p>
-        <button id="stopScannerBtn" class="mt-4 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg">
-            <i class="fas fa-stop-circle mr-2"></i>Detener Escáner
-        </button>
-    </div>
-
-
     <div id="mainContentArea" class="w-full opacity-0 transition-opacity duration-500">
         <main id="inventoryView" class="w-full max-w-4xl mx-auto flex flex-col lg:flex-row gap-6 items-start">
             <div class="w-full lg:w-1/2 flex flex-col items-center text-center">
@@ -230,18 +269,24 @@
                 <p class="text-base sm:text-lg text-gray-300 mb-6 sm:mb-8">
                     Sistema de venta y gestión
                 </p>
-                <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6 sm:mb-8 w-full justify-center items-center">
-                     <button id="viewProductListBtn" class="btn-view-list flex items-center justify-center gap-2 px-5 py-3 text-sm sm:text-base font-semibold text-green-400 border-2 border-green-400 neon-border-green rounded-lg hover:bg-green-600 hover:text-black hover:border-green-600 transition-all w-full sm:w-auto">
+                <div class="flex flex-wrap justify-center items-center gap-3 mb-6 sm:mb-8 w-full">
+                     <button id="viewProductListBtn" class="btn-view-list flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-green-400 border-2 border-green-400 neon-border-green rounded-lg hover:bg-green-600 hover:text-black hover:border-green-600 transition-all">
                         <i class="fas fa-list-ul mr-2"></i>VER LISTA
                     </button>
-                    <button id="startScannerBtn" class="btn-action-magenta flex items-center justify-center gap-2 px-5 py-3 text-sm sm:text-base font-semibold text-fuchsia-400 border-2 border-fuchsia-400 neon-border-magenta rounded-lg hover:bg-fuchsia-600 hover:text-black hover:border-fuchsia-600 transition-all w-full sm:w-auto">
-                        <i class="fas fa-barcode mr-2"></i>ESCANEAR
+                    <button id="sellByWeightBtn" class="btn-action-magenta flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-fuchsia-400 border-2 border-fuchsia-400 neon-border-magenta rounded-lg hover:bg-fuchsia-600 hover:text-black hover:border-fuchsia-600 transition-all">
+                        <i class="fas fa-balance-scale-right mr-2"></i>PESO LB
+                    </button>
+                    <button id="sellByValueBtn" class="btn-action-blue flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold border-2 neon-border-green rounded-lg hover:bg-blue-600 hover:text-black hover:border-blue-600 transition-all">
+                        <i class="fas fa-dollar-sign mr-2"></i>VALOR $
+                    </button>
+                    <button id="sellMeatSpecialBtn" class="btn-special-yellow flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold border-2 neon-border-green rounded-lg hover:bg-yellow-500 hover:text-black hover:border-yellow-500 transition-all">
+                        <i class="fas fa-drumstick-bite mr-2"></i>CARNES (GRANEL)
                     </button>
                 </div>
 
                 <div class="w-full max-w-md mb-2">
                     <form id="scanForm">
-                        <input type="text" id="barcodeScannerInput" placeholder="Escanear o ingresar ID de producto..." class="w-full px-5 py-3 sm:py-4 bg-neutral-800 border-2 border-green-400 neon-border-green rounded-full text-gray-200 placeholder-gray-500 focus:outline-none focus:border-green-300 focus:ring-1 focus:ring-green-300 transition-all text-sm sm:text-base">
+                        <input type="text" id="barcodeScannerInput" placeholder="Ingresar ID de producto..." class="w-full px-5 py-3 sm:py-4 bg-neutral-800 border-2 border-green-400 neon-border-green rounded-full text-gray-200 placeholder-gray-500 focus:outline-none focus:border-green-300 focus:ring-1 focus:ring-green-300 transition-all text-sm sm:text-base">
                     </form>
                 </div>
                 <div class="w-full max-w-md mb-6 mt-4">
@@ -249,6 +294,13 @@
                         <i class="fas fa-trash-alt"></i> LIMPIAR CARRITO
                     </button>
                 </div>
+
+                <div class="w-full max-w-md mb-6 mt-4">
+                    <h3 class="text-xl text-fuchsia-400 mb-2">Productos Sugeridos</h3>
+                    <div id="frequentProductsContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    </div>
+                </div>
+
 
                 <div id="productListModal" class="hidden fixed inset-0 modal flex items-center justify-center z-30 p-4">
                     <div class="bg-neutral-900 p-4 sm:p-6 rounded-lg shadow-xl max-w-xl w-full max-h-[90vh] flex flex-col border-2 border-fuchsia-500 neon-border-magenta">
@@ -272,10 +324,13 @@
                     <p id="emptyCartMessage" class="text-gray-400 text-center">El carrito está vacío.</p>
                 </div>
                 <div class="border-t-2 border-fuchsia-400 pt-4">
-                    <div class="flex justify-between items-center text-xl sm:text-2xl font-bold mb-4">
+                    <div class="flex justify-between items-center text-xl sm:text-2xl font-bold mb-2">
                         <span class="text-green-400">TOTAL:</span>
                         <span id="cartTotal" class="text-green-400">$0.00</span>
                     </div>
+                    <button id="previewReceiptBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2.5 px-4 rounded-lg text-base transition-all mb-3 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fas fa-receipt mr-2"></i>Vista Previa Recibo
+                    </button>
                     <button id="finalizeSaleBtn" class="w-full bg-green-500 hover:bg-green-600 text-black font-bold py-3 sm:py-4 rounded-lg text-lg sm:text-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                         <i class="fas fa-check-circle mr-2"></i> FINALIZAR VENTA
                     </button>
@@ -284,20 +339,44 @@
         </main>
 
         <section id="reportView" class="hidden w-full max-w-3xl mx-auto mt-10 p-6 bg-neutral-800 rounded-lg border-2 border-green-500 neon-border-green">
-            <h1 class="text-3xl sm:text-4xl font-bold text-green-400 neon-text-green mb-6 text-center">Resumen Diario de Ventas</h1>
+            <h1 class="text-3xl sm:text-4xl font-bold text-green-400 neon-text-green mb-6 text-center">Reporte de Ventas</h1>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 items-end">
+                <div>
+                    <label for="reportStartDate" class="block text-sm font-medium text-gray-300 mb-1">Fecha Inicio:</label>
+                    <input type="date" id="reportStartDate" class="w-full date-input-field">
+                </div>
+                <div>
+                    <label for="reportEndDate" class="block text-sm font-medium text-gray-300 mb-1">Fecha Fin:</label>
+                    <input type="date" id="reportEndDate" class="w-full date-input-field">
+                </div>
+                <button id="filterReportBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2.5 px-4 rounded-lg transition-all h-fit">
+                    <i class="fas fa-filter mr-2"></i>Filtrar Reporte
+                </button>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                 <button id="showTodayReportBtn" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 px-4 rounded-lg transition-all">
+                    <i class="fas fa-calendar-day mr-2"></i>Reporte de Hoy
+                </button>
+                <button id="showAllSalesReportBtn" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2.5 px-4 rounded-lg transition-all">
+                    <i class="fas fa-history mr-2"></i>Mostrar Todas las Ventas
+                </button>
+            </div>
+
+
             <div class="space-y-4 text-lg mb-6">
-                <p><strong>Fecha del Reporte:</strong> <span id="reportDate" class="text-gray-300"></span></p>
-                <p><strong>Total Recaudado del Día:</strong> <span id="dailyTotalRevenue" class="text-green-400 font-bold"></span></p>
+                <p><strong>Mostrando Reporte Para:</strong> <span id="reportDateRange" class="text-gray-300">Hoy</span></p>
+                <p><strong>Total Recaudado:</strong> <span id="dailyTotalRevenue" class="text-green-400 font-bold"></span></p>
                 <p><strong>Cantidad de Productos Vendidos:</strong> <span id="dailyTotalProductsSold" class="text-fuchsia-400 font-bold"></span></p>
                 <p><strong>Cantidad de Ventas Realizadas:</strong> <span id="dailyTotalSalesCount" class="text-fuchsia-400 font-bold"></span></p>
             </div>
             <div class="mb-6">
-                <h3 class="text-xl text-fuchsia-400 mb-2">Detalle de Ventas del Día:</h3>
+                <h3 class="text-xl text-fuchsia-400 mb-2">Detalle de Ventas:</h3>
                 <div id="dailySalesDetails" class="max-h-96 overflow-y-auto space-y-3 pr-2">
                 </div>
             </div>
             <div class="mb-8">
-                <h3 class="text-xl text-fuchsia-400 mb-2">Productos Más Vendidos Hoy:</h3>
+                <h3 class="text-xl text-fuchsia-400 mb-2">Productos Más Vendidos (en rango):</h3>
                 <div id="topSellingProducts" class="space-y-1 text-sm">
                 </div>
             </div>
@@ -307,7 +386,7 @@
                 </button>
             </div>
              <div class="mt-6 text-sm text-gray-400">
-                <p>Nota: Este reporte se basa en las ventas registradas hoy en el almacenamiento local del navegador.</p>
+                <p>Nota: Este reporte se basa en las ventas registradas en el almacenamiento local del navegador.</p>
             </div>
         </section>
 
@@ -386,6 +465,140 @@
         </section>
     </div>
 
+    <div id="weightProductModal" class="hidden fixed inset-0 modal flex items-center justify-center z-40 p-4">
+        <div class="bg-neutral-900 p-6 rounded-lg shadow-xl max-w-md w-full border-2 border-green-500 neon-border-green">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-green-400 neon-text-green">Vender Producto por Peso</h3>
+                <button id="closeWeightProductModalBtn" class="text-fuchsia-400 hover:text-fuchsia-300 text-2xl">
+                    <i class="fas fa-times-circle"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label for="weightProductNameSelect" class="block text-sm font-medium text-gray-300 mb-1">Producto:</label>
+                    <select id="weightProductNameSelect" class="w-full input-field">
+                    </select>
+                </div>
+                <div>
+                    <label for="weightProductPricePerLb" class="block text-sm font-medium text-gray-300 mb-1">Precio por Libra ($):</label>
+                    <input type="number" id="weightProductPricePerLb" step="0.01" min="0" class="w-full input-field" placeholder="0.00">
+                </div>
+                <div>
+                    <label for="weightProductWeightLb" class="block text-sm font-medium text-gray-300 mb-1">Peso (Libras):</label>
+                    <input type="number" id="weightProductWeightLb" step="0.01" min="0" class="w-full input-field" placeholder="0.00">
+                </div>
+                <div class="text-lg">
+                    Precio Total Calculado: <strong id="weightProductTotalCalculated" class="text-green-400">$0.00</strong>
+                </div>
+            </div>
+            <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                <button id="addWeightProductToCartBtn" class="flex-1 bg-green-500 hover:bg-green-600 text-black font-bold py-2.5 px-4 rounded-lg transition-all">
+                    <i class="fas fa-cart-plus mr-2"></i>Añadir al Carrito
+                </button>
+                <button id="resetSavedPriceBtn" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2.5 px-4 rounded-lg transition-all">
+                    <i class="fas fa-undo mr-2"></i>Restablecer Precio
+                </button>
+            </div>
+             <button id="closeWeightProductModalBottomBtn" class="mt-4 bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors w-full">Cerrar</button>
+        </div>
+    </div>
+
+    <div id="sellByValueModal" class="hidden fixed inset-0 modal flex items-center justify-center z-40 p-4">
+        <div class="bg-neutral-900 p-6 rounded-lg shadow-xl max-w-md w-full border-2 border-blue-500 neon-border-green"> 
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-blue-400 neon-text-green">Vender Producto por Valor</h3>
+                <button id="closeSellByValueModalBtn" class="text-fuchsia-400 hover:text-fuchsia-300 text-2xl">
+                    <i class="fas fa-times-circle"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label for="valueProductNameSelect" class="block text-sm font-medium text-gray-300 mb-1">Producto:</label>
+                    <select id="valueProductNameSelect" class="w-full input-field">
+                    </select>
+                </div>
+                <div>
+                    <label for="valueProductPricePerLb" class="block text-sm font-medium text-gray-300 mb-1">Precio por Libra ($):</label>
+                    <input type="number" id="valueProductPricePerLb" step="0.01" min="0" class="w-full input-field" placeholder="0.00">
+                </div>
+                <div>
+                    <label for="valueProductDesiredValue" class="block text-sm font-medium text-gray-300 mb-1">Valor Deseado ($):</label>
+                    <input type="number" id="valueProductDesiredValue" step="0.01" min="0" class="w-full input-field" placeholder="5.00">
+                </div>
+                <div class="text-lg">
+                    Peso Calculado: <strong id="valueProductCalculatedWeight" class="text-blue-400">0.00 lbs</strong>
+                </div>
+            </div>
+            <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                <button id="addValueProductToCartBtn" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2.5 px-4 rounded-lg transition-all">
+                    <i class="fas fa-cart-plus mr-2"></i>Añadir al Carrito
+                </button>
+                <button id="resetSavedValuePriceBtn" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2.5 px-4 rounded-lg transition-all">
+                    <i class="fas fa-undo mr-2"></i>Restablecer Precio
+                </button>
+            </div>
+             <button id="closeSellByValueModalBottomBtn" class="mt-4 bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors w-full">Cerrar</button>
+        </div>
+    </div>
+
+    <div id="meatSaleModal" class="hidden fixed inset-0 modal flex items-center justify-center z-40 p-4">
+        <div class="bg-neutral-900 p-6 rounded-lg shadow-xl max-w-lg w-full border-2 border-yellow-500 neon-border-green">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-yellow-400 neon-text-green">Vender Carnes (Peso/Valor)</h3>
+                <button id="closeMeatSaleModalBtn" class="text-fuchsia-400 hover:text-fuchsia-300 text-2xl">
+                    <i class="fas fa-times-circle"></i>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label for="meatProductSelect" class="block text-sm font-medium text-gray-300 mb-1">Seleccione Producto Cárnico:</label>
+                    <select id="meatProductSelect" class="w-full input-field">
+                        </select>
+                </div>
+                <div>
+                    <label for="meatPricePerLb" class="block text-sm font-medium text-gray-300 mb-1">Precio por Libra ($):</label>
+                    <input type="number" id="meatPricePerLb" step="0.01" min="0" class="w-full input-field" placeholder="0.00">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="meatWeightLb" class="block text-sm font-medium text-gray-300 mb-1">Peso (Libras):</label>
+                        <input type="number" id="meatWeightLb" step="0.01" min="0" class="w-full input-field" placeholder="0.00">
+                    </div>
+                    <div>
+                        <label for="meatDesiredValue" class="block text-sm font-medium text-gray-300 mb-1">Valor Deseado ($):</label>
+                        <input type="number" id="meatDesiredValue" step="0.01" min="0" class="w-full input-field" placeholder="0.00">
+                    </div>
+                </div>
+                <div id="meatCalculationResult" class="text-lg text-yellow-300 h-10 flex items-center justify-center bg-neutral-800 rounded-md p-2">
+                    </div>
+            </div>
+            <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                <button id="addMeatToCartBtn" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2.5 px-4 rounded-lg transition-all">
+                    <i class="fas fa-cart-plus mr-2"></i>Añadir al Carrito
+                </button>
+                <button id="resetMeatSaleFormBtn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2.5 px-4 rounded-lg transition-all">
+                    <i class="fas fa-undo mr-2"></i>Restablecer Campos
+                </button>
+            </div>
+             <button id="closeMeatSaleModalBottomBtn" class="mt-4 bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors w-full">Cerrar</button>
+        </div>
+    </div>
+
+
+    <div id="receiptPreviewModal" class="hidden fixed inset-0 modal flex items-center justify-center z-40 p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-neutral-800">Vista Previa del Recibo</h3>
+                <button id="closeReceiptPreviewModalBtn" class="text-neutral-500 hover:text-neutral-700 text-2xl">
+                    <i class="fas fa-times-circle"></i>
+                </button>
+            </div>
+            <div id="receiptPreviewContent" class="text-sm">
+            </div>
+            <button id="closeReceiptPreviewModalBottomBtn" class="mt-4 bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors w-full">Cerrar</button>
+        </div>
+    </div>
+
     <div id="paymentModal" class="hidden fixed inset-0 modal flex items-center justify-center z-30 p-4">
         <div class="bg-neutral-800 p-6 rounded-lg shadow-xl max-w-md w-full">
             <h3 class="text-2xl font-bold text-green-400 neon-text-green mb-4">Procesar Pago</h3>
@@ -398,6 +611,10 @@
                     <option value="Tarjeta">Tarjeta</option>
                     <option value="Otro">Otro</option>
                 </select>
+            </div>
+             <div class="mb-4">
+                <label for="saleNoteInput" class="block text-sm font-medium text-gray-300 mb-1">Nota de la Venta (Opcional):</label>
+                <textarea id="saleNoteInput" rows="2" class="w-full input-field" placeholder="Ej: Cliente VIP, Para llevar..."></textarea>
             </div>
 
             <div class="mb-4">
@@ -419,6 +636,55 @@
     <script>
         const { jsPDF } = window.jspdf;
         let synth;
+
+        const sellByWeightProducts = [ 
+            { key: 'pollo_entero_granel', name: 'Pollo Entero (Granel)' }, 
+            { key: 'carne_molida_res_granel', name: 'Carne Molida Res (Granel)' },
+            { key: 'queso_fresco_lb_granel', name: 'Queso Fresco (Granel)' },
+            { key: 'jamon_pierna_lb_granel', name: 'Jamón de Pierna (Granel)' },
+            { key: 'frutas_temporada_lb_granel', name: 'Frutas de Temporada (Granel)' },
+            { key: 'vegetales_varios_lb_granel', name: 'Vegetales Varios (Granel)' }
+        ];
+
+        const bulkMeatProducts = [
+            // Pollo
+            { key: 'pollo_entero', name: 'Pollo entero (granel, por libra)' },
+            { key: 'pollo_pechuga', name: 'Pechuga de pollo (por libra)' },
+            { key: 'pollo_pierna_muslo', name: 'Pierna con muslo de pollo (por libra)' },
+            { key: 'pollo_alas', name: 'Alas de pollo (por libra)' },
+            { key: 'pollo_menudencias', name: 'Menudencias de pollo (por libra)' },
+            { key: 'pollo_troceado', name: 'Pollo troceado (por libra)' },
+            { key: 'pollo_amarillo_campero', name: 'Pollo amarillo (campero, por libra)' },
+            // Carne de res (vaca)
+            { key: 'carne_res_molida', name: 'Carne molida de res (por libra)' },
+            { key: 'carne_res_segunda', name: 'Carne de segunda (res, por libra)' },
+            { key: 'carne_res_primera', name: 'Carne de primera (res, por libra)' },
+            { key: 'carne_res_bistec', name: 'Bistec de res (por libra)' },
+            { key: 'carne_res_costilla', name: 'Costilla de res (por libra)' },
+            { key: 'carne_res_hueso_caldo', name: 'Hueso con carne (res, para caldo, por libra)' },
+            { key: 'visceras_res', name: 'Vísceras de res (hígado, corazón, lengua, por libra)' },
+            // Carne de cerdo
+            { key: 'cerdo_chuleta', name: 'Chuleta de cerdo (por libra)' },
+            { key: 'cerdo_costilla', name: 'Costilla de cerdo (por libra)' },
+            { key: 'cerdo_lomo', name: 'Lomo de cerdo (por libra)' },
+            { key: 'cerdo_pierna', name: 'Pierna de cerdo (por libra)' },
+            { key: 'cerdo_patas', name: 'Patas de cerdo (por libra)' },
+            { key: 'cerdo_hueso_carnudo', name: 'Hueso carnudo de cerdo (por libra)' },
+            { key: 'cerdo_tocino_grasa', name: 'Tocino / grasa de cerdo (por libra)' },
+            // Embutidos y preparados (Asumiendo que algunos pueden venderse por peso)
+            { key: 'embutido_chorizo_criollo', name: 'Chorizo criollo (por libra)' },
+            { key: 'embutido_longaniza', name: 'Longaniza (por libra)' },
+            { key: 'embutido_salchicha_vienesa', name: 'Salchicha vienesa (por libra)' },
+            { key: 'embutido_morcilla', name: 'Morcilla (por libra)' },
+            // Otros
+            { key: 'otro_carne_picada_seco', name: 'Carne picada para seco (por libra)' },
+            { key: 'otro_carne_guatita', name: 'Carne para guatita (por libra)' },
+            { key: 'otro_cueros_tripas_hornado', name: 'Cueros / tripas para hornado o fritada (por libra)' },
+            { key: 'otro_panceta', name: 'Panceta (por libra)' },
+            { key: 'otro_chicharron_crudo', name: 'Chicharrón crudo (por libra)' },
+            { key: 'otro_carne_chancho_fritada', name: 'Carne de chancho para fritada (por libra)' }
+        ];
+
 
         let mockProducts = JSON.parse(localStorage.getItem('mockProducts')) || [
             // ... (lista de productos extensa omitida por brevedad, pero está en el código completo con 'stock') ...
@@ -679,17 +945,16 @@
             localStorage.setItem('storeInfo', JSON.stringify(storeInfo));
         }
         
-        if (!localStorage.getItem('mockProductsDefaultLoaded_v6')) {
+        if (!localStorage.getItem('mockProductsDefaultLoaded_v8')) { // Versión incrementada
              localStorage.setItem('mockProducts', JSON.stringify(mockProducts));
              localStorage.setItem('storeInfo', JSON.stringify(storeInfo));
-             localStorage.setItem('mockProductsDefaultLoaded_v6', 'true');
+             localStorage.setItem('mockProductsDefaultLoaded_v8', 'true');
         }
 
 
         let cart = [];
         let salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
         let editingProductId = null;
-        let quaggaRunning = false;
 
         const preloader = document.getElementById('preloader');
         const mainContentArea = document.getElementById('mainContentArea');
@@ -704,14 +969,14 @@
         const clearCartBtn = document.getElementById('clearCartBtn');
         const addProductManuallyBtn = document.getElementById('addProductManuallyBtn');
         const viewProductListBtn = document.getElementById('viewProductListBtn');
-        const startScannerBtn = document.getElementById('startScannerBtn');
-        const scannerContainer = document.getElementById('scanner-container');
-        const stopScannerBtn = document.getElementById('stopScannerBtn');
-        const scannerMessage = document.getElementById('scanner-message');
+        const sellByWeightBtn = document.getElementById('sellByWeightBtn');
+        const sellByValueBtn = document.getElementById('sellByValueBtn');
+        const sellMeatSpecialBtn = document.getElementById('sellMeatSpecialBtn');
         
         const paymentModal = document.getElementById('paymentModal');
         const paymentModalTotal = document.getElementById('paymentModalTotal');
         const paymentMethodSelect = document.getElementById('paymentMethodSelect');
+        const saleNoteInput = document.getElementById('saleNoteInput');
         const amountPaidInput = document.getElementById('amountPaidInput');
         const changeDue = document.getElementById('changeDue');
         const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
@@ -727,7 +992,13 @@
         const linkManageProducts = document.getElementById('linkManageProducts');
         const linkConfiguracion = document.getElementById('linkConfiguracion');
 
-        const reportDate = document.getElementById('reportDate');
+        const reportDateRange = document.getElementById('reportDateRange');
+        const reportStartDateInput = document.getElementById('reportStartDate');
+        const reportEndDateInput = document.getElementById('reportEndDate');
+        const filterReportBtn = document.getElementById('filterReportBtn');
+        const showTodayReportBtn = document.getElementById('showTodayReportBtn');
+        const showAllSalesReportBtn = document.getElementById('showAllSalesReportBtn');
+
         const dailyTotalRevenue = document.getElementById('dailyTotalRevenue');
         const dailyTotalProductsSold = document.getElementById('dailyTotalProductsSold');
         const dailyTotalSalesCount = document.getElementById('dailyTotalSalesCount');
@@ -763,6 +1034,44 @@
         const footerStoreName = document.getElementById('footerStoreName');
         const headerStoreName = document.getElementById('headerStoreName');
 
+        const receiptPreviewModal = document.getElementById('receiptPreviewModal');
+        const receiptPreviewContent = document.getElementById('receiptPreviewContent');
+        const closeReceiptPreviewModalBtn = document.getElementById('closeReceiptPreviewModalBtn');
+        const closeReceiptPreviewModalBottomBtn = document.getElementById('closeReceiptPreviewModalBottomBtn');
+        const previewReceiptBtn = document.getElementById('previewReceiptBtn');
+        const frequentProductsContainer = document.getElementById('frequentProductsContainer');
+
+        const weightProductModal = document.getElementById('weightProductModal');
+        const closeWeightProductModalBtn = document.getElementById('closeWeightProductModalBtn');
+        const closeWeightProductModalBottomBtn = document.getElementById('closeWeightProductModalBottomBtn');
+        const weightProductNameSelect = document.getElementById('weightProductNameSelect');
+        const weightProductPricePerLb = document.getElementById('weightProductPricePerLb');
+        const weightProductWeightLb = document.getElementById('weightProductWeightLb');
+        const weightProductTotalCalculated = document.getElementById('weightProductTotalCalculated');
+        const addWeightProductToCartBtn = document.getElementById('addWeightProductToCartBtn');
+        const resetSavedPriceBtn = document.getElementById('resetSavedPriceBtn');
+
+        const sellByValueModal = document.getElementById('sellByValueModal');
+        const closeSellByValueModalBtn = document.getElementById('closeSellByValueModalBtn');
+        const closeSellByValueModalBottomBtn = document.getElementById('closeSellByValueModalBottomBtn');
+        const valueProductNameSelect = document.getElementById('valueProductNameSelect');
+        const valueProductPricePerLb = document.getElementById('valueProductPricePerLb');
+        const valueProductDesiredValue = document.getElementById('valueProductDesiredValue');
+        const valueProductCalculatedWeight = document.getElementById('valueProductCalculatedWeight');
+        const addValueProductToCartBtn = document.getElementById('addValueProductToCartBtn');
+        const resetSavedValuePriceBtn = document.getElementById('resetSavedValuePriceBtn');
+
+        const meatSaleModal = document.getElementById('meatSaleModal');
+        const closeMeatSaleModalBtn = document.getElementById('closeMeatSaleModalBtn');
+        const meatProductSelect = document.getElementById('meatProductSelect');
+        const meatPricePerLb = document.getElementById('meatPricePerLb');
+        const meatWeightLb = document.getElementById('meatWeightLb');
+        const meatDesiredValue = document.getElementById('meatDesiredValue');
+        const meatCalculationResult = document.getElementById('meatCalculationResult');
+        const addMeatToCartBtn = document.getElementById('addMeatToCartBtn');
+        const resetMeatSaleFormBtn = document.getElementById('resetMeatSaleFormBtn');
+        const closeMeatSaleModalBottomBtn = document.getElementById('closeMeatSaleModalBottomBtn');
+
 
         document.getElementById('currentYear').textContent = new Date().getFullYear();
         
@@ -772,6 +1081,7 @@
                 mainContentArea.style.opacity = '1';
             }, 500);
             loadStoreInfo();
+            displayFrequentProducts();
         });
 
         function initializeAudio() {
@@ -799,118 +1109,6 @@
                 catch (e) { console.error("Error al reproducir sonido de error:", e); }
             }
         }
-
-        function startLiveScanner() {
-            if (quaggaRunning) {
-                console.log("Quagga ya está corriendo.");
-                return;
-            }
-            scannerContainer.classList.remove('hidden');
-            mainContentArea.classList.add('hidden'); // Ocultar contenido principal
-            scannerMessage.textContent = "Iniciando cámara...";
-
-            Quagga.init({
-                inputStream : {
-                    name : "Live",
-                    type : "LiveStream",
-                    target: document.querySelector('#interactive'),
-                    constraints: {
-                        width: {min: 640, ideal: 1280, max: 1920},
-                        height: {min: 480, ideal: 720, max: 1080},
-                        aspectRatio: {ideal: 1.7777777778}, // 16:9
-                        facingMode: "environment" 
-                    },
-                },
-                decoder : {
-                    readers : ["ean_reader", "code_128_reader", "upc_reader", "ean_8_reader", "code_39_reader"],
-                    debug: {
-                        drawBoundingBox: true,
-                        showFrequency: false, // Menos verboso en consola
-                        drawScanline: true,
-                        showPattern: false // Menos verboso en consola
-                    },
-                    multiple: false
-                },
-                locate: true,
-                locator: {
-                    patchSize: "medium",
-                    halfSample: true
-                },
-                numOfWorkers: navigator.hardwareConcurrency || 2,
-            }, function(err) {
-                if (err) {
-                    console.error("Error al inicializar Quagga:", err);
-                    scannerMessage.textContent = "Error al iniciar cámara. Asegúrate de tener permisos y que la cámara no esté en uso.";
-                    playErrorSound();
-                    // No ocultar scannerContainer aquí para que el mensaje de error sea visible
-                    // Podríamos añadir un botón para reintentar o cerrar aquí si la inicialización falla.
-                    return;
-                }
-                console.log("QuaggaJS inicializado correctamente.");
-                Quagga.start();
-                quaggaRunning = true;
-                scannerMessage.textContent = "Apunte la cámara al código de barras...";
-            });
-
-            Quagga.onProcessed(function(result) {
-                var drawingCtx = Quagga.canvas.ctx.overlay,
-                    drawingCanvas = Quagga.canvas.dom.overlay;
-
-                if (result) {
-                    if (result.boxes) {
-                        drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute("width")), parseInt(drawingCanvas.getAttribute("height")));
-                        result.boxes.filter(function (box) {
-                            return box !== result.box;
-                        }).forEach(function (box) {
-                            Quagga.ImageDebug.drawPath(box, {x: 0, y: 1}, drawingCtx, {color: "green", lineWidth: 2});
-                        });
-                    }
-
-                    if (result.box) {
-                        Quagga.ImageDebug.drawPath(result.box, {x: 0, y: 1}, drawingCtx, {color: "#00F", lineWidth: 2});
-                    }
-                }
-            });
-
-            Quagga.onDetected(function(result) {
-                const code = result.codeResult.code;
-                console.log("Código detectado:", code);
-                scannerMessage.textContent = `Detectado: ${code}. Añadido. Escanee otro o Detenga.`;
-                playSuccessSound();
-                
-                addProductToCart(code); 
-                // El escáner sigue activo para el siguiente producto
-            });
-        }
-
-        function stopLiveScanner() {
-            if (quaggaRunning) {
-                Quagga.stop();
-                quaggaRunning = false;
-                console.log("QuaggaJS detenido.");
-            }
-            scannerContainer.classList.add('hidden');
-            mainContentArea.classList.remove('hidden'); // Mostrar contenido principal de nuevo
-        }
-
-        if(startScannerBtn) {
-            startScannerBtn.addEventListener('click', () => {
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-                .then((stream) => {
-                    stream.getTracks().forEach(track => track.stop()); 
-                    startLiveScanner();
-                })
-                .catch((err) => {
-                    console.error("Error al obtener acceso a la cámara:", err);
-                    alert("No se pudo acceder a la cámara. Por favor, verifica los permisos en tu navegador.\nEsta función podría requerir HTTPS.");
-                    playErrorSound();
-                });
-            });
-        }
-        if(stopScannerBtn) {
-            stopScannerBtn.addEventListener('click', stopLiveScanner);
-        }
-
 
         function displayCurrentProducts(searchTerm = '') {
             currentProductsList.innerHTML = '';
@@ -1109,54 +1307,112 @@
             return mockProducts.find(p => p.id.toLowerCase() === id.toLowerCase());
         }
 
-        function addProductToCart(productId) {
-            const product = findProductById(productId);
-            if (!product) {
+        function addProductToCart(productId, isSpecialtyItem = false, weightOrValue = 0, pricePerUnit = 0, calculatedPrice = 0, type = 'unit') {
+            const productBase = findProductById(productId); 
+            
+            if (type === 'unit' && !productBase) {
                 alert("Producto no encontrado. Verifica el ID.");
                 playErrorSound();
                 return;
             }
-
-            const existingCartItem = cart.find(item => item.product.id === productId);
-            const currentQuantityInCart = existingCartItem ? existingCartItem.quantity : 0;
-
-            if (product.stock <= currentQuantityInCart) {
-                alert(`¡Stock insuficiente para "${product.name}"! Disponible: ${product.stock}, en carrito: ${currentQuantityInCart}.`);
-                playErrorSound();
-                return;
-            }
             
-            // No reproducir beep aquí si el escáner ya lo hizo. 
-            // Si se añade manualmente, sí.
-            if (!quaggaRunning) { // Solo reproducir si no es desde el escáner (que ya tiene su propio beep)
-                 playBeepSound();
-            }
+            if (type === 'unit') {
+                const existingCartItem = cart.find(item => item.type === 'unit' && item.product.id === productId);
+                const currentQuantityInCart = existingCartItem ? existingCartItem.quantity : 0;
 
-            if (existingCartItem) {
-                existingCartItem.quantity++;
-            } else {
-                cart.push({ product: product, quantity: 1 });
+                if (productBase.stock <= currentQuantityInCart) {
+                    alert(`¡Stock insuficiente para "${productBase.name}"! Disponible: ${productBase.stock}, en carrito: ${currentQuantityInCart}.`);
+                    playErrorSound();
+                    return;
+                }
+                playBeepSound();
+                if (existingCartItem) {
+                    existingCartItem.quantity++;
+                } else {
+                    cart.push({ product: productBase, quantity: 1, type: 'unit', price: productBase.price });
+                }
+            } else if (type === 'weight') {
+                 const cartItem = {
+                    id: `${productId}_w_${Date.now()}`, 
+                    name: `${weightProductNameSelect.options[weightProductNameSelect.selectedIndex].text} (${parseFloat(weightOrValue).toFixed(2)} lbs)`,
+                    price: calculatedPrice, 
+                    quantity: 1, // La "cantidad" visual es 1, el peso es el detalle.
+                    type: 'weight',
+                    weight: parseFloat(weightOrValue), // Peso real
+                    pricePerUnit: pricePerUnit, // Precio por Libra
+                    baseProductKey: productId 
+                };
+                cart.push(cartItem);
+                playBeepSound();
+            } else if (type === 'value') {
+                const cartItem = {
+                    id: `${productId}_v_${Date.now()}`,
+                    name: `${valueProductNameSelect.options[valueProductNameSelect.selectedIndex].text} (Valor: $${parseFloat(weightOrValue).toFixed(2)})`,
+                    price: parseFloat(weightOrValue), // El precio final es el valor deseado
+                    quantity: 1,
+                    type: 'value',
+                    desiredValue: parseFloat(weightOrValue),
+                    pricePerUnit: pricePerUnit, 
+                    calculatedWeight: calculatedPrice, // Aquí calculatedPrice es el peso
+                    baseProductKey: productId
+                };
+                cart.push(cartItem);
+                playBeepSound();
+            } else if (type === 'meat_special') { // Para Pollo Amarillo o carnes del nuevo modal
+                const selectedMeatName = meatProductSelect.options[meatProductSelect.selectedIndex].text;
+                const cartItem = {
+                    id: `${productId}_ms_${Date.now()}`, // productId es la clave del producto, ej: 'pollo_entero'
+                    name: `${selectedMeatName} (${parseFloat(weightOrValue).toFixed(2)} lbs)`, // weightOrValue es el peso aquí
+                    price: calculatedPrice, 
+                    quantity: 1, 
+                    type: 'meat_special',
+                    weight: parseFloat(weightOrValue),
+                    pricePerUnit: pricePerUnit,
+                    baseProductKey: productId
+                };
+                cart.push(cartItem);
+                playSuccessSound();
             }
             updateCartDisplay();
         }
+
 
         function updateCartDisplay() {
             cartItemsContainer.innerHTML = '';
             if (cart.length === 0) {
                 emptyCartMessage.style.display = 'block';
                 finalizeSaleBtn.disabled = true;
+                previewReceiptBtn.disabled = true;
             } else {
                 emptyCartMessage.style.display = 'none';
                 finalizeSaleBtn.disabled = false;
+                previewReceiptBtn.disabled = false;
                 cart.forEach((item, index) => {
                     const itemElement = document.createElement('div');
                     itemElement.classList.add('cart-item', 'flex', 'justify-between', 'items-center', 'p-2', 'border-b', 'border-neutral-700', 'hover:bg-neutral-700', 'transition-colors', 'rounded');
+                    
+                    let itemNameDisplay, itemPriceDetails, itemTotalPrice;
+
+                    if (item.type === 'weight' || item.type === 'meat_special') {
+                        itemNameDisplay = item.name; 
+                        itemPriceDetails = `(${item.weight.toFixed(2)} lbs x $${item.pricePerUnit.toFixed(2)}/lb)`;
+                        itemTotalPrice = item.price.toFixed(2);
+                    } else if (item.type === 'value') {
+                        itemNameDisplay = item.name; 
+                        itemPriceDetails = `(${item.calculatedWeight.toFixed(2)} lbs @ $${item.pricePerUnit.toFixed(2)}/lb)`;
+                        itemTotalPrice = item.price.toFixed(2);
+                    } else { // type 'unit'
+                        itemNameDisplay = item.product.name;
+                        itemPriceDetails = `(${item.quantity} x $${item.product.price.toFixed(2)})`;
+                        itemTotalPrice = (item.product.price * item.quantity).toFixed(2);
+                    }
+
                     itemElement.innerHTML = `
                         <div class="flex-grow">
-                            <span class="font-semibold text-sm">${item.product.name}</span>
-                            <span class="text-xs text-gray-400 block">(${item.quantity} x $${item.product.price.toFixed(2)})</span>
+                            <span class="font-semibold text-sm">${itemNameDisplay}</span>
+                            <span class="text-xs text-gray-400 block">${itemPriceDetails}</span>
                         </div>
-                        <span class="font-bold text-green-400 text-sm">$${(item.product.price * item.quantity).toFixed(2)}</span>
+                        <span class="font-bold text-green-400 text-sm">$${itemTotalPrice}</span>
                         <button class="ml-2 text-red-500 hover:text-red-400 remove-item-btn" data-index="${index}" title="Eliminar item">
                             <i class="fas fa-times-circle"></i>
                         </button>
@@ -1175,7 +1431,9 @@
         }
 
         function calculateAndDisplayTotals() {
-            const total = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+            const total = cart.reduce((sum, item) => {
+                return sum + item.price; 
+            }, 0);
             cartTotalElement.textContent = `$${total.toFixed(2)}`;
             return total;
         }
@@ -1191,6 +1449,7 @@
             
             amountPaidInput.value = '';
             changeDue.textContent = '$0.00';
+            document.getElementById('saleNoteInput').value = '';
             confirmPaymentBtn.disabled = true;
             paymentModal.classList.remove('hidden');
             amountPaidInput.focus();
@@ -1213,6 +1472,7 @@
             const amountPaid = parseFloat(amountPaidInput.value);
             const change = amountPaid - total;
             const paymentMethod = paymentMethodSelect.value;
+            const saleNote = document.getElementById('saleNoteInput').value.trim();
 
             if (amountPaid < total) {
                 alert("El monto pagado es insuficiente.");
@@ -1221,45 +1481,139 @@
             }
 
             for (const cartItem of cart) {
-                const productInDb = mockProducts.find(p => p.id === cartItem.product.id);
-                if (!productInDb || productInDb.stock < cartItem.quantity) {
-                    alert(`¡Stock insuficiente para "${cartItem.product.name}" al momento de finalizar! Disponible: ${productInDb ? productInDb.stock : 0}. Venta cancelada.`);
-                    playErrorSound();
-                    return;
+                if (cartItem.type === 'unit') { 
+                    const productInDb = mockProducts.find(p => p.id === cartItem.product.id);
+                    if (!productInDb || productInDb.stock < cartItem.quantity) {
+                        alert(`¡Stock insuficiente para "${cartItem.product.name}" al momento de finalizar! Disponible: ${productInDb ? productInDb.stock : 0}. Venta cancelada.`);
+                        playErrorSound();
+                        return;
+                    }
                 }
             }
 
             cart.forEach(cartItem => {
-                const productIndex = mockProducts.findIndex(p => p.id === cartItem.product.id);
-                if (productIndex > -1) {
-                    mockProducts[productIndex].stock -= cartItem.quantity;
+                if (cartItem.type === 'unit') {
+                    const productIndex = mockProducts.findIndex(p => p.id === cartItem.product.id);
+                    if (productIndex > -1) {
+                        mockProducts[productIndex].stock -= cartItem.quantity;
+                    }
                 }
+                // Nota: El stock de productos por peso/valor/pollo_amarillo no se descuenta de mockProducts
+                // porque mockProducts maneja stock por unidad. Se necesitaría una lógica más compleja
+                // para mapear estos productos a granel a un stock unitario si se desea.
             });
             saveProductsToLocalStorage();
 
             const saleData = {
                 id: `VEN-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-                items: cart.map(item => ({ id: item.product.id, name: item.product.name, quantity: item.quantity, price: item.product.price, subtotal: item.product.price * item.quantity })),
+                items: cart.map(item => {
+                    if (item.type === 'weight' || item.type === 'meat_special') {
+                        return { 
+                            name: item.name, 
+                            quantity: item.weight, 
+                            price: item.pricePerUnit, 
+                            subtotal: item.price,
+                            isWeighted: true, 
+                            unit: 'lbs'
+                        };
+                    } else if (item.type === 'value') {
+                         return { 
+                            name: item.name, 
+                            quantity: item.calculatedWeight, 
+                            price: item.pricePerUnit, 
+                            subtotal: item.price, 
+                            isWeighted: true, 
+                            unit: 'lbs (valor)'
+                        };
+                    }
+                    else { 
+                        return { 
+                            id: item.product.id, 
+                            name: item.product.name, 
+                            quantity: item.quantity, 
+                            price: item.product.price, 
+                            subtotal: item.product.price * item.quantity,
+                            isWeighted: false,
+                            unit: item.product.unit
+                        };
+                    }
+                }),
                 totalAmount: total,
                 amountPaid: amountPaid,
                 changeGiven: change,
                 paymentMethod: paymentMethod,
+                note: saleNote,
                 timestamp: new Date().toISOString()
             };
 
             generateInvoicePDF(saleData);
             saveSaleToHistory(saleData);
             playSuccessSound();
-            alert(`Venta completada!\nTotal: $${total.toFixed(2)}\nPagado: $${amountPaid.toFixed(2)}\nCambio: $${change.toFixed(2)}\nMétodo: ${paymentMethod}`);
+            alert(`Venta completada!\nTotal: $${total.toFixed(2)}\nPagado: $${amountPaid.toFixed(2)}\nCambio: $${change.toFixed(2)}\nMétodo: ${paymentMethod}${saleNote ? '\nNota: ' + saleNote : ''}`);
             clearCart();
             closePaymentModal();
             displayCurrentProducts(searchCurrentProductsInput.value);
+            displayFrequentProducts();
         }
 
         function saveSaleToHistory(saleData) {
             salesHistory.push(saleData);
             localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
         }
+
+        function generateReceiptPreviewHTML() {
+            if (cart.length === 0) {
+                receiptPreviewContent.innerHTML = '<p class="text-center">El carrito está vacío.</p>';
+                return;
+            }
+            const now = new Date();
+            const formattedDate = `${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            let currentTotal = 0;
+            
+            let html = `<div class="text-center"><strong>${storeInfo.name || "MiniMarket POS"}</strong></div>`;
+            html += `<div class="text-center text-xs">${storeInfo.address || "Dirección no especificada"}</div>`;
+            html += `<div class="text-center text-xs">RUC/CI: ${storeInfo.ruc || "No especificado"}</div>`;
+            html += `<hr>`;
+            html += `<div class="text-xs">Fecha: ${formattedDate}</div>`;
+            html += `<hr>`;
+            html += `<div><strong>DETALLE:</strong></div>`;
+            
+            cart.forEach(item => {
+                let itemName, itemDetails, itemSubtotal;
+                if (item.type === 'weight' || item.type === 'meat_special') {
+                    itemName = item.name;
+                    itemDetails = `${item.weight.toFixed(2)} lbs @ $${item.pricePerUnit.toFixed(2)}/lb`;
+                    itemSubtotal = item.price;
+                } else if (item.type === 'value') {
+                    itemName = item.name;
+                    itemDetails = `${item.calculatedWeight.toFixed(2)} lbs (Valor: $${item.desiredValue.toFixed(2)}) @ $${item.pricePerUnit.toFixed(2)}/lb`;
+                    itemSubtotal = item.price;
+                }
+                else { // type 'unit'
+                    itemName = `${item.quantity}x ${item.product.name}`;
+                    itemDetails = `@ $${item.product.price.toFixed(2)}`;
+                    itemSubtotal = item.product.price * item.quantity;
+                }
+                currentTotal += itemSubtotal;
+                html += `<div class="item-line">
+                            <span class="item-name">${itemName} ${ (item.type !== 'value' && item.type !== 'weight' && item.type !== 'meat_special') ? `<span class="text-xs text-gray-500">${itemDetails}</span>` : ''}</span>
+                            <span class="item-price">$${itemSubtotal.toFixed(2)}</span>
+                         </div>`;
+                 if(item.type === 'weight' || item.type === 'value' || item.type === 'meat_special') {
+                     html += `<div class="item-line" style="font-size:10px; padding-left:10px;">
+                                 <span>&nbsp;&nbsp;${itemDetails}</span>
+                              </div>`;
+                 }
+            });
+            
+            html += `<hr>`;
+            html += `<div class="item-line"><strong>TOTAL:</strong> <strong class="item-price">$${currentTotal.toFixed(2)}</strong></div>`;
+            html += `<hr>`;
+            html += `<div class="text-center text-xs mt-2">¡Gracias por su compra!</div>`;
+            
+            receiptPreviewContent.innerHTML = html;
+        }
+
 
         function generateInvoicePDF(saleData) {
             const receiptWidthMm = 80; 
@@ -1304,12 +1658,18 @@
             addText(`Venta ID: ${saleData.id}`, leftMarginMm, yPos);
             yPos += lineSpacing - 2;
             addText(`Método: ${saleData.paymentMethod}`, leftMarginMm, yPos);
+            if (saleData.note) {
+                yPos += lineSpacing - 2;
+                const noteLines = pdf.splitTextToSize(`Nota: ${saleData.note}`, contentWidthMm);
+                addText(noteLines, leftMarginMm, yPos);
+                yPos += (noteLines.length * (lineSpacing - 2.5));
+            }
             yPos += lineSpacing -1;
             pdf.line(leftMarginMm, yPos, receiptWidthMm - rightMarginMm, yPos);
             yPos += lineSpacing - 2;
 
             pdf.setFont(undefined, 'bold');
-            addText("Cant. Descripción", leftMarginMm, yPos, {}, true);
+            addText("Cant/Peso Descripción", leftMarginMm, yPos, {}, true);
             addText("Total", receiptWidthMm - rightMarginMm, yPos, { align: 'right' }, true);
             pdf.setFont(undefined, 'normal');
             yPos += lineSpacing -1;
@@ -1323,7 +1683,12 @@
                     yPos = 10; 
                 }
                 const productNameMaxWidth = contentWidthMm - 20; 
-                const productText = `${item.quantity}x ${item.name}`;
+                let productText;
+                if (item.isWeighted) { 
+                    productText = `${item.quantity.toFixed(2)} ${item.unit || 'lbs'} ${item.name.split('(')[0].trim()} @ $${item.price.toFixed(2)}/${item.unit || 'lb'}`;
+                } else {
+                    productText = `${item.quantity}x ${item.name}`;
+                }
                 const productLines = pdf.splitTextToSize(productText, productNameMaxWidth);
                 
                 addText(productLines.join('\n'), leftMarginMm, yPos);
@@ -1371,43 +1736,71 @@
                 searchCurrentProductsInput.value = ''; 
             }
             if (viewToShow === reportView) {
-                loadAndDisplayDailyReport();
+                loadAndDisplayDailyReport({ type: 'today' });
+                reportStartDateInput.value = ''; 
+                reportEndDateInput.value = '';
             }
             if (viewToShow === inventoryView) {
                 searchProductListInput.value = ''; 
+                displayFrequentProducts();
             }
             if (viewToShow === configuracionView) {
                 loadStoreInfoToForm();
             }
         }
         
-        function loadAndDisplayDailyReport() {
-            const today = new Date().toLocaleDateString();
-            reportDate.textContent = today;
-            const todaySales = salesHistory.filter(sale => new Date(sale.timestamp).toLocaleDateString() === today);
+        function loadAndDisplayDailyReport(filterOptions = { type: 'today' }) {
+            let filteredSales = [];
+            let dateRangeText = "Hoy";
+            const today = new Date();
+            const todayLocaleString = today.toLocaleDateString('en-CA'); 
+
+            if (filterOptions.type === 'today') {
+                filteredSales = salesHistory.filter(sale => new Date(sale.timestamp).toLocaleDateString('en-CA') === todayLocaleString);
+            } else if (filterOptions.type === 'all') {
+                filteredSales = [...salesHistory];
+                dateRangeText = "Todas las Ventas";
+            } else if (filterOptions.type === 'range' && filterOptions.startDate && filterOptions.endDate) {
+                const start = new Date(filterOptions.startDate + "T00:00:00");
+                const end = new Date(filterOptions.endDate + "T23:59:59");
+                
+                if (start > end) {
+                    alert("La fecha de inicio no puede ser posterior a la fecha de fin.");
+                    return;
+                }
+
+                filteredSales = salesHistory.filter(sale => {
+                    const saleDate = new Date(sale.timestamp);
+                    return saleDate >= start && saleDate <= end;
+                });
+                dateRangeText = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+            }
             
+            document.getElementById('reportDateRange').textContent = dateRangeText;
+
             let totalRevenue = 0;
             let totalProductsSold = 0;
             const productQuantities = {};
 
             dailySalesDetails.innerHTML = ''; 
 
-            if (todaySales.length === 0) {
-                dailySalesDetails.innerHTML = '<p class="text-gray-400">No hay ventas registradas hoy.</p>';
+            if (filteredSales.length === 0) {
+                dailySalesDetails.innerHTML = '<p class="text-gray-400">No hay ventas registradas para el periodo seleccionado.</p>';
             }
 
-            todaySales.forEach(sale => {
+            filteredSales.forEach(sale => {
                 totalRevenue += sale.totalAmount;
                 
                 const saleDetailDiv = document.createElement('div');
                 saleDetailDiv.className = 'report-sale-item';
-                let saleItemsHtml = `<strong>Venta ID: ${sale.id.substring(0,8)} (${new Date(sale.timestamp).toLocaleTimeString()})</strong><br>
+                let saleItemsHtml = `<strong>Venta ID: ${sale.id.substring(0,8)} (${new Date(sale.timestamp).toLocaleString()})</strong><br>
                                      Total: $${sale.totalAmount.toFixed(2)} | Pagado con: ${sale.paymentMethod}
+                                     ${sale.note ? `<br><span class="text-xs text-gray-400">Nota: ${sale.note}</span>` : ''}
                                      <ul>`;
                 sale.items.forEach(item => {
-                    totalProductsSold += item.quantity;
+                    totalProductsSold += item.quantity; 
                     productQuantities[item.name] = (productQuantities[item.name] || 0) + item.quantity;
-                    saleItemsHtml += `<li>${item.quantity} x ${item.name} ($${item.price.toFixed(2)} c/u) = $${item.subtotal.toFixed(2)}</li>`;
+                    saleItemsHtml += `<li>${item.quantity}${item.unit || 'x'} ${item.name.split('(')[0].trim()} ($${item.price.toFixed(2)} ${item.isWeighted ? '/'+item.unit : 'c/u'}) = $${item.subtotal.toFixed(2)}</li>`;
                 });
                 saleItemsHtml += '</ul>';
                 saleDetailDiv.innerHTML = saleItemsHtml;
@@ -1416,29 +1809,57 @@
 
             dailyTotalRevenue.textContent = `$${totalRevenue.toFixed(2)}`;
             dailyTotalProductsSold.textContent = totalProductsSold;
-            dailyTotalSalesCount.textContent = todaySales.length;
+            dailyTotalSalesCount.textContent = filteredSales.length;
 
             topSellingProducts.innerHTML = '';
             const sortedTopProducts = Object.entries(productQuantities)
                 .sort(([,a],[,b]) => b-a)
                 .slice(0, 5);
 
-            if (sortedTopProducts.length === 0) {
-                topSellingProducts.innerHTML = '<p class="text-gray-400">No hay productos vendidos hoy.</p>';
-            } else {
+            if (sortedTopProducts.length === 0 && filteredSales.length > 0) {
+                topSellingProducts.innerHTML = '<p class="text-gray-400">No hay productos suficientes para mostrar un top.</p>';
+            } else if (sortedTopProducts.length === 0) {
+                 topSellingProducts.innerHTML = '<p class="text-gray-400">No hay productos vendidos en este periodo.</p>';
+            }else {
                 sortedTopProducts.forEach(([name, quantity]) => {
                     const p = document.createElement('p');
-                    p.textContent = `${name}: ${quantity} unidades`;
+                    p.textContent = `${name}: ${quantity.toFixed(2)} ${name.includes('lbs') || name.includes('(Valor: $') ? 'lbs' : 'unidades'}`;
                     topSellingProducts.appendChild(p);
                 });
             }
         }
         
-        function generateDailyReportPDF() {
+        if(filterReportBtn) {
+            filterReportBtn.addEventListener('click', () => {
+                const startDate = reportStartDateInput.value;
+                const endDate = reportEndDateInput.value;
+                if (startDate && endDate) {
+                    loadAndDisplayDailyReport({ type: 'range', startDate, endDate });
+                } else {
+                    alert("Por favor, seleccione ambas fechas para filtrar.");
+                }
+            });
+        }
+
+        if(showTodayReportBtn) {
+            showTodayReportBtn.addEventListener('click', () => {
+                reportStartDateInput.value = '';
+                reportEndDateInput.value = '';
+                loadAndDisplayDailyReport({ type: 'today' });
+            });
+        }
+        if(showAllSalesReportBtn){
+             showAllSalesReportBtn.addEventListener('click', () => {
+                reportStartDateInput.value = '';
+                reportEndDateInput.value = '';
+                loadAndDisplayDailyReport({ type: 'all' });
+            });
+        }
+        
+        function generateDailyReportPDF() { 
             const pdf = new jsPDF();
-            const now = new Date();
-            const formattedDate = now.toLocaleDateString();
-            const fileName = `ReporteDiario-${storeInfo.name.replace(/\s+/g, '_')}-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}.pdf`;
+            const reportTitleDate = document.getElementById('reportDateRange').textContent;
+            const fileName = `Reporte-${storeInfo.name.replace(/\s+/g, '_')}-${reportTitleDate.replace(/\s-\s/g, '_to_').replace(/\//g, '-')}.pdf`;
             
             pdf.setFontSize(16);
             pdf.setFont(undefined, 'bold');
@@ -1450,33 +1871,53 @@
 
             pdf.setFontSize(18);
             pdf.setFont(undefined, 'bold');
-            pdf.text("Reporte Diario de Ventas", 105, 40, null, null, "center");
+            pdf.text(`Reporte de Ventas (${reportTitleDate})`, 105, 40, null, null, "center");
             pdf.setFontSize(12);
             pdf.setFont(undefined, 'normal');
-            pdf.text(`Fecha del Reporte: ${formattedDate}`, 10, 50);
-            pdf.text(`Total Recaudado del Día: ${dailyTotalRevenue.textContent}`, 10, 60);
-            pdf.text(`Cantidad de Productos Vendidos: ${dailyTotalProductsSold.textContent}`, 10, 67);
-            pdf.text(`Cantidad de Ventas Realizadas: ${dailyTotalSalesCount.textContent}`, 10, 74);
+            let yPos = 50;
+            pdf.text(`Total Recaudado: ${dailyTotalRevenue.textContent}`, 10, yPos); yPos += 7;
+            pdf.text(`Cantidad de Productos Vendidos: ${dailyTotalProductsSold.textContent}`, 10, yPos); yPos += 7;
+            pdf.text(`Cantidad de Ventas Realizadas: ${dailyTotalSalesCount.textContent}`, 10, yPos); yPos += 10;
             
             pdf.setFontSize(11);
             pdf.setFont(undefined, 'bold');
-            pdf.text("Detalle de Ventas del Día:", 10, 88);
-            let yPos = 93;
-            const todaySales = salesHistory.filter(sale => new Date(sale.timestamp).toLocaleDateString() === formattedDate);
-            if (todaySales.length === 0) {
+            pdf.text("Detalle de Ventas:", 10, yPos); yPos += 6;
+            
+            const salesToReport = salesHistory.filter(sale => {
+                const reportRangeText = document.getElementById('reportDateRange').textContent;
+                if (reportRangeText === "Hoy") {
+                    return new Date(sale.timestamp).toLocaleDateString() === new Date().toLocaleDateString();
+                } else if (reportRangeText === "Todas las Ventas") {
+                    return true;
+                } else { 
+                    const [startStr, endStr] = reportRangeText.split(' - ');
+                    const startDate = new Date(startStr.split('/').reverse().join('-') + "T00:00:00");
+                    const endDate = new Date(endStr.split('/').reverse().join('-') + "T23:59:59");
+                    const saleDate = new Date(sale.timestamp);
+                    return saleDate >= startDate && saleDate <= endDate;
+                }
+            });
+
+
+            if (salesToReport.length === 0) {
                 pdf.setFont(undefined, 'normal');
-                pdf.text("No se registraron ventas hoy.", 15, yPos);
+                pdf.text("No se registraron ventas para este periodo.", 15, yPos);
                 yPos += 10;
             } else {
-                todaySales.forEach(sale => {
+                salesToReport.forEach(sale => {
                     if (yPos > 260) { pdf.addPage(); yPos = 20; }
                     pdf.setFont(undefined, 'bold');
-                    pdf.text(`Venta ID: ${sale.id.substring(0,8)} (${new Date(sale.timestamp).toLocaleTimeString()}) - Total: $${sale.totalAmount.toFixed(2)} (Pagado con: ${sale.paymentMethod})`, 15, yPos);
+                    pdf.text(`Venta ID: ${sale.id.substring(0,8)} (${new Date(sale.timestamp).toLocaleString()}) - Total: $${sale.totalAmount.toFixed(2)} (Pago: ${sale.paymentMethod})`, 15, yPos);
                     yPos += 6;
                     pdf.setFont(undefined, 'normal');
+                    if (sale.note) {
+                         const noteLines = pdf.splitTextToSize(`Nota: ${sale.note}`, 180);
+                         pdf.text(noteLines, 20, yPos);
+                         yPos += (noteLines.length * 4);
+                    }
                     sale.items.forEach(item => {
                         if (yPos > 270) { pdf.addPage(); yPos = 20; }
-                        pdf.text(`  - ${item.quantity}x ${item.name} ($${item.subtotal.toFixed(2)})`, 20, yPos);
+                        pdf.text(`  - ${item.quantity}${item.unit || 'x'} ${item.name.split('(')[0].trim()} ($${item.price.toFixed(2)} ${item.isWeighted ? '/'+item.unit : 'c/u'}) = $${item.subtotal.toFixed(2)}`, 20, yPos);
                         yPos += 5;
                     });
                     yPos += 3;
@@ -1486,11 +1927,11 @@
             if (yPos > 250) { pdf.addPage(); yPos = 20; }
             pdf.setFontSize(11);
             pdf.setFont(undefined, 'bold');
-            pdf.text("Productos Más Vendidos Hoy:", 10, yPos);
-            yPos += 6;
+            pdf.text("Productos Más Vendidos (en rango):", 10, yPos); yPos += 6;
             pdf.setFont(undefined, 'normal');
+            
             const productQuantities = {};
-            todaySales.forEach(sale => {
+            salesToReport.forEach(sale => {
                 sale.items.forEach(item => {
                     productQuantities[item.name] = (productQuantities[item.name] || 0) + item.quantity;
                 });
@@ -1500,11 +1941,11 @@
                 .slice(0, 5);
 
             if (sortedTopProducts.length === 0) {
-                pdf.text("No hay productos vendidos hoy.", 15, yPos);
+                pdf.text("No hay productos vendidos en este periodo.", 15, yPos);
             } else {
                 sortedTopProducts.forEach(([name, quantity]) => {
                     if (yPos > 270) { pdf.addPage(); yPos = 20; }
-                    pdf.text(`- ${name}: ${quantity} unidades`, 15, yPos);
+                    pdf.text(`- ${name}: ${quantity.toFixed(2)} ${name.includes('lbs') || name.includes('(Valor: $') ? 'lbs' : 'unidades'}`, 15, yPos);
                     yPos += 5;
                 });
             }
@@ -1543,7 +1984,7 @@
                     localStorage.removeItem('mockProducts');
                     localStorage.removeItem('salesHistory');
                     localStorage.removeItem('storeInfo');
-                    localStorage.removeItem('mockProductsDefaultLoaded_v6'); 
+                    localStorage.removeItem('mockProductsDefaultLoaded_v7'); 
                     
                     mockProducts = []; 
                     salesHistory = [];
@@ -1595,20 +2036,23 @@
             }
         });
         
-        if(startScannerBtn) {
-            startScannerBtn.addEventListener('click', () => {
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-                .then((stream) => {
-                    stream.getTracks().forEach(track => track.stop()); 
-                    startLiveScanner();
-                })
-                .catch((err) => {
-                    console.error("Error al obtener acceso a la cámara:", err);
-                    alert("No se pudo acceder a la cámara. Por favor, verifica los permisos en tu navegador.\nEsta función podría requerir HTTPS.");
-                    playErrorSound();
-                });
+        if(previewReceiptBtn) {
+            previewReceiptBtn.addEventListener('click', () => {
+                if (cart.length > 0) {
+                    generateReceiptPreviewHTML();
+                    receiptPreviewModal.classList.remove('hidden');
+                } else {
+                    alert("El carrito está vacío. Añade productos para ver la vista previa.");
+                }
             });
         }
+        if(closeReceiptPreviewModalBtn) {
+            closeReceiptPreviewModalBtn.addEventListener('click', () => receiptPreviewModal.classList.add('hidden'));
+        }
+        if(closeReceiptPreviewModalBottomBtn) {
+            closeReceiptPreviewModalBottomBtn.addEventListener('click', () => receiptPreviewModal.classList.add('hidden'));
+        }
+
 
         confirmPaymentBtn.addEventListener('click', finalizeSale);
         cancelPaymentBtn.addEventListener('click', closePaymentModal);
@@ -1639,6 +2083,11 @@
                 searchProductListInput.value = ''; 
             });
         }
+        if(appLogo) {
+            appLogo.addEventListener('click', () => {
+                showView(inventoryView);
+            });
+        }
 
 
         linkVerInventario.addEventListener('click', (e) => {
@@ -1650,12 +2099,415 @@
         closeProductListModal.addEventListener('click', () => productListModal.classList.add('hidden'));
         closeProductListModalBottom.addEventListener('click', () => productListModal.classList.add('hidden'));
 
+        function displayFrequentProducts() {
+            frequentProductsContainer.innerHTML = '';
+            const productsWithStock = mockProducts.filter(p => p.stock > 0);
+            // Lógica simple: tomar los primeros 6 con stock. Podría ser más sofisticada (más vendidos).
+            const suggestions = productsWithStock.slice(0, 6); 
+
+            if (suggestions.length === 0 && mockProducts.length > 0) {
+                frequentProductsContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-full text-center">No hay productos con stock para sugerir.</p>';
+                return;
+            }
+             if (mockProducts.length === 0) {
+                frequentProductsContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-full text-center">Aún no hay productos en el inventario.</p>';
+                return;
+            }
+
+            suggestions.forEach(product => {
+                const btn = document.createElement('button');
+                btn.className = 'frequent-product-btn p-2 rounded-md text-xs truncate transition-all hover:neon-border-green';
+                btn.textContent = `${product.name} ($${product.price.toFixed(2)})`;
+                btn.title = `${product.name} - $${product.price.toFixed(2)} (Stock: ${product.stock})`;
+                btn.addEventListener('click', () => {
+                    addProductToCart(product.id);
+                });
+                frequentProductsContainer.appendChild(btn);
+            });
+        }
+
+        // --- Funciones para Venta por Peso (Genérico) ---
+        function openWeightProductModal() {
+            weightProductNameSelect.innerHTML = ''; 
+            sellByWeightProducts.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.key;
+                option.textContent = p.name;
+                weightProductNameSelect.appendChild(option);
+            });
+            
+            if (sellByWeightProducts.length > 0) {
+                loadPriceForWeightedProduct(); 
+            }
+            weightProductWeightLb.value = '';
+            updateWeightProductTotal();
+            weightProductModal.classList.remove('hidden');
+        }
+
+        function closeWeightProductModal() {
+            weightProductModal.classList.add('hidden');
+        }
+
+        function loadPriceForWeightedProduct() {
+            const selectedProductKey = weightProductNameSelect.value;
+            if (selectedProductKey) {
+                const savedPrice = localStorage.getItem(`precio_libra_${selectedProductKey}`);
+                weightProductPricePerLb.value = savedPrice ? parseFloat(savedPrice).toFixed(2) : '';
+                updateWeightProductTotal();
+            }
+        }
+
+        function savePriceForWeightedProduct() {
+            const selectedProductKey = weightProductNameSelect.value;
+            const price = parseFloat(weightProductPricePerLb.value);
+            if (selectedProductKey && !isNaN(price) && price >= 0) {
+                localStorage.setItem(`precio_libra_${selectedProductKey}`, price.toFixed(2));
+            }
+            updateWeightProductTotal();
+        }
+        
+        function resetSavedPriceForWeightedProduct() {
+            const selectedProductKey = weightProductNameSelect.value;
+            if (selectedProductKey) {
+                if (confirm(`¿Seguro que quieres restablecer el precio guardado para "${weightProductNameSelect.options[weightProductNameSelect.selectedIndex].text}"?`)) {
+                    localStorage.removeItem(`precio_libra_${selectedProductKey}`);
+                    weightProductPricePerLb.value = '';
+                    updateWeightProductTotal();
+                    alert("Precio restablecido.");
+                }
+            }
+        }
+
+
+        function updateWeightProductTotal() {
+            const pricePerLb = parseFloat(weightProductPricePerLb.value) || 0;
+            const weight = parseFloat(weightProductWeightLb.value) || 0;
+            const total = pricePerLb * weight;
+            weightProductTotalCalculated.textContent = `$${total.toFixed(2)}`;
+        }
+
+        function addProductByWeightToCart() {
+            const selectedProductKey = weightProductNameSelect.value;
+            const pricePerLb = parseFloat(weightProductPricePerLb.value);
+            const weight = parseFloat(weightProductWeightLb.value);
+
+            if (!selectedProductKey) {
+                alert("Por favor, seleccione un producto."); return;
+            }
+            if (isNaN(pricePerLb) || pricePerLb <= 0) {
+                alert("Por favor, ingrese un precio por libra válido."); return;
+            }
+            if (isNaN(weight) || weight <= 0) {
+                alert("Por favor, ingrese un peso válido."); return;
+            }
+            const calculatedPrice = pricePerLb * weight;
+            addProductToCart(selectedProductKey, true, weight, pricePerLb, calculatedPrice, 'weight');
+            closeWeightProductModal();
+        }
+
+        // --- Funciones para Venta por Valor (Genérico) ---
+        function openSellByValueModal() {
+            valueProductNameSelect.innerHTML = ''; 
+            sellByWeightProducts.forEach(p => { 
+                const option = document.createElement('option');
+                option.value = p.key;
+                option.textContent = p.name;
+                valueProductNameSelect.appendChild(option);
+            });
+            
+            if (sellByWeightProducts.length > 0) {
+                loadPriceForValueProduct(); 
+            }
+            valueProductDesiredValue.value = '';
+            valueProductCalculatedWeight.textContent = '0.00 lbs';
+            sellByValueModal.classList.remove('hidden');
+        }
+
+        function closeSellByValueModal() {
+            sellByValueModal.classList.add('hidden');
+        }
+
+        function loadPriceForValueProduct() {
+            const selectedProductKey = valueProductNameSelect.value;
+            if (selectedProductKey) {
+                const savedPrice = localStorage.getItem(`precio_libra_${selectedProductKey}`); 
+                valueProductPricePerLb.value = savedPrice ? parseFloat(savedPrice).toFixed(2) : '';
+                calculateWeightFromValue();
+            }
+        }
+        
+        function savePriceForValueProduct() { 
+            const selectedProductKey = valueProductNameSelect.value;
+            const price = parseFloat(valueProductPricePerLb.value);
+            if (selectedProductKey && !isNaN(price) && price >= 0) {
+                localStorage.setItem(`precio_libra_${selectedProductKey}`, price.toFixed(2));
+            }
+            calculateWeightFromValue();
+        }
+
+        function resetSavedPriceForValueProduct() {
+            const selectedProductKey = valueProductNameSelect.value;
+            if (selectedProductKey) {
+                if (confirm(`¿Seguro que quieres restablecer el precio por libra guardado para "${valueProductNameSelect.options[valueProductNameSelect.selectedIndex].text}"?`)) {
+                    localStorage.removeItem(`precio_libra_${selectedProductKey}`);
+                    valueProductPricePerLb.value = '';
+                    calculateWeightFromValue();
+                    alert("Precio por libra restablecido.");
+                }
+            }
+        }
+
+        function calculateWeightFromValue() {
+            const pricePerLb = parseFloat(valueProductPricePerLb.value) || 0;
+            const desiredValue = parseFloat(valueProductDesiredValue.value) || 0;
+            let calculatedWeight = 0;
+            if (pricePerLb > 0 && desiredValue > 0) {
+                calculatedWeight = desiredValue / pricePerLb;
+            }
+            valueProductCalculatedWeight.textContent = `${calculatedWeight.toFixed(2)} lbs`;
+        }
+
+        function addProductByValueToCart() {
+            const selectedProductKey = valueProductNameSelect.value;
+            const pricePerLb = parseFloat(valueProductPricePerLb.value);
+            const desiredValue = parseFloat(valueProductDesiredValue.value);
+
+            if (!selectedProductKey) {
+                alert("Por favor, seleccione un producto."); return;
+            }
+            if (isNaN(pricePerLb) || pricePerLb <= 0) {
+                alert("Por favor, ingrese un precio por libra válido."); return;
+            }
+            if (isNaN(desiredValue) || desiredValue <= 0) {
+                alert("Por favor, ingrese un valor deseado válido."); return;
+            }
+            const calculatedWeight = desiredValue / pricePerLb;
+            addProductToCart(selectedProductKey, true, desiredValue, pricePerLb, calculatedWeight, 'value');
+            closeSellByValueModal();
+        }
+        
+        // --- Funciones para Venta de Carnes (antes Pollo Amarillo) ---
+        function openMeatSaleModal() {
+            meatProductSelect.innerHTML = ''; // Limpiar opciones anteriores
+            bulkMeatProducts.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.key; // Usar la clave única
+                option.textContent = p.name;
+                meatProductSelect.appendChild(option);
+            });
+            
+            if (bulkMeatProducts.length > 0) {
+                loadPriceForMeatSale(); // Cargar precio para el primer producto por defecto
+            }
+            meatWeightLb.value = '';
+            meatDesiredValue.value = '';
+            meatWeightLb.disabled = false;
+            meatDesiredValue.disabled = false;
+            updateMeatSaleCalculation();
+            meatSaleModal.classList.remove('hidden');
+        }
+
+        function closeMeatSaleModal() {
+            meatSaleModal.classList.add('hidden');
+        }
+
+        function loadPriceForMeatSale() {
+            const selectedProductKey = meatProductSelect.value;
+            if (selectedProductKey) {
+                const savedPrice = localStorage.getItem(`precio_libra_${selectedProductKey}`);
+                meatPricePerLb.value = savedPrice ? parseFloat(savedPrice).toFixed(2) : '';
+                updateMeatSaleCalculation();
+            }
+        }
+
+        function saveMeatPricePerLb() {
+            const selectedProductKey = meatProductSelect.value;
+            const price = parseFloat(meatPricePerLb.value);
+            if (selectedProductKey && !isNaN(price) && price >= 0) {
+                localStorage.setItem(`precio_libra_${selectedProductKey}`, price.toFixed(2));
+            }
+            updateMeatSaleCalculation();
+        }
+        
+        function handleMeatSaleInput(event) {
+            const inputType = event.target.id;
+            if (inputType === 'meatWeightLb' && meatWeightLb.value.trim() !== '') {
+                meatDesiredValue.value = '';
+                meatDesiredValue.disabled = true;
+            } else if (inputType === 'meatDesiredValue' && meatDesiredValue.value.trim() !== '') {
+                meatWeightLb.value = '';
+                meatWeightLb.disabled = true;
+            } else if (meatWeightLb.value.trim() === '' && meatDesiredValue.value.trim() === '') {
+                meatWeightLb.disabled = false;
+                meatDesiredValue.disabled = false;
+            }
+            updateMeatSaleCalculation();
+        }
+
+        function updateMeatSaleCalculation() {
+            const pricePerLb = parseFloat(meatPricePerLb.value) || 0;
+            const weight = parseFloat(meatWeightLb.value) || 0;
+            const desiredValue = parseFloat(meatDesiredValue.value) || 0;
+            let resultText = "Ingrese peso o valor.";
+
+            if (pricePerLb > 0) {
+                if (weight > 0) {
+                    const total = pricePerLb * weight;
+                    resultText = `Total: $${total.toFixed(2)} por ${weight.toFixed(2)} lbs`;
+                } else if (desiredValue > 0) {
+                    const calculatedWeight = desiredValue / pricePerLb;
+                    resultText = `Peso: ${calculatedWeight.toFixed(2)} lbs por $${desiredValue.toFixed(2)}`;
+                }
+            }
+            meatCalculationResult.textContent = resultText;
+        }
+        
+        function addMeatToCart() {
+            const selectedProductKey = meatProductSelect.value;
+            const selectedProductName = meatProductSelect.options[meatProductSelect.selectedIndex].text;
+            const pricePerLb = parseFloat(meatPricePerLb.value);
+            let weight = parseFloat(meatWeightLb.value);
+            let desiredValue = parseFloat(meatDesiredValue.value);
+            let total;
+            let finalWeight;
+
+            if (!selectedProductKey){
+                alert("Por favor seleccione un producto cárnico."); return;
+            }
+            if (isNaN(pricePerLb) || pricePerLb <= 0) {
+                alert("Por favor, ingrese un precio por libra válido para el producto."); return;
+            }
+
+            if (weight > 0) {
+                total = pricePerLb * weight;
+                finalWeight = weight;
+            } else if (desiredValue > 0) {
+                finalWeight = desiredValue / pricePerLb;
+                total = desiredValue;
+            } else {
+                alert("Por favor, ingrese un peso o un valor deseado para el producto."); return;
+            }
+            
+            if (isNaN(finalWeight) || finalWeight <= 0) {
+                 alert("El cálculo resultó en un peso inválido. Verifique el precio y el valor/peso ingresado."); return;
+            }
+
+            // Usar un tipo genérico para los ítems de este modal en el carrito
+            const cartItem = {
+                id: `${selectedProductKey}_${Date.now()}`, // ID único para este item específico
+                name: `${selectedProductName} (${finalWeight.toFixed(2)} lbs)`,
+                price: total, 
+                quantity: 1, 
+                type: 'meat_by_weight_value', // Tipo específico
+                weight: finalWeight,
+                pricePerUnit: pricePerLb, // Precio por libra
+                baseProductKey: selectedProductKey
+            };
+            cart.push(cartItem);
+            updateCartDisplay();
+            playSuccessSound();
+            alert(`Agregado al carrito: ${selectedProductName}`);
+            closeMeatSaleModal();
+        }
+
+        function resetMeatSaleForm() {
+            // No restablecer el precio por libra, solo los campos de peso/valor y el resultado
+            meatWeightLb.value = '';
+            meatDesiredValue.value = '';
+            meatWeightLb.disabled = false;
+            meatDesiredValue.disabled = false;
+            if(meatProductSelect.options.length > 0) { // Recargar precio para el producto actualmente seleccionado
+                 loadPriceForMeatSale();
+            } else {
+                 meatPricePerLb.value = '';
+            }
+            updateMeatSaleCalculation();
+        }
+
+        // Event Listeners para Modales Genéricos de Peso/Valor
+        if(sellByWeightBtn) {
+            sellByWeightBtn.addEventListener('click', openWeightProductModal);
+        }
+        if(closeWeightProductModalBtn) {
+            closeWeightProductModalBtn.addEventListener('click', closeWeightProductModal);
+        }
+        if(closeWeightProductModalBottomBtn) {
+            closeWeightProductModalBottomBtn.addEventListener('click', closeWeightProductModal);
+        }
+        if(weightProductNameSelect) {
+            weightProductNameSelect.addEventListener('change', loadPriceForWeightedProduct);
+        }
+        if(weightProductPricePerLb) {
+            weightProductPricePerLb.addEventListener('input', savePriceForWeightedProduct);
+        }
+        if(weightProductWeightLb) {
+            weightProductWeightLb.addEventListener('input', updateWeightProductTotal);
+        }
+        if(addWeightProductToCartBtn) {
+            addWeightProductToCartBtn.addEventListener('click', addProductByWeightToCart);
+        }
+        if(resetSavedPriceBtn) {
+            resetSavedPriceBtn.addEventListener('click', resetSavedPriceForWeightedProduct);
+        }
+
+        if(sellByValueBtn) {
+            sellByValueBtn.addEventListener('click', openSellByValueModal);
+        }
+        if(closeSellByValueModalBtn) {
+            closeSellByValueModalBtn.addEventListener('click', closeSellByValueModal);
+        }
+        if(closeSellByValueModalBottomBtn) {
+            closeSellByValueModalBottomBtn.addEventListener('click', closeSellByValueModal);
+        }
+        if(valueProductNameSelect) {
+            valueProductNameSelect.addEventListener('change', loadPriceForValueProduct);
+        }
+        if(valueProductPricePerLb) {
+            valueProductPricePerLb.addEventListener('input', savePriceForValueProduct); 
+        }
+        if(valueProductDesiredValue) {
+            valueProductDesiredValue.addEventListener('input', calculateWeightFromValue);
+        }
+        if(addValueProductToCartBtn) {
+            addValueProductToCartBtn.addEventListener('click', addProductByValueToCart);
+        }
+        if(resetSavedValuePriceBtn) {
+            resetSavedValuePriceBtn.addEventListener('click', resetSavedPriceForValueProduct);
+        }
+
+        // Event Listeners para Modal de Venta de Carnes (antes Pollo Amarillo)
+        if(sellMeatSpecialBtn) {
+            sellMeatSpecialBtn.addEventListener('click', openMeatSaleModal);
+        }
+        if(closeMeatSaleModalBtn) {
+            closeMeatSaleModalBtn.addEventListener('click', closeMeatSaleModal);
+        }
+        if(closeMeatSaleModalBottomBtn) {
+            closeMeatSaleModalBottomBtn.addEventListener('click', closeMeatSaleModal);
+        }
+        if(meatProductSelect) {
+            meatProductSelect.addEventListener('change', loadPriceForMeatSale);
+        }
+        if(meatPricePerLb) {
+            meatPricePerLb.addEventListener('input', saveMeatPricePerLb);
+        }
+        if(meatWeightLb) {
+            meatWeightLb.addEventListener('input', handleMeatSaleInput);
+        }
+        if(meatDesiredValue) {
+            meatDesiredValue.addEventListener('input', handleMeatSaleInput);
+        }
+        if(addMeatToCartBtn) {
+            addMeatToCartBtn.addEventListener('click', addMeatToCart);
+        }
+        if(resetMeatSaleFormBtn) {
+            resetMeatSaleFormBtn.addEventListener('click', resetMeatSaleForm);
+        }
 
         updateCartDisplay();
         showView(inventoryView);
         
-        console.log("MiniMarket POS App Inicializada con escáner de cámara manual y ticket mejorado.");
+        console.log("MiniMarket POS App Inicializada con Venta de Carnes por Peso/Valor.");
     </script>
 </body>
-                    </html>
-    
+</html>
