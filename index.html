@@ -25,27 +25,34 @@
             box-shadow: 0 0 3px #ff00ff, 0 0 5px #ff00ff, 0 0 7px #ff00ff;
         }
         .btn-view-list {
-            background-color: rgba(0, 255, 0, 0.1); 
+            background-color: rgba(0, 255, 0, 0.1);
         }
         .btn-action-magenta {
             background-color: rgba(255, 0, 255, 0.1);
         }
-        .btn-action-blue { 
-            background-color: rgba(59, 130, 246, 0.1); 
-            border-color: #3b82f6; 
-            color: #60a5fa; 
+        .btn-action-blue {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+            color: #60a5fa;
         }
         .btn-action-blue:hover {
             background-color: rgba(59, 130, 246, 0.2);
         }
-        .btn-special-yellow { 
-            background-color: rgba(234, 179, 8, 0.1); 
-            border-color: #eab308; 
-            color: #facc15; 
+        .btn-special-yellow {
+            background-color: rgba(234, 179, 8, 0.1);
+            border-color: #eab308;
+            color: #facc15;
         }
         .btn-special-yellow:hover {
              background-color: rgba(234, 179, 8, 0.2);
         }
+
+        /* Estilo para aplicar el filtro de color a los logos */
+        .app-logo {
+             /* Ajustado el valor del filtro */
+            filter: hue-rotate(180deg); /* Intentando un tono magenta/morado */
+        }
+
 
         ::-webkit-scrollbar {
             width: 8px;
@@ -90,8 +97,10 @@
             visibility: hidden;
         }
         #preloader img {
-            width: 150px; 
+            width: 150px;
             height: auto;
+             /* Aplicar filtro al logo del preloader */
+            filter: hue-rotate(180deg);
         }
 
         .input-field {
@@ -112,8 +121,8 @@
             cursor: not-allowed;
         }
         .input-field:disabled {
-            background-color: #3f3f46; 
-            color: #71717a; 
+            background-color: #3f3f46;
+            color: #71717a;
             cursor: not-allowed;
         }
         .date-input-field {
@@ -133,7 +142,7 @@
         #demoProductList .category-title, #currentProductsList .category-title {
             font-size: 1.25rem;
             font-weight: 600;
-            color: #f0abfc; 
+            color: #f0abfc;
             margin-top: 1rem;
             margin-bottom: 0.5rem;
             padding-bottom: 0.25rem;
@@ -154,11 +163,11 @@
             color: #a0aec0;
         }
         .stock-info {
-            font-size: 0.75rem; 
-            color: #facc15; 
+            font-size: 0.75rem;
+            color: #facc15;
         }
         .out-of-stock {
-            color: #f87171; 
+            color: #f87171;
             font-weight: bold;
         }
         .report-sale-item {
@@ -219,12 +228,93 @@
         #appLogo {
             cursor: pointer;
         }
+
+        /* Estilos para el contenedor de resultados de búsqueda */
+        #searchResultsContainer {
+            position: absolute; /* Posicionamiento absoluto para que aparezca sobre otros elementos */
+            top: 100%; /* Debajo de la barra de búsqueda */
+            left: 0;
+            right: 0;
+            background-color: #1a1a1a; /* Fondo oscuro */
+            border: 1px solid #00ff00; /* Borde verde neón */
+            border-radius: 5px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.5);
+            z-index: 10; /* Asegura que esté por encima del contenido principal */
+            max-height: 200px; /* Altura máxima con scroll */
+            overflow-y: auto;
+            margin-top: 5px; /* Espacio entre la barra de búsqueda y los resultados */
+            width: 100%; /* Ocupa todo el ancho del contenedor padre */
+            max-width: 400px; /* Mismo ancho máximo que la barra de búsqueda */
+            left: 50%; /* Centrar horizontalmente */
+            transform: translateX(-50%); /* Centrar horizontalmente */
+        }
+
+        /* Estilos para cada resultado de búsqueda */
+        .search-result-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            text-align: left; /* Alinear texto a la izquierda */
+            border-bottom: 1px solid #333; /* Separador */
+        }
+        .search-result-item:last-child {
+            border-bottom: none; /* Eliminar borde del último item */
+        }
+        .search-result-item:hover {
+            background-color: #333; /* Fondo al pasar el ratón */
+        }
+        .search-result-item strong {
+            color: #00ff00; /* Color para el nombre del producto */
+        }
+        .search-result-item span {
+            font-size: 0.9em;
+            color: #ccc; /* Color para los detalles del producto */
+        }
+
+        /* Estilos para el modal de productos por peso categorizados */
+        #categorizedWeightProductsModal .category-header {
+            background-color: #2a2a2a; /* Fondo oscuro para encabezados */
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: #f0abfc; /* Color magenta */
+            transition: background-color 0.2s ease;
+        }
+        #categorizedWeightProductsModal .category-header:hover {
+            background-color: #3a3a3a;
+        }
+        #categorizedWeightProductsModal .category-content {
+            padding: 10px 15px;
+            background-color: #1a1a1a; /* Fondo más oscuro para el contenido */
+            border-bottom: 1px solid #444;
+        }
+        #categorizedWeightProductsModal .category-content .product-item {
+            padding: 8px 0;
+            cursor: pointer;
+            border-bottom: 1px dashed #555;
+            transition: background-color 0.1s ease;
+            color: #ccc; /* Color de texto para productos */
+        }
+        #categorizedWeightProductsModal .category-content .product-item:last-child {
+            border-bottom: none;
+        }
+        #categorizedWeightProductsModal .category-content .product-item:hover {
+            background-color: #2a2a2a;
+        }
+        #categorizedWeightProductsModal .category-content .product-item strong {
+            color: #00ff00; /* Color verde para el nombre del producto */
+        }
+
     </style>
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col items-center pt-4 sm:pt-8 px-4">
 
     <div id="preloader">
-        <img src="https://raw.githubusercontent.com/jona30-web/Minimarket.app/032d691df1461e1c933efb7be1a82ed963380606/loader.png.jpg" alt="Cargando..." onerror="this.src='https://placehold.co/150x150/000000/FFFFFF?text=Error+Loader+URL'; console.error('Error al cargar el loader desde GitHub.')"/>
+        <img src="https://raw.githubusercontent.com/jona30-web/Minimarket.app/032d691df1461e1c933efb7be1a82ed963380606/loader.png.jpg" alt="Cargando..." onerror="this.src='https://placehold.co/150x150/000000/FFFFFF?text=Error+Loader+URL'; console.error('Error al cargar el loader desde GitHub.')" class="app-logo"/>
     </div>
 
     <header class="w-full max-w-4xl flex justify-between items-center mb-8 sm:mb-12">
@@ -233,7 +323,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
         </button>
-        <img src="https://raw.githubusercontent.com/jona30-web/Minimarket.app/032d691df1461e1c933efb7be1a82ed963380606/logosinfondo.png.png" alt="MiniMarket Logo" id="appLogo" class="h-12 sm:h-14 object-contain cursor-pointer" onerror="this.src='https://placehold.co/120x50/000000/808080?text=Error+Logo+URL'; console.error('Error al cargar el logo desde GitHub.')"/>
+        <img src="https://raw.githubusercontent.com/jona30-web/Minimarket.app/032d691df1461e1c933efb7be1a82ed963380606/logosinfondo.png.png" alt="MiniMarket Logo" id="appLogo" class="h-12 sm:h-14 object-contain cursor-pointer app-logo" onerror="this.src='https://placehold.co/120x50/000000/808080?text=Error+Logo+URL'; console.error('Error al cargar el logo desde GitHub.')"/>
         <div class="relative">
             <button id="menuButton" class="p-2 sm:p-3 border-2 border-fuchsia-500 neon-border-magenta rounded-lg text-fuchsia-500 hover:bg-fuchsia-700 hover:text-white transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 sm:w-6 sm:h-6">
@@ -270,28 +360,29 @@
                     Sistema de venta y gestión
                 </p>
                 <div class="flex flex-wrap justify-center items-center gap-3 mb-6 sm:mb-8 w-full">
-                     <button id="viewProductListBtn" class="btn-view-list flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-green-400 border-2 border-green-400 neon-border-green rounded-lg hover:bg-green-600 hover:text-black hover:border-green-600 transition-all">
-                        <i class="fas fa-list-ul mr-2"></i>VER LISTA
+                     <button id="viewProductListBtn" class="btn-view-list flex items-center justify-center gap-2 px-4 py-3 text-xs sm:text-sm font-semibold text-green-400 border-2 border-green-400 neon-border-green rounded-lg hover:bg-green-600 hover:text-black hover:border-green-600 transition-all">
+                         <i class="fas fa-list-ul mr-2"></i>VER LISTA
                     </button>
-                    <button id="sellByWeightBtn" class="btn-action-magenta flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-fuchsia-400 border-2 border-fuchsia-400 neon-border-magenta rounded-lg hover:bg-fuchsia-600 hover:text-black hover:border-fuchsia-600 transition-all">
-                        <i class="fas fa-balance-scale-right mr-2"></i>PESO LB
+                    <button id="sellByWeightBtn" class="btn-action-magenta flex items-center justify-center gap-2 px-4 py-3 text-xs sm:text-sm font-semibold text-fuchsia-400 border-2 border-fuchsia-400 neon-border-magenta rounded-lg hover:bg-fuchsia-600 hover:text-black hover:border-fuchsia-600 transition-all">
+                         <i class="fas fa-balance-scale-right mr-2"></i>PESO LB
                     </button>
-                    <button id="sellByValueBtn" class="btn-action-blue flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold border-2 neon-border-green rounded-lg hover:bg-blue-600 hover:text-black hover:border-blue-600 transition-all">
-                        <i class="fas fa-dollar-sign mr-2"></i>VALOR $
+                    <button id="sellByValueBtn" class="btn-action-blue flex items-center justify-center gap-2 px-4 py-3 text-xs sm:text-sm font-semibold border-2 neon-border-green rounded-lg hover:bg-blue-600 hover:text-black hover:border-blue-600 transition-all">
+                         <i class="fas fa-dollar-sign mr-2"></i>VALOR $
                     </button>
-                    <button id="sellMeatSpecialBtn" class="btn-special-yellow flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold border-2 neon-border-green rounded-lg hover:bg-yellow-500 hover:text-black hover:border-yellow-500 transition-all">
-                        <i class="fas fa-drumstick-bite mr-2"></i>CARNES (GRANEL)
+                    <button id="sellPolloAmarilloBtn" class="btn-special-yellow flex items-center justify-center gap-2 px-4 py-3 text-xs sm:text-sm font-semibold border-2 neon-border-green rounded-lg hover:bg-yellow-500 hover:text-black hover:border-yellow-500 transition-all">
+                         <i class="fas fa-drumstick-bite mr-2"></i>PRODUCTOS POR PESO
                     </button>
                 </div>
 
-                <div class="w-full max-w-md mb-2">
-                    <form id="scanForm">
-                        <input type="text" id="barcodeScannerInput" placeholder="Ingresar ID de producto..." class="w-full px-5 py-3 sm:py-4 bg-neutral-800 border-2 border-green-400 neon-border-green rounded-full text-gray-200 placeholder-gray-500 focus:outline-none focus:border-green-300 focus:ring-1 focus:ring-green-300 transition-all text-sm sm:text-base">
+                <div class="w-full max-w-md mb-2 relative"> <form id="scanForm">
+                        <input type="text" id="barcodeScannerInput" placeholder="Buscar producto por nombre o ID..." class="w-full px-5 py-3 sm:py-4 bg-neutral-800 border-2 border-green-400 neon-border-green rounded-full text-gray-200 placeholder-gray-500 focus:outline-none focus:border-green-300 focus:ring-1 focus:ring-green-300 transition-all text-sm sm:text-base">
                     </form>
+                    <div id="searchResultsContainer" class="hidden">
+                        </div>
                 </div>
                 <div class="w-full max-w-md mb-6 mt-4">
                      <button id="clearCartBtn" class="w-full btn-action-magenta flex items-center justify-center gap-2 sm:gap-3 px-6 py-3 text-base sm:text-lg font-semibold text-fuchsia-400 border-2 border-fuchsia-400 neon-border-magenta rounded-xl hover:bg-fuchsia-600 hover:text-black hover:border-fuchsia-600 transition-all">
-                        <i class="fas fa-trash-alt"></i> LIMPIAR CARRITO
+                         <i class="fas fa-trash-alt"></i> LIMPIAR CARRITO
                     </button>
                 </div>
 
@@ -340,7 +431,7 @@
 
         <section id="reportView" class="hidden w-full max-w-3xl mx-auto mt-10 p-6 bg-neutral-800 rounded-lg border-2 border-green-500 neon-border-green">
             <h1 class="text-3xl sm:text-4xl font-bold text-green-400 neon-text-green mb-6 text-center">Reporte de Ventas</h1>
-            
+
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 items-end">
                 <div>
                     <label for="reportStartDate" class="block text-sm font-medium text-gray-300 mb-1">Fecha Inicio:</label>
@@ -477,7 +568,7 @@
                 <div>
                     <label for="weightProductNameSelect" class="block text-sm font-medium text-gray-300 mb-1">Producto:</label>
                     <select id="weightProductNameSelect" class="w-full input-field">
-                    </select>
+                        </select>
                 </div>
                 <div>
                     <label for="weightProductPricePerLb" class="block text-sm font-medium text-gray-300 mb-1">Precio por Libra ($):</label>
@@ -504,7 +595,7 @@
     </div>
 
     <div id="sellByValueModal" class="hidden fixed inset-0 modal flex items-center justify-center z-40 p-4">
-        <div class="bg-neutral-900 p-6 rounded-lg shadow-xl max-w-md w-full border-2 border-blue-500 neon-border-green"> 
+        <div class="bg-neutral-900 p-6 rounded-lg shadow-xl max-w-md w-full border-2 border-blue-500 neon-border-green">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-2xl font-bold text-blue-400 neon-text-green">Vender Producto por Valor</h3>
                 <button id="closeSellByValueModalBtn" class="text-fuchsia-400 hover:text-fuchsia-300 text-2xl">
@@ -515,7 +606,7 @@
                 <div>
                     <label for="valueProductNameSelect" class="block text-sm font-medium text-gray-300 mb-1">Producto:</label>
                     <select id="valueProductNameSelect" class="w-full input-field">
-                    </select>
+                        </select>
                 </div>
                 <div>
                     <label for="valueProductPricePerLb" class="block text-sm font-medium text-gray-300 mb-1">Precio por Libra ($):</label>
@@ -541,46 +632,17 @@
         </div>
     </div>
 
-    <div id="meatSaleModal" class="hidden fixed inset-0 modal flex items-center justify-center z-40 p-4">
-        <div class="bg-neutral-900 p-6 rounded-lg shadow-xl max-w-lg w-full border-2 border-yellow-500 neon-border-green">
+    <div id="categorizedWeightProductsModal" class="hidden fixed inset-0 modal flex items-center justify-center z-40 p-4">
+        <div class="bg-neutral-900 p-4 sm:p-6 rounded-lg shadow-xl max-w-xl w-full max-h-[90vh] flex flex-col border-2 border-fuchsia-500 neon-border-magenta">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-2xl font-bold text-yellow-400 neon-text-green">Vender Carnes (Peso/Valor)</h3>
-                <button id="closeMeatSaleModalBtn" class="text-fuchsia-400 hover:text-fuchsia-300 text-2xl">
+                <h3 class="text-2xl font-bold text-green-400 neon-text-green">Productos por Peso</h3>
+                <button id="closeCategorizedWeightProductsModalBtn" class="text-fuchsia-400 hover:text-fuchsia-300 text-2xl">
                     <i class="fas fa-times-circle"></i>
                 </button>
             </div>
-            <div class="space-y-3">
-                <div>
-                    <label for="meatProductSelect" class="block text-sm font-medium text-gray-300 mb-1">Seleccione Producto Cárnico:</label>
-                    <select id="meatProductSelect" class="w-full input-field">
-                        </select>
+            <div id="categorizedProductsList" class="text-left overflow-y-auto flex-grow pr-2">
                 </div>
-                <div>
-                    <label for="meatPricePerLb" class="block text-sm font-medium text-gray-300 mb-1">Precio por Libra ($):</label>
-                    <input type="number" id="meatPricePerLb" step="0.01" min="0" class="w-full input-field" placeholder="0.00">
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label for="meatWeightLb" class="block text-sm font-medium text-gray-300 mb-1">Peso (Libras):</label>
-                        <input type="number" id="meatWeightLb" step="0.01" min="0" class="w-full input-field" placeholder="0.00">
-                    </div>
-                    <div>
-                        <label for="meatDesiredValue" class="block text-sm font-medium text-gray-300 mb-1">Valor Deseado ($):</label>
-                        <input type="number" id="meatDesiredValue" step="0.01" min="0" class="w-full input-field" placeholder="0.00">
-                    </div>
-                </div>
-                <div id="meatCalculationResult" class="text-lg text-yellow-300 h-10 flex items-center justify-center bg-neutral-800 rounded-md p-2">
-                    </div>
-            </div>
-            <div class="mt-6 flex flex-col sm:flex-row gap-3">
-                <button id="addMeatToCartBtn" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2.5 px-4 rounded-lg transition-all">
-                    <i class="fas fa-cart-plus mr-2"></i>Añadir al Carrito
-                </button>
-                <button id="resetMeatSaleFormBtn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2.5 px-4 rounded-lg transition-all">
-                    <i class="fas fa-undo mr-2"></i>Restablecer Campos
-                </button>
-            </div>
-             <button id="closeMeatSaleModalBottomBtn" class="mt-4 bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors w-full">Cerrar</button>
+             <button id="closeCategorizedWeightProductsModalBottomBtn" class="mt-4 bg-fuchsia-500 text-white px-6 py-2 rounded-lg hover:bg-fuchsia-600 transition-colors w-full sm:w-auto mx-auto block">Cerrar</button>
         </div>
     </div>
 
@@ -603,7 +665,7 @@
         <div class="bg-neutral-800 p-6 rounded-lg shadow-xl max-w-md w-full">
             <h3 class="text-2xl font-bold text-green-400 neon-text-green mb-4">Procesar Pago</h3>
             <p class="text-xl mb-2">Total a Pagar: <span id="paymentModalTotal" class="font-bold text-green-400"></span></p>
-            
+
             <div class="mb-4">
                 <label for="paymentMethodSelect" class="block text-sm font-medium text-gray-300 mb-1">Método de Pago:</label>
                 <select id="paymentMethodSelect" class="w-full input-field">
@@ -637,53 +699,82 @@
         const { jsPDF } = window.jspdf;
         let synth;
 
-        const sellByWeightProducts = [ 
-            { key: 'pollo_entero_granel', name: 'Pollo Entero (Granel)' }, 
-            { key: 'carne_molida_res_granel', name: 'Carne Molida Res (Granel)' },
-            { key: 'queso_fresco_lb_granel', name: 'Queso Fresco (Granel)' },
-            { key: 'jamon_pierna_lb_granel', name: 'Jamón de Pierna (Granel)' },
-            { key: 'frutas_temporada_lb_granel', name: 'Frutas de Temporada (Granel)' },
-            { key: 'vegetales_varios_lb_granel', name: 'Vegetales Varios (Granel)' }
-        ];
-
-        const bulkMeatProducts = [
-            // Pollo
-            { key: 'pollo_entero', name: 'Pollo entero (granel, por libra)' },
-            { key: 'pollo_pechuga', name: 'Pechuga de pollo (por libra)' },
-            { key: 'pollo_pierna_muslo', name: 'Pierna con muslo de pollo (por libra)' },
-            { key: 'pollo_alas', name: 'Alas de pollo (por libra)' },
-            { key: 'pollo_menudencias', name: 'Menudencias de pollo (por libra)' },
-            { key: 'pollo_troceado', name: 'Pollo troceado (por libra)' },
-            { key: 'pollo_amarillo_campero', name: 'Pollo amarillo (campero, por libra)' },
-            // Carne de res (vaca)
-            { key: 'carne_res_molida', name: 'Carne molida de res (por libra)' },
-            { key: 'carne_res_segunda', name: 'Carne de segunda (res, por libra)' },
-            { key: 'carne_res_primera', name: 'Carne de primera (res, por libra)' },
-            { key: 'carne_res_bistec', name: 'Bistec de res (por libra)' },
-            { key: 'carne_res_costilla', name: 'Costilla de res (por libra)' },
-            { key: 'carne_res_hueso_caldo', name: 'Hueso con carne (res, para caldo, por libra)' },
-            { key: 'visceras_res', name: 'Vísceras de res (hígado, corazón, lengua, por libra)' },
-            // Carne de cerdo
-            { key: 'cerdo_chuleta', name: 'Chuleta de cerdo (por libra)' },
-            { key: 'cerdo_costilla', name: 'Costilla de cerdo (por libra)' },
-            { key: 'cerdo_lomo', name: 'Lomo de cerdo (por libra)' },
-            { key: 'cerdo_pierna', name: 'Pierna de cerdo (por libra)' },
-            { key: 'cerdo_patas', name: 'Patas de cerdo (por libra)' },
-            { key: 'cerdo_hueso_carnudo', name: 'Hueso carnudo de cerdo (por libra)' },
-            { key: 'cerdo_tocino_grasa', name: 'Tocino / grasa de cerdo (por libra)' },
-            // Embutidos y preparados (Asumiendo que algunos pueden venderse por peso)
-            { key: 'embutido_chorizo_criollo', name: 'Chorizo criollo (por libra)' },
-            { key: 'embutido_longaniza', name: 'Longaniza (por libra)' },
-            { key: 'embutido_salchicha_vienesa', name: 'Salchicha vienesa (por libra)' },
-            { key: 'embutido_morcilla', name: 'Morcilla (por libra)' },
-            // Otros
-            { key: 'otro_carne_picada_seco', name: 'Carne picada para seco (por libra)' },
-            { key: 'otro_carne_guatita', name: 'Carne para guatita (por libra)' },
-            { key: 'otro_cueros_tripas_hornado', name: 'Cueros / tripas para hornado o fritada (por libra)' },
-            { key: 'otro_panceta', name: 'Panceta (por libra)' },
-            { key: 'otro_chicharron_crudo', name: 'Chicharrón crudo (por libra)' },
-            { key: 'otro_carne_chancho_fritada', name: 'Carne de chancho para fritada (por libra)' }
-        ];
+        // Lista expandida de productos para venta por peso, organizada por categorías
+        const sellByWeightProducts = {
+            "Fideos": [
+                { key: 'fideo_lazo', name: 'Lazo (Fideo)' },
+                { key: 'fideo_tornillo', name: 'Tornillo (Fideo)' },
+                { key: 'fideo_macarron', name: 'Macarrón (Fideo)' },
+                { key: 'fideo_tallarin', name: 'Tallarín (Fideo)' },
+                { key: 'fideo_cabello_angel', name: 'Cabello de Ángel (Fideo)' },
+                { key: 'fideo_broca', name: 'Broca (Fideo)' },
+                { key: 'fideo_chino', name: 'Fideo Chino' },
+                { key: 'fideo_figuras', name: 'Figuras (Fideo)' }
+            ],
+            "Harinas": [
+                { key: 'harina_trigo', name: 'Harina de Trigo' },
+                { key: 'harina_maiz', name: 'Harina de Maíz' },
+                { key: 'harina_integral', name: 'Harina Integral' },
+                { key: 'harina_polvo_hornear', name: 'Harina con Polvo de Hornear' },
+                { key: 'harina_sin_polvo_hornear', name: 'Harina sin Polvo de Hornear' },
+                { key: 'harina_haba', name: 'Harina de Haba' },
+                { key: 'harina_maiz_morado', name: 'Harina de Maíz Morado' },
+                { key: 'harina_maiz_tostado', name: 'Harina de Maíz Tostado' },
+                { key: 'harina_platano', name: 'Harina de Plátano' },
+                { key: 'harina_quinua', name: 'Harina de Quinua' },
+                { key: 'harina_arveja', name: 'Harina de Arveja' },
+                { key: 'harina_centeno', name: 'Harina de Centeno' },
+                { key: 'harina_yuca', name: 'Harina de Yuca (Almidón de Yuca)' },
+                { key: 'harina_arroz', name: 'Harina de Arroz' },
+                { key: 'harina_amaranto', name: 'Harina de Amaranto' },
+                { key: 'harina_lentejas', name: 'Harina de Lentejas' },
+                { key: 'harina_almendras', name: 'Harina de Almendras' },
+                { key: 'harina_coco', name: 'Harina de Coco' },
+                { key: 'machica', name: 'Máchica (Harina de cebada tostada)' },
+                { key: 'maicena', name: 'Maicena (Almidón de maíz)' }
+            ],
+             "Pollo": [
+                { key: 'pollo_entero_granel', name: 'Pollo entero' },
+                { key: 'pechuga_pollo_granel', name: 'Pechuga de pollo' },
+                { key: 'pierna_muslo_pollo_granel', name: 'Pierna con Muslo de pollo' },
+                { key: 'alas_pollo_granel', name: 'Alas de pollo' },
+                { key: 'menudencias_pollo_granel', name: 'Menudencias de pollo' },
+                { key: 'pollo_troceado_granel', name: 'Pollo troceado' },
+                { key: 'pollo_amarillo_campero_granel', name: 'Pollo amarillo (campero)' }
+            ],
+            "Res": [
+                { key: 'carne_molida_res_granel', name: 'Carne Molida de res' },
+                { key: 'carne_segunda_res_granel', name: 'Carne de segunda (Res)' },
+                { key: 'carne_primera_res_granel', name: 'Carne de Primera (Res)' },
+                { key: 'bistec_res_granel', name: 'Bistec de res' },
+                { key: 'costilla_res_granel', name: 'Costilla de res' },
+                { key: 'hueso_carne_res_granel', name: 'Hueso con carne (Res, para caldo)' },
+                { key: 'visceras_res_granel', name: 'Vísceras de Res (Hígado, corazón, lengua)' }
+            ],
+            "Cerdo": [
+                { key: 'chuleta_cerdo_granel', name: 'Chuleta de cerdo' },
+                { key: 'costilla_cerdo_granel', name: 'Costilla de cerdo' },
+                { key: 'lomo_cerdo_granel', name: 'Lomo de cerdo' },
+                { key: 'pierna_cerdo_granel', name: 'Pierna de cerdo' },
+                { key: 'patas_cerdo_granel', name: 'Patas de cerdo' },
+                { key: 'hueso_carnudo_cerdo_granel', name: 'Hueso carnudo de cerdo' },
+                { key: 'tocino_grasa_cerdo_granel', name: 'Tocino / grasa de cerdo' },
+                { key: 'chorizo_criollo_granel', name: 'Chorizo criollo' },
+                { key: 'longaniza_granel', name: 'Longaniza' },
+                { key: 'salchicha_vienesa_granel', name: 'Salchicha Vienesa (a granel/por libra)' },
+                { key: 'carne_picada_seco_granel', name: 'Carne picada para seco (Res o Cerdo)' },
+                { key: 'carne_guatita_res_granel', name: 'Carne para guatita (Res)' },
+                { key: 'cueros_tripas_cerdo_granel', name: 'Cueros / tripas para hornado o fritada (Cerdo)' },
+                { key: 'panceta_cerdo_granel', name: 'Panceta (Cerdo)' },
+                { key: 'chicharron_crudo_cerdo_granel', name: 'Chicharrón crudo (Cerdo)' },
+                { key: 'carne_chancho_fritada_granel', name: 'Carne de chancho para fritada' }
+            ],
+            "Pescados y Mariscos": [
+                { key: 'camaron_granel', name: 'Camarón' },
+                { key: 'tilapia_granel', name: 'Tilapia' },
+                { key: 'corvina_granel', name: 'Corvina' }
+            ]
+        };
 
 
         let mockProducts = JSON.parse(localStorage.getItem('mockProducts')) || [
@@ -706,17 +797,17 @@
             { id: "P014", name: "Protex Jabón Antibacterial Omega 3", unit: "110g", price: 1.25, category: "Jabonería Protex", stock: 18 },
             { id: "P015", name: "Protex Jabón Limpieza Profunda Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex", stock: 9 },
             { id: "P016", name: "Protex Jabón Omega 3 Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex", stock: 7 },
-            { id: "P017", name: "Aje Sporade Bebida Hidratante Cereza", unit: "500 ml", price: 0.55, category: "Hidratación", stock: 40 }, 
-            { id: "P018", name: "Aje Sporade Bebida Hidratante Tropical", unit: "1200 ml", price: 1.00, category: "Hidratación", stock: 20 }, 
-            { id: "P019", name: "Aje Sporade Bebida Hidratante Uva", unit: "500 ml", price: 0.55, category: "Hidratación", stock: 35 }, 
-            { id: "P020", name: "Aje Sporade Bebida Hidratante Manzana", unit: "1.2 lt", price: 1.00, category: "Hidratación", stock: 18 }, 
-            { id: "P021", name: "Aje Volt Bebida Energizante Frambuesa Ginseng", unit: "650 ml", price: 1.00, category: "Energizantes", stock: 20 }, 
-            { id: "P022", name: "Aje Volt Bebida Energizante Maca Arándano", unit: "400 ml", price: 0.50, category: "Energizantes", stock: 30 }, 
-            { id: "P023", name: "Aje Volt Bebida Energizante Uva Colágeno Aloe Vera", unit: "400 ml", price: 0.50, category: "Energizantes", stock: 28 }, 
-            { id: "P024", name: "Aroma Melis Té de Hierba Luisa Pack 20u", unit: "24 g", price: 1.15, category: "Jugos y Té", stock: 15 }, 
-            { id: "P025", name: "Aroma Melis Té de Hierbas Aromáticas Horchata Pack 20u", unit: "24 g", price: 1.15, category: "Jugos y Té", stock: 12 }, 
+            { id: "P017", name: "Aje Sporade Bebida Hidratante Cereza", unit: "500 ml", price: 0.55, category: "Hidratación", stock: 40 },
+            { id: "P018", name: "Aje Sporade Bebida Hidratante Tropical", unit: "1200 ml", price: 1.00, category: "Hidratación", stock: 20 },
+            { id: "P019", name: "Aje Sporade Bebida Hidratante Uva", unit: "500 ml", price: 0.55, category: "Hidratación", stock: 35 },
+            { id: "P020", name: "Aje Sporade Bebida Hidratante Manzana", unit: "1.2 lt", price: 1.00, category: "Hidratación", stock: 18 },
+            { id: "P021", name: "Aje Volt Bebida Energizante Frambuesa Ginseng", unit: "650 ml", price: 1.00, category: "Energizantes", stock: 20 },
+            { id: "P022", name: "Aje Volt Bebida Energizante Maca Arándano", unit: "400 ml", price: 0.50, category: "Energizantes", stock: 30 },
+            { id: "P023", name: "Aje Volt Bebida Energizante Uva Colágeno Aloe Vera", unit: "400 ml", price: 0.50, category: "Energizantes", stock: 28 },
+            { id: "P024", name: "Aroma Melis Té de Hierba Luisa Pack 20u", unit: "24 g", price: 1.15, category: "Jugos y Té", stock: 15 },
+            { id: "P025", name: "Aroma Melis Té de Hierbas Aromáticas Horchata Pack 20u", unit: "24 g", price: 1.15, category: "Jugos y Té", stock: 12 },
             { id: "P069", name: "Coca-Cola Sabor Original", unit: "500 ml", price: 0.75, category: "Gaseosas", stock: 60},
-            { id: "P070", name: "Agua Dasani Sin Gas", unit: "600 ml", price: 0.50, category: "Hidratación", stock: 50}, 
+            { id: "P070", name: "Agua Dasani Sin Gas", unit: "600 ml", price: 0.50, category: "Hidratación", stock: 50},
             { id: "P071", name: "Red Bull Energy Drink", unit: "250 ml", price: 2.50, category: "Energizantes", stock: 25},
             { id: "P026", name: "Alpina Regeneris Yogurt con Frutas Trozos de Frutilla", unit: "150 g", price: 0.70, category: "Lácteos", stock: 20 },
             { id: "P027", name: "Alpina Regeneris Yogurt con Frutas Trozos de Mora", unit: "150 g", price: 0.70, category: "Lácteos", stock: 18 },
@@ -727,12 +818,12 @@
             { id: "P032", name: "Toni Yogurt en Postre Natural Griego Semidescremado", unit: "150 g", price: 1.45, category: "Lácteos", stock: 25 },
             { id: "P033", name: "Toni Yogurt Mix con Cereal Durazno", unit: "190 g", price: 0.85, category: "Lácteos", stock: 30 },
             { id: "P034", name: "Toni Yogurt Mix con Cereal Frutilla", unit: "190 g", price: 0.85, category: "Lácteos", stock: 32 },
-            { id: "P035", name: "Pasta de Tomate Pronaca", unit: "250g", price: 1.82, category: "Despensa", stock: 20 }, 
+            { id: "P035", name: "Pasta de Tomate Pronaca", unit: "250g", price: 1.82, category: "Despensa", stock: 20 },
             { id: "P036", name: "Salsa Pizza Pronaca", unit: "490g", price: 2.68, category: "Despensa", stock: 15 },
             { id: "P037", name: "Salsa Spaghetti Pronaca", unit: "490g", price: 2.77, category: "Despensa", stock: 16 },
             { id: "P038", name: "Salsa Spaghetti Napolitana Pronaca", unit: "500g", price: 3.65, category: "Despensa", stock: 10 },
             { id: "P039", name: "Ají Indio Bravo", unit: "100ml", price: 0.66, category: "Despensa", stock: 40 },
-            { id: "P040", name: "Fritada Funda Pronaca", unit: "1 kg", price: 6.31, category: "Carnes y Embutidos", stock: 5 }, 
+            { id: "P040", name: "Fritada Funda Pronaca", unit: "1 kg", price: 6.31, category: "Carnes y Embutidos", stock: 5 },
             { id: "P041", name: "Cuero en Rollos Pronaca", unit: "1 kg", price: 4.85, category: "Carnes y Embutidos", stock: 6 },
             { id: "P042", name: "Chuletas Bandeja 4 Unidades Pronaca", unit: "1 kg", price: 10.95, category: "Carnes y Embutidos", stock: 4 },
             { id: "P043", name: "Chuletas Funda Marinadas 4 unidades Pronaca", unit: "1 kg", price: 5.50, category: "Carnes y Embutidos", stock: 7 },
@@ -790,11 +881,11 @@
             { id: "P102", name: "Coca-Cola Sabor Ligero 500 ML", unit: "500 ML", price: 0.75, category: "Gaseosas", stock: 28 },
             { id: "P103", name: "Coca-Cola Sabor Original 1000 ML", unit: "1000 ML", price: 1.20, category: "Gaseosas", stock: 25 },
             { id: "P104", name: "Coca-Cola Sabor Original 1350 ML", unit: "1350 ML", price: 1.50, category: "Gaseosas", stock: 18 },
-            { id: "P105", name: "Coca-Cola Sabor Original 2000 ML", unit: "2000 ML", price: 2.20, category: "Gaseosas", stock: 20 }, 
-            { id: "P106", name: "Coca-Cola Sabor Original 300 ML", unit: "300 ML", price: 0.50, category: "Gaseosas", stock: 55 }, 
+            { id: "P105", name: "Coca-Cola Sabor Original 2000 ML", unit: "2000 ML", price: 2.20, category: "Gaseosas", stock: 20 },
+            { id: "P106", name: "Coca-Cola Sabor Original 300 ML", unit: "300 ML", price: 0.50, category: "Gaseosas", stock: 55 },
             { id: "P107", name: "Coca-Cola Sabor Original 3000 ML", unit: "3000 ML", price: 3.10, category: "Gaseosas", stock: 10 },
             { id: "P108", name: "Coca-Cola Sabor Original 350 ML Lata", unit: "350 ML", price: 1.30, category: "Gaseosas", stock: 40 },
-            { id: "P109", name: "Coca-Cola Sin Azúcar 1000 ML", unit: "1000 ML", price: 0.75, category: "Gaseosas", stock: 22 }, 
+            { id: "P109", name: "Coca-Cola Sin Azúcar 1000 ML", unit: "1000 ML", price: 0.75, category: "Gaseosas", stock: 22 },
             { id: "P110", name: "Coca-Cola Sin Azúcar 1600ml", unit: "1600ml", price: 1.00, category: "Gaseosas", stock: 15 },
             { id: "P111", name: "Coca-Cola Sin Azúcar 2750 ML", unit: "2750 ML", price: 1.75, category: "Gaseosas", stock: 12 },
             { id: "P112", name: "Coca-Cola Sin Azúcar 410ml", unit: "410ml", price: 0.40, category: "Gaseosas", stock: 30 },
@@ -806,7 +897,7 @@
             { id: "P118", name: "Fanta Naranja 500 ML", unit: "500 ML", price: 0.60, category: "Gaseosas", stock: 40 },
             { id: "P119", name: "Fioravanti Fresa 1000 ML", unit: "1000 ML", price: 0.65, category: "Gaseosas", stock: 20 },
             { id: "P120", name: "Fioravanti Fresa 1350 ML", unit: "1350 ML", price: 1.15, category: "Gaseosas", stock: 14 },
-            { id: "P121", name: "Fioravanti Fresa 2000 ML", unit: "2000 ML", price: 1.60, category: "Gaseosas", stock: 18 }, 
+            { id: "P121", name: "Fioravanti Fresa 2000 ML", unit: "2000 ML", price: 1.60, category: "Gaseosas", stock: 18 },
             { id: "P122", name: "Fioravanti Fresa 250 ML", unit: "250 ML", price: 0.30, category: "Gaseosas", stock: 45 },
             { id: "P123", name: "Fioravanti Fresa 3000 ML", unit: "3000 ML", price: 3.10, category: "Gaseosas", stock: 7 },
             { id: "P124", name: "Fioravanti Fresa 500 ML", unit: "500 ML", price: 0.60, category: "Gaseosas", stock: 38 },
@@ -819,7 +910,7 @@
             { id: "P131", name: "Inca Kola 3000 ML", unit: "3000 ML", price: 3.10, category: "Gaseosas", stock: 5 },
             { id: "P132", name: "Inca Kola 500 ML", unit: "500 ML", price: 0.60, category: "Gaseosas", stock: 36 },
             { id: "P133", name: "Sprite 350ML Lata", unit: "350 ML", price: 1.30, category: "Gaseosas", stock: 28 },
-            { id: "P134", name: "Sprite Limon 1000 ML", unit: "1000 ML", price: 0.65, category: "Gaseosas", stock: 20 }, 
+            { id: "P134", name: "Sprite Limon 1000 ML", unit: "1000 ML", price: 0.65, category: "Gaseosas", stock: 20 },
             { id: "P135", name: "Sprite Limon 1350 ML", unit: "1350 ML", price: 1.15, category: "Gaseosas", stock: 13 },
             { id: "P136", name: "Sprite Limon 250 ML", unit: "250 ML", price: 0.30, category: "Gaseosas", stock: 44 },
             { id: "P137", name: "Sprite Limon 3000 ML", unit: "3000 ML", price: 3.10, category: "Gaseosas", stock: 4 },
@@ -831,11 +922,11 @@
             { id: "P224", name: "Yogur Durazno Toni 110 GR", unit: "110 GR", price: 0.50, category: "Lácteos", stock: 40 },
             { id: "P225", name: "Yogur Frutilla Toni 110 GR", unit: "110 GR", price: 0.50, category: "Lácteos", stock: 42 },
             { id: "P226", name: "Yogur Mora Toni 110 GR", unit: "110 GR", price: 0.50, category: "Lácteos", stock: 38 },
-            { id: "P227", name: "Yogur Bebible Durazno Toni 1700ML", unit: "1700 ML", price: 5.40, category: "Lácteos", stock: 5 }, 
+            { id: "P227", name: "Yogur Bebible Durazno Toni 1700ML", unit: "1700 ML", price: 5.40, category: "Lácteos", stock: 5 },
             { id: "P228", name: "Yogur Bebible Frutilla Toni 1700ML", unit: "1700 ML", price: 5.40, category: "Lácteos", stock: 6 },
             { id: "P229", name: "Yogur Bebible Mora Toni 1700ML", unit: "1700 ML", price: 5.40, category: "Lácteos", stock: 4 },
             { id: "P230", name: "Yogur Mix Frootloops Vainilla Toni 175G", unit: "175g", price: 0.90, category: "Lácteos", stock: 25 },
-            { id: "P231", name: "Yogur Mix Zucaritas Mora Toni 175G", unit: "175g", price: 0.90, category: "Lácteos", stock: 22 }, 
+            { id: "P231", name: "Yogur Mix Zucaritas Mora Toni 175G", unit: "175g", price: 0.90, category: "Lácteos", stock: 22 },
             { id: "P232", name: "Yogurt Cremoso Trozos Durazno Toni 150 GR", unit: "150 GR", price: 0.90, category: "Lácteos", stock: 20 },
             { id: "P233", name: "Yogurt Cremoso Trozos Frutilla Toni 150 GR", unit: "150 GR", price: 0.90, category: "Lácteos", stock: 18 },
             { id: "P234", name: "Yogurt Durazno Toni 190 GR", unit: "190 GR", price: 1.00, category: "Lácteos", stock: 30 },
@@ -873,15 +964,15 @@
             { id: "P266", name: "Atún Lomito en agua 80GR", unit: "80 GR", price: 3.33, category: "Despensa", stock: 16 },
             { id: "P267", name: "Azucar Morena 1KG", unit: "1 KG", price: 1.30, category: "Despensa", stock: 30 },
             { id: "P268", name: "Azucar San Carlos 2K", unit: "2 KG", price: 2.40, category: "Despensa", stock: 15 },
-            { id: "P269", name: "Bizcotelas Vainilla 150GR", unit: "150 GR", price: 2.50, category: "Snacks", stock: 20 }, 
+            { id: "P269", name: "Bizcotelas Vainilla 150GR", unit: "150 GR", price: 2.50, category: "Snacks", stock: 20 },
             { id: "P270", name: "Bizcotelas Vainilla 75GR", unit: "75 GR", price: 1.70, category: "Snacks", stock: 25 },
-            { id: "P271", name: "Bony Manjar 50GR", unit: "50 GR", price: 0.60, category: "Snacks", stock: 40 }, 
+            { id: "P271", name: "Bony Manjar 50GR", unit: "50 GR", price: 0.60, category: "Snacks", stock: 40 },
             { id: "P272", name: "CanguiPop Mantequilla 134G", unit: "134g", price: 1.50, category: "Snacks", stock: 18 },
             { id: "P273", name: "Chicharrones Original 100GR", unit: "100 GR", price: 2.20, category: "Snacks", stock: 22 },
             { id: "P274", name: "Chicharrones Original 30GR", unit: "30 GR", price: 1.00, category: "Snacks", stock: 35 },
             { id: "P275", name: "Chicharrones Picante 100GR", unit: "100 GR", price: 2.20, category: "Snacks", stock: 20 },
             { id: "P276", name: "Chicharrones Picante 30GR", unit: "30 GR", price: 1.00, category: "Snacks", stock: 33 },
-            { id: "P277", name: "Chococake 100 GR", unit: "100 GR", price: 1.00, category: "Snacks", stock: 28 }, 
+            { id: "P277", name: "Chococake 100 GR", unit: "100 GR", price: 1.00, category: "Snacks", stock: 28 },
             { id: "P278", name: "Chococake Red Velvet 50G", unit: "50g", price: 0.50, category: "Snacks", stock: 32 },
             { id: "P279", name: "Inacake Gemelo 80 GR", unit: "80 GR", price: 0.75, category: "Snacks", stock: 26 },
             { id: "P280", name: "Inacake Mini Chocolate 55Gr", unit: "55 Gr", price: 0.50, category: "Snacks", stock: 38 },
@@ -894,16 +985,16 @@
             { id: "P289", name: "Mayonesa 200GR", unit: "200 GR", price: 1.28, category: "Despensa", stock: 30 },
             { id: "P291", name: "Mostaza 200GR", unit: "200 GR", price: 1.00, category: "Despensa", stock: 28 },
             { id: "P292", name: "Nachos Queso 300GR", unit: "300 GR", price: 2.85, category: "Snacks", stock: 15 },
-            { id: "P293", name: "Oreo Mini 54 GR", unit: "54 GR", price: 0.52, category: "Snacks", stock: 50 }, 
+            { id: "P293", name: "Oreo Mini 54 GR", unit: "54 GR", price: 0.52, category: "Snacks", stock: 50 },
             { id: "P294", name: "Panchito Natural 170G", unit: "170g", price: 0.75, category: "Snacks", stock: 30 },
-            { id: "P295", name: "Panchito Pican 163G", unit: "163g", price: 0.75, category: "Snacks", stock: 28 }, 
+            { id: "P295", name: "Panchito Pican 163G", unit: "163g", price: 0.75, category: "Snacks", stock: 28 },
             { id: "P296", name: "Pringles Cebolla 124 GR", unit: "124 GR", price: 5.13, category: "Snacks", stock: 10 },
             { id: "P297", name: "Pringles Original 124 GR", unit: "124 GR", price: 5.13, category: "Snacks", stock: 12 },
             { id: "P298", name: "Pringles Queso 124 GR", unit: "124 GR", price: 5.13, category: "Snacks", stock: 11 },
-            { id: "P299", name: "Rebanada Chocolate/Vainilla 80GR", unit: "80 GR", price: 0.75, category: "Snacks", stock: 20 }, 
+            { id: "P299", name: "Rebanada Chocolate/Vainilla 80GR", unit: "80 GR", price: 0.75, category: "Snacks", stock: 20 },
             { id: "P300", name: "Rebanada Vainilla 80GR", unit: "80 GR", price: 0.75, category: "Snacks", stock: 22 },
-            { id: "P301", name: "Relleno De Vainilla 100 GR", unit: "100 GR", price: 1.00, category: "Snacks", stock: 18 }, 
-            { id: "P302", name: "Ritz Taco 67G", unit: "67g", price: 0.45, category: "Snacks", stock: 40 }, 
+            { id: "P301", name: "Relleno De Vainilla 100 GR", unit: "100 GR", price: 1.00, category: "Snacks", stock: 18 },
+            { id: "P302", name: "Ritz Taco 67G", unit: "67g", price: 0.45, category: "Snacks", stock: 40 },
             { id: "P303", name: "Ronditos 150GR", unit: "150 GR", price: 1.75, category: "Snacks", stock: 20 },
             { id: "P304", name: "Ronditos Fiesta 300 GR", unit: "300 GR", price: 2.85, category: "Snacks", stock: 12 },
             { id: "P305", name: "Rosquita Natural 34 G", unit: "34g", price: 0.25, category: "Snacks", stock: 60 },
@@ -913,13 +1004,13 @@
             { id: "P309", name: "Sal Ecuasal 1K", unit: "1 KG", price: 0.58, category: "Despensa", stock: 50 },
             { id: "P310", name: "Sal Ecuasal 2K", unit: "2 KG", price: 0.92, category: "Despensa", stock: 25 },
             { id: "P311", name: "Salsa de Tomate 200GR", unit: "200 GR", price: 1.05, category: "Despensa", stock: 30 },
-            { id: "P312", name: "Sardina 425GR", unit: "425 GR", price: 2.28, category: "Despensa", stock: 18 }, 
+            { id: "P312", name: "Sardina 425GR", unit: "425 GR", price: 2.28, category: "Despensa", stock: 18 },
             { id: "P313", name: "Sarita Rizada Cebolla 100GR", unit: "100 GR", price: 1.50, category: "Snacks", stock: 20 },
             { id: "P314", name: "Sarita Rizada Cebolla 300 GR", unit: "300 GR", price: 3.50, category: "Snacks", stock: 10 },
             { id: "P315", name: "Sarita Rizada Natural 100GR", unit: "100 GR", price: 1.50, category: "Snacks", stock: 22 },
             { id: "P316", name: "Sarita Rizada Natural 300GR", unit: "300 GR", price: 3.50, category: "Snacks", stock: 11 },
             { id: "P317", name: "Sarita Rizadas Natural 30 GR", unit: "30 GR", price: 0.50, category: "Snacks", stock: 40 },
-            { id: "P318", name: "Tigreton Chocolate 50 GR", unit: "50 GR", price: 0.75, category: "Snacks", stock: 30 }, 
+            { id: "P318", name: "Tigreton Chocolate 50 GR", unit: "50 GR", price: 0.75, category: "Snacks", stock: 30 },
             { id: "P319", name: "Tortolines 45 GR", unit: "45 GR", price: 0.60, category: "Snacks", stock: 35 },
             { id: "P320", name: "Tortolines Familiar 300 GR", unit: "300 GR", price: 2.60, category: "Snacks", stock: 14 },
             { id: "P321", name: "Tortolines Picantes 300GR", unit: "300 GR", price: 2.60, category: "Snacks", stock: 13 },
@@ -944,11 +1035,11 @@
         function saveStoreInfoToLocalStorage() {
             localStorage.setItem('storeInfo', JSON.stringify(storeInfo));
         }
-        
-        if (!localStorage.getItem('mockProductsDefaultLoaded_v8')) { // Versión incrementada
+
+        if (!localStorage.getItem('mockProductsDefaultLoaded_v7')) {
              localStorage.setItem('mockProducts', JSON.stringify(mockProducts));
              localStorage.setItem('storeInfo', JSON.stringify(storeInfo));
-             localStorage.setItem('mockProductsDefaultLoaded_v8', 'true');
+             localStorage.setItem('mockProductsDefaultLoaded_v7', 'true');
         }
 
 
@@ -960,8 +1051,9 @@
         const mainContentArea = document.getElementById('mainContentArea');
         const menuButton = document.getElementById('menuButton');
         const dropdownMenu = document.getElementById('dropdownMenu');
-        const barcodeScannerInput = document.getElementById('barcodeScannerInput');
-        const scanForm = document.getElementById('scanForm');
+        const barcodeScannerInput = document.getElementById('barcodeScannerInput'); // Ahora también para búsqueda
+        const scanForm = document.getElementById('scanForm'); // Se mantiene para la acción de Enter
+        const searchResultsContainer = document.getElementById('searchResultsContainer'); // Nuevo contenedor para resultados
         const cartItemsContainer = document.getElementById('cartItemsContainer');
         const cartTotalElement = document.getElementById('cartTotal');
         const emptyCartMessage = document.getElementById('emptyCartMessage');
@@ -971,8 +1063,8 @@
         const viewProductListBtn = document.getElementById('viewProductListBtn');
         const sellByWeightBtn = document.getElementById('sellByWeightBtn');
         const sellByValueBtn = document.getElementById('sellByValueBtn');
-        const sellMeatSpecialBtn = document.getElementById('sellMeatSpecialBtn');
-        
+        const sellPolloAmarilloBtn = document.getElementById('sellPolloAmarilloBtn'); // Botón de Pollo Amarillo
+
         const paymentModal = document.getElementById('paymentModal');
         const paymentModalTotal = document.getElementById('paymentModalTotal');
         const paymentMethodSelect = document.getElementById('paymentMethodSelect');
@@ -1061,20 +1153,15 @@
         const addValueProductToCartBtn = document.getElementById('addValueProductToCartBtn');
         const resetSavedValuePriceBtn = document.getElementById('resetSavedValuePriceBtn');
 
-        const meatSaleModal = document.getElementById('meatSaleModal');
-        const closeMeatSaleModalBtn = document.getElementById('closeMeatSaleModalBtn');
-        const meatProductSelect = document.getElementById('meatProductSelect');
-        const meatPricePerLb = document.getElementById('meatPricePerLb');
-        const meatWeightLb = document.getElementById('meatWeightLb');
-        const meatDesiredValue = document.getElementById('meatDesiredValue');
-        const meatCalculationResult = document.getElementById('meatCalculationResult');
-        const addMeatToCartBtn = document.getElementById('addMeatToCartBtn');
-        const resetMeatSaleFormBtn = document.getElementById('resetMeatSaleFormBtn');
-        const closeMeatSaleModalBottomBtn = document.getElementById('closeMeatSaleModalBottomBtn');
+        // Referencias al nuevo modal categorizado
+        const categorizedWeightProductsModal = document.getElementById('categorizedWeightProductsModal');
+        const categorizedProductsList = document.getElementById('categorizedProductsList');
+        const closeCategorizedWeightProductsModalBtn = document.getElementById('closeCategorizedWeightProductsModalBtn');
+        const closeCategorizedWeightProductsModalBottomBtn = document.getElementById('closeCategorizedWeightProductsModalBottomBtn');
 
 
         document.getElementById('currentYear').textContent = new Date().getFullYear();
-        
+
         window.addEventListener('load', () => {
             setTimeout(() => {
                 preloader.classList.add('hidden');
@@ -1090,7 +1177,7 @@
             }
         }
         document.body.addEventListener('click', initializeAudio, { once: true });
-        
+
         function playBeepSound() {
             if (synth) {
                 try { synth.triggerAttackRelease("C5", "8n"); }
@@ -1113,8 +1200,8 @@
         function displayCurrentProducts(searchTerm = '') {
             currentProductsList.innerHTML = '';
             const lowerSearchTerm = searchTerm.toLowerCase();
-            const filteredProducts = mockProducts.filter(p => 
-                p.name.toLowerCase().includes(lowerSearchTerm) || 
+            const filteredProducts = mockProducts.filter(p =>
+                p.name.toLowerCase().includes(lowerSearchTerm) ||
                 p.id.toLowerCase().includes(lowerSearchTerm)
             );
 
@@ -1122,7 +1209,7 @@
                 currentProductsList.innerHTML = `<p class="text-gray-400">No se encontraron productos ${searchTerm ? 'con ese criterio' : 'registrados'}.</p>`;
                 return;
             }
-            
+
             const grouped = filteredProducts.reduce((acc, product) => {
                 acc[product.category] = acc[product.category] || [];
                 acc[product.category].push(product);
@@ -1143,7 +1230,7 @@
                         <div>
                             <p class="font-semibold product-name">${p.name} (ID: ${p.id})</p>
                             <p class="text-sm text-gray-400 product-details">Unidad: ${p.unit} - Categoría: ${p.category}</p>
-                            <p class="text-sm stock-info ${stockClass}">Stock: ${p.stock}</p> 
+                            <p class="text-sm stock-info ${stockClass}">Stock: ${p.stock}</p>
                             <p class="text-sm text-green-400">$${p.price.toFixed(2)}</p>
                         </div>
                         <div>
@@ -1166,7 +1253,7 @@
                 button.addEventListener('click', handleRemoveProduct);
             });
         }
-        
+
         searchCurrentProductsInput.addEventListener('input', (e) => {
             displayCurrentProducts(e.target.value);
         });
@@ -1203,7 +1290,7 @@
                 }
             }
         }
-        
+
         cancelEditBtn.addEventListener('click', () => {
             editingProductId = null;
             addProductForm.reset();
@@ -1254,10 +1341,10 @@
 
 
         function openProductListModal(searchTerm = '') {
-            demoProductList.innerHTML = ''; 
+            demoProductList.innerHTML = '';
             const lowerSearchTerm = searchTerm.toLowerCase();
-            const filteredProducts = mockProducts.filter(p => 
-                p.name.toLowerCase().includes(lowerSearchTerm) || 
+            const filteredProducts = mockProducts.filter(p =>
+                p.name.toLowerCase().includes(lowerSearchTerm) ||
                 p.id.toLowerCase().includes(lowerSearchTerm)
             );
 
@@ -1301,21 +1388,21 @@
         searchProductListInput.addEventListener('input', (e) => {
             openProductListModal(e.target.value);
         });
-        
+
 
         function findProductById(id) {
             return mockProducts.find(p => p.id.toLowerCase() === id.toLowerCase());
         }
 
-        function addProductToCart(productId, isSpecialtyItem = false, weightOrValue = 0, pricePerUnit = 0, calculatedPrice = 0, type = 'unit') {
-            const productBase = findProductById(productId); 
-            
+        function addProductToCart(productId, isWeightedOrValue = false, weightOrValue = 0, pricePerUnit = 0, calculatedPrice = 0, type = 'unit') {
+            const productBase = findProductById(productId);
+
             if (type === 'unit' && !productBase) {
                 alert("Producto no encontrado. Verifica el ID.");
                 playErrorSound();
                 return;
             }
-            
+
             if (type === 'unit') {
                 const existingCartItem = cart.find(item => item.type === 'unit' && item.product.id === productId);
                 const currentQuantityInCart = existingCartItem ? existingCartItem.quantity : 0;
@@ -1331,47 +1418,33 @@
                 } else {
                     cart.push({ product: productBase, quantity: 1, type: 'unit', price: productBase.price });
                 }
-            } else if (type === 'weight') {
+            } else if (type === 'weight' || type === 'value' || type === 'pollo_amarillo_granel') { // Manejar todos los productos por peso/valor aquí
+                 // Encontrar el producto en la lista de productos por peso
+                 let productInfo = null;
+                 for (const category in sellByWeightProducts) {
+                     const found = sellByWeightProducts[category].find(p => p.key === productId);
+                     if (found) {
+                         productInfo = found;
+                         break;
+                     }
+                 }
+                 const itemName = productInfo ? productInfo.name : 'Producto por Peso/Valor'; // Usar nombre de la lista de peso
+
+
                  const cartItem = {
-                    id: `${productId}_w_${Date.now()}`, 
-                    name: `${weightProductNameSelect.options[weightProductNameSelect.selectedIndex].text} (${parseFloat(weightOrValue).toFixed(2)} lbs)`,
-                    price: calculatedPrice, 
-                    quantity: 1, // La "cantidad" visual es 1, el peso es el detalle.
-                    type: 'weight',
-                    weight: parseFloat(weightOrValue), // Peso real
-                    pricePerUnit: pricePerUnit, // Precio por Libra
-                    baseProductKey: productId 
-                };
-                cart.push(cartItem);
-                playBeepSound();
-            } else if (type === 'value') {
-                const cartItem = {
-                    id: `${productId}_v_${Date.now()}`,
-                    name: `${valueProductNameSelect.options[valueProductNameSelect.selectedIndex].text} (Valor: $${parseFloat(weightOrValue).toFixed(2)})`,
-                    price: parseFloat(weightOrValue), // El precio final es el valor deseado
+                    id: `${productId}_${Date.now()}`, // ID único para este item específico
+                    name: `${itemName} (${parseFloat(weightOrValue).toFixed(2)} ${type === 'value' ? '$' : 'lbs'})`,
+                    price: calculatedPrice,
                     quantity: 1,
-                    type: 'value',
-                    desiredValue: parseFloat(weightOrValue),
-                    pricePerUnit: pricePerUnit, 
-                    calculatedWeight: calculatedPrice, // Aquí calculatedPrice es el peso
-                    baseProductKey: productId
-                };
-                cart.push(cartItem);
-                playBeepSound();
-            } else if (type === 'meat_special') { // Para Pollo Amarillo o carnes del nuevo modal
-                const selectedMeatName = meatProductSelect.options[meatProductSelect.selectedIndex].text;
-                const cartItem = {
-                    id: `${productId}_ms_${Date.now()}`, // productId es la clave del producto, ej: 'pollo_entero'
-                    name: `${selectedMeatName} (${parseFloat(weightOrValue).toFixed(2)} lbs)`, // weightOrValue es el peso aquí
-                    price: calculatedPrice, 
-                    quantity: 1, 
-                    type: 'meat_special',
-                    weight: parseFloat(weightOrValue),
+                    type: type, // Mantener el tipo original (weight, value, pollo_amarillo_granel)
+                    weight: type === 'value' ? calculatedPrice : parseFloat(weightOrValue), // Peso calculado si es por valor, sino el peso ingresado
                     pricePerUnit: pricePerUnit,
-                    baseProductKey: productId
+                    desiredValue: type === 'value' ? parseFloat(weightOrValue) : undefined, // Valor deseado si es por valor
+                    calculatedWeight: type === 'value' ? calculatedPrice : undefined, // Peso calculado si es por valor
+                    baseProductKey: productId // Mantener la clave del producto por peso
                 };
                 cart.push(cartItem);
-                playSuccessSound();
+                playBeepSound(); // Puedes usar un sonido diferente si quieres
             }
             updateCartDisplay();
         }
@@ -1390,16 +1463,16 @@
                 cart.forEach((item, index) => {
                     const itemElement = document.createElement('div');
                     itemElement.classList.add('cart-item', 'flex', 'justify-between', 'items-center', 'p-2', 'border-b', 'border-neutral-700', 'hover:bg-neutral-700', 'transition-colors', 'rounded');
-                    
+
                     let itemNameDisplay, itemPriceDetails, itemTotalPrice;
 
-                    if (item.type === 'weight' || item.type === 'meat_special') {
-                        itemNameDisplay = item.name; 
+                    if (item.type === 'weight' || item.type === 'pollo_amarillo_granel') {
+                        itemNameDisplay = item.name;
                         itemPriceDetails = `(${item.weight.toFixed(2)} lbs x $${item.pricePerUnit.toFixed(2)}/lb)`;
                         itemTotalPrice = item.price.toFixed(2);
                     } else if (item.type === 'value') {
-                        itemNameDisplay = item.name; 
-                        itemPriceDetails = `(${item.calculatedWeight.toFixed(2)} lbs @ $${item.pricePerUnit.toFixed(2)}/lb)`;
+                        itemNameDisplay = item.name;
+                        itemPriceDetails = `${item.calculatedWeight.toFixed(2)} lbs @ $${item.pricePerUnit.toFixed(2)}/lb`;
                         itemTotalPrice = item.price.toFixed(2);
                     } else { // type 'unit'
                         itemNameDisplay = item.product.name;
@@ -1432,7 +1505,7 @@
 
         function calculateAndDisplayTotals() {
             const total = cart.reduce((sum, item) => {
-                return sum + item.price; 
+                return sum + item.price;
             }, 0);
             cartTotalElement.textContent = `$${total.toFixed(2)}`;
             return total;
@@ -1442,11 +1515,11 @@
             cart = [];
             updateCartDisplay();
         }
-        
+
         function openPaymentModal() {
             const total = calculateAndDisplayTotals();
             paymentModalTotal.textContent = `$${total.toFixed(2)}`;
-            
+
             amountPaidInput.value = '';
             changeDue.textContent = '$0.00';
             document.getElementById('saleNoteInput').value = '';
@@ -1480,59 +1553,59 @@
                 return;
             }
 
-            for (const cartItem of cart) {
-                if (cartItem.type === 'unit') { 
-                    const productInDb = mockProducts.find(p => p.id === cartItem.product.id);
-                    if (!productInDb || productInDb.stock < cartItem.quantity) {
-                        alert(`¡Stock insuficiente para "${cartItem.product.name}" al momento de finalizar! Disponible: ${productInDb ? productInDb.stock : 0}. Venta cancelada.`);
-                        playErrorSound();
-                        return;
-                    }
-                }
-            }
+            // No necesitamos verificar stock para productos por peso/valor en este modelo simple
+            // for (const cartItem of cart) {
+            //     if (cartItem.type === 'unit') {
+            //         const productInDb = mockProducts.find(p => p.id === cartItem.product.id);
+            //         if (!productInDb || productInDb.stock < cartItem.quantity) {
+            //             alert(`¡Stock insuficiente para "${cartItem.product.name}" al momento de finalizar! Disponible: ${productInDb ? productInDb.stock : 0}. Venta cancelada.`);
+            //             playErrorSound();
+            //             return;
+            //         }
+            //     }
+            // }
 
-            cart.forEach(cartItem => {
-                if (cartItem.type === 'unit') {
-                    const productIndex = mockProducts.findIndex(p => p.id === cartItem.product.id);
-                    if (productIndex > -1) {
-                        mockProducts[productIndex].stock -= cartItem.quantity;
-                    }
-                }
-                // Nota: El stock de productos por peso/valor/pollo_amarillo no se descuenta de mockProducts
-                // porque mockProducts maneja stock por unidad. Se necesitaría una lógica más compleja
-                // para mapear estos productos a granel a un stock unitario si se desea.
-            });
-            saveProductsToLocalStorage();
+            // No descontamos stock para productos por peso/valor en este modelo simple
+            // cart.forEach(cartItem => {
+            //     if (cartItem.type === 'unit') {
+            //         const productIndex = mockProducts.findIndex(p => p.id === cartItem.product.id);
+            //         if (productIndex > -1) {
+            //             mockProducts[productIndex].stock -= cartItem.quantity;
+            //         }
+            //     }
+            // });
+            // saveProductsToLocalStorage(); // Guardar cambios en stock si se implementa
 
             const saleData = {
                 id: `VEN-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
                 items: cart.map(item => {
-                    if (item.type === 'weight' || item.type === 'meat_special') {
-                        return { 
-                            name: item.name, 
-                            quantity: item.weight, 
-                            price: item.pricePerUnit, 
-                            subtotal: item.price,
-                            isWeighted: true, 
+                    // Adaptar la estructura del item para el reporte/historial
+                    if (item.type === 'weight' || item.type === 'pollo_amarillo_granel') {
+                        return {
+                            name: item.name,
+                            quantity: item.weight, // Cantidad es el peso
+                            price: item.pricePerUnit, // Precio es el precio por unidad
+                            subtotal: item.price, // Subtotal es el precio total del item
+                            isWeighted: true,
                             unit: 'lbs'
                         };
                     } else if (item.type === 'value') {
-                         return { 
-                            name: item.name, 
-                            quantity: item.calculatedWeight, 
-                            price: item.pricePerUnit, 
-                            subtotal: item.price, 
-                            isWeighted: true, 
+                         return {
+                            name: item.name,
+                            quantity: item.calculatedWeight, // Cantidad es el peso calculado
+                            price: item.pricePerUnit, // Precio es el precio por unidad
+                            subtotal: item.price, // Subtotal es el valor deseado
+                            isWeighted: true,
                             unit: 'lbs (valor)'
                         };
                     }
-                    else { 
-                        return { 
-                            id: item.product.id, 
-                            name: item.product.name, 
-                            quantity: item.quantity, 
-                            price: item.product.price, 
-                            subtotal: item.product.price * item.quantity,
+                    else { // type 'unit'
+                        return {
+                            id: item.product.id,
+                            name: item.product.name,
+                            quantity: item.quantity, // Cantidad es unidades
+                            price: item.product.price, // Precio es precio por unidad
+                            subtotal: item.product.price * item.quantity, // Subtotal es precio * cantidad
                             isWeighted: false,
                             unit: item.product.unit
                         };
@@ -1552,8 +1625,8 @@
             alert(`Venta completada!\nTotal: $${total.toFixed(2)}\nPagado: $${amountPaid.toFixed(2)}\nCambio: $${change.toFixed(2)}\nMétodo: ${paymentMethod}${saleNote ? '\nNota: ' + saleNote : ''}`);
             clearCart();
             closePaymentModal();
-            displayCurrentProducts(searchCurrentProductsInput.value);
-            displayFrequentProducts();
+            // displayCurrentProducts(searchCurrentProductsInput.value); // No es necesario actualizar stock en este modelo
+            displayFrequentProducts(); // Puede que quieras actualizar sugerencias si implementas stock para peso
         }
 
         function saveSaleToHistory(saleData) {
@@ -1569,7 +1642,7 @@
             const now = new Date();
             const formattedDate = `${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
             let currentTotal = 0;
-            
+
             let html = `<div class="text-center"><strong>${storeInfo.name || "MiniMarket POS"}</strong></div>`;
             html += `<div class="text-center text-xs">${storeInfo.address || "Dirección no especificada"}</div>`;
             html += `<div class="text-center text-xs">RUC/CI: ${storeInfo.ruc || "No especificado"}</div>`;
@@ -1577,10 +1650,10 @@
             html += `<div class="text-xs">Fecha: ${formattedDate}</div>`;
             html += `<hr>`;
             html += `<div><strong>DETALLE:</strong></div>`;
-            
+
             cart.forEach(item => {
                 let itemName, itemDetails, itemSubtotal;
-                if (item.type === 'weight' || item.type === 'meat_special') {
+                if (item.type === 'weight' || item.type === 'pollo_amarillo_granel') {
                     itemName = item.name;
                     itemDetails = `${item.weight.toFixed(2)} lbs @ $${item.pricePerUnit.toFixed(2)}/lb`;
                     itemSubtotal = item.price;
@@ -1589,44 +1662,44 @@
                     itemDetails = `${item.calculatedWeight.toFixed(2)} lbs (Valor: $${item.desiredValue.toFixed(2)}) @ $${item.pricePerUnit.toFixed(2)}/lb`;
                     itemSubtotal = item.price;
                 }
-                else { // type 'unit'
+                else {
                     itemName = `${item.quantity}x ${item.product.name}`;
                     itemDetails = `@ $${item.product.price.toFixed(2)}`;
                     itemSubtotal = item.product.price * item.quantity;
                 }
                 currentTotal += itemSubtotal;
                 html += `<div class="item-line">
-                            <span class="item-name">${itemName} ${ (item.type !== 'value' && item.type !== 'weight' && item.type !== 'meat_special') ? `<span class="text-xs text-gray-500">${itemDetails}</span>` : ''}</span>
+                            <span class="item-name">${itemName} ${ (item.type !== 'value' && item.type !== 'weight' && item.type !== 'pollo_amarillo_granel') ? `<span class="text-xs text-gray-500">${itemDetails}</span>` : ''}</span>
                             <span class="item-price">$${itemSubtotal.toFixed(2)}</span>
-                         </div>`;
-                 if(item.type === 'weight' || item.type === 'value' || item.type === 'meat_special') {
+                           </div>`;
+                 if(item.type === 'weight' || item.type === 'value' || item.type === 'pollo_amarillo_granel') {
                      html += `<div class="item-line" style="font-size:10px; padding-left:10px;">
                                  <span>&nbsp;&nbsp;${itemDetails}</span>
                               </div>`;
                  }
             });
-            
+
             html += `<hr>`;
             html += `<div class="item-line"><strong>TOTAL:</strong> <strong class="item-price">$${currentTotal.toFixed(2)}</strong></div>`;
             html += `<hr>`;
             html += `<div class="text-center text-xs mt-2">¡Gracias por su compra!</div>`;
-            
+
             receiptPreviewContent.innerHTML = html;
         }
 
 
         function generateInvoicePDF(saleData) {
-            const receiptWidthMm = 80; 
+            const receiptWidthMm = 80;
             const leftMarginMm = 5;
             const rightMarginMm = 5;
             const contentWidthMm = receiptWidthMm - leftMarginMm - rightMarginMm;
-            const lineSpacing = 4.5; 
-            let yPos = 10; 
+            const lineSpacing = 4.5;
+            let yPos = 10;
 
             const pdf = new jsPDF({
                 orientation: 'portrait',
                 unit: 'mm',
-                format: [receiptWidthMm, 297] 
+                format: [receiptWidthMm, 297]
             });
 
             function addText(text, x, y, options = {}, isBold = false) {
@@ -1634,12 +1707,12 @@
                 pdf.text(text, x, y, options);
                 if (isBold) pdf.setFont(undefined, 'normal');
             }
-            
-            pdf.setFontSize(10); 
+
+            pdf.setFontSize(10);
             pdf.setFont(undefined, 'bold');
             addText(storeInfo.name || "MiniMarket POS", receiptWidthMm / 2, yPos, { align: 'center' }, true);
             yPos += lineSpacing -1;
-            
+
             pdf.setFontSize(7);
             pdf.setFont(undefined, 'normal');
             const addressLines = pdf.splitTextToSize(storeInfo.address || "Dirección no especificada", contentWidthMm);
@@ -1668,6 +1741,7 @@
             pdf.line(leftMarginMm, yPos, receiptWidthMm - rightMarginMm, yPos);
             yPos += lineSpacing - 2;
 
+            pdf.setFontSize(10);
             pdf.setFont(undefined, 'bold');
             addText("Cant/Peso Descripción", leftMarginMm, yPos, {}, true);
             addText("Total", receiptWidthMm - rightMarginMm, yPos, { align: 'right' }, true);
@@ -1678,23 +1752,23 @@
 
             pdf.setFontSize(7);
             saleData.items.forEach(item => {
-                if (yPos > 270) { 
+                if (yPos > 270) {
                     pdf.addPage();
-                    yPos = 10; 
+                    yPos = 10;
                 }
-                const productNameMaxWidth = contentWidthMm - 20; 
+                const productNameMaxWidth = contentWidthMm - 20;
                 let productText;
-                if (item.isWeighted) { 
-                    productText = `${item.quantity.toFixed(2)} ${item.unit || 'lbs'} ${item.name.split('(')[0].trim()} @ $${item.price.toFixed(2)}/${item.unit || 'lb'}`;
+                if (item.isWeighted) {
+                     productText = `${item.quantity.toFixed(2)} ${item.unit || 'lbs'} ${item.name.split('(')[0].trim()} @ $${item.price.toFixed(2)}/${item.unit || 'lb'}`;
                 } else {
                     productText = `${item.quantity}x ${item.name}`;
                 }
                 const productLines = pdf.splitTextToSize(productText, productNameMaxWidth);
-                
+
                 addText(productLines.join('\n'), leftMarginMm, yPos);
                 addText(`$${item.subtotal.toFixed(2)}`, receiptWidthMm - rightMarginMm, yPos, { align: 'right' });
                 yPos += (productLines.length * (lineSpacing - 2.5));
-                 yPos += 1; 
+                 yPos += 1;
             });
             yPos += lineSpacing - 3;
             pdf.line(leftMarginMm, yPos, receiptWidthMm - rightMarginMm, yPos);
@@ -1732,28 +1806,28 @@
             isDropdownOpen = false;
 
             if (viewToShow === manageProductsView) {
-                displayCurrentProducts(); 
-                searchCurrentProductsInput.value = ''; 
+                displayCurrentProducts();
+                searchCurrentProductsInput.value = '';
             }
             if (viewToShow === reportView) {
                 loadAndDisplayDailyReport({ type: 'today' });
-                reportStartDateInput.value = ''; 
+                reportStartDateInput.value = '';
                 reportEndDateInput.value = '';
             }
             if (viewToShow === inventoryView) {
-                searchProductListInput.value = ''; 
+                searchProductListInput.value = '';
                 displayFrequentProducts();
             }
             if (viewToShow === configuracionView) {
                 loadStoreInfoToForm();
             }
         }
-        
+
         function loadAndDisplayDailyReport(filterOptions = { type: 'today' }) {
             let filteredSales = [];
             let dateRangeText = "Hoy";
             const today = new Date();
-            const todayLocaleString = today.toLocaleDateString('en-CA'); 
+            const todayLocaleString = today.toLocaleDateString('en-CA');
 
             if (filterOptions.type === 'today') {
                 filteredSales = salesHistory.filter(sale => new Date(sale.timestamp).toLocaleDateString('en-CA') === todayLocaleString);
@@ -1763,7 +1837,7 @@
             } else if (filterOptions.type === 'range' && filterOptions.startDate && filterOptions.endDate) {
                 const start = new Date(filterOptions.startDate + "T00:00:00");
                 const end = new Date(filterOptions.endDate + "T23:59:59");
-                
+
                 if (start > end) {
                     alert("La fecha de inicio no puede ser posterior a la fecha de fin.");
                     return;
@@ -1775,14 +1849,14 @@
                 });
                 dateRangeText = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
             }
-            
+
             document.getElementById('reportDateRange').textContent = dateRangeText;
 
             let totalRevenue = 0;
             let totalProductsSold = 0;
             const productQuantities = {};
 
-            dailySalesDetails.innerHTML = ''; 
+            dailySalesDetails.innerHTML = '';
 
             if (filteredSales.length === 0) {
                 dailySalesDetails.innerHTML = '<p class="text-gray-400">No hay ventas registradas para el periodo seleccionado.</p>';
@@ -1790,15 +1864,15 @@
 
             filteredSales.forEach(sale => {
                 totalRevenue += sale.totalAmount;
-                
+
                 const saleDetailDiv = document.createElement('div');
                 saleDetailDiv.className = 'report-sale-item';
                 let saleItemsHtml = `<strong>Venta ID: ${sale.id.substring(0,8)} (${new Date(sale.timestamp).toLocaleString()})</strong><br>
-                                     Total: $${sale.totalAmount.toFixed(2)} | Pagado con: ${sale.paymentMethod}
-                                     ${sale.note ? `<br><span class="text-xs text-gray-400">Nota: ${sale.note}</span>` : ''}
-                                     <ul>`;
+                                         Total: $${sale.totalAmount.toFixed(2)} | Pagado con: ${sale.paymentMethod}
+                                        ${sale.note ? `<br><span class="text-xs text-gray-400">Nota: ${sale.note}</span>` : ''}
+                                         <ul>`;
                 sale.items.forEach(item => {
-                    totalProductsSold += item.quantity; 
+                    totalProductsSold += item.quantity;
                     productQuantities[item.name] = (productQuantities[item.name] || 0) + item.quantity;
                     saleItemsHtml += `<li>${item.quantity}${item.unit || 'x'} ${item.name.split('(')[0].trim()} ($${item.price.toFixed(2)} ${item.isWeighted ? '/'+item.unit : 'c/u'}) = $${item.subtotal.toFixed(2)}</li>`;
                 });
@@ -1828,7 +1902,7 @@
                 });
             }
         }
-        
+
         if(filterReportBtn) {
             filterReportBtn.addEventListener('click', () => {
                 const startDate = reportStartDateInput.value;
@@ -1855,12 +1929,12 @@
                 loadAndDisplayDailyReport({ type: 'all' });
             });
         }
-        
-        function generateDailyReportPDF() { 
+
+        function generateDailyReportPDF() {
             const pdf = new jsPDF();
             const reportTitleDate = document.getElementById('reportDateRange').textContent;
             const fileName = `Reporte-${storeInfo.name.replace(/\s+/g, '_')}-${reportTitleDate.replace(/\s-\s/g, '_to_').replace(/\//g, '-')}.pdf`;
-            
+
             pdf.setFontSize(16);
             pdf.setFont(undefined, 'bold');
             pdf.text(storeInfo.name || "MiniMarket POS", 105, 15, null, null, "center");
@@ -1878,18 +1952,18 @@
             pdf.text(`Total Recaudado: ${dailyTotalRevenue.textContent}`, 10, yPos); yPos += 7;
             pdf.text(`Cantidad de Productos Vendidos: ${dailyTotalProductsSold.textContent}`, 10, yPos); yPos += 7;
             pdf.text(`Cantidad de Ventas Realizadas: ${dailyTotalSalesCount.textContent}`, 10, yPos); yPos += 10;
-            
+
             pdf.setFontSize(11);
             pdf.setFont(undefined, 'bold');
             pdf.text("Detalle de Ventas:", 10, yPos); yPos += 6;
-            
+
             const salesToReport = salesHistory.filter(sale => {
                 const reportRangeText = document.getElementById('reportDateRange').textContent;
                 if (reportRangeText === "Hoy") {
                     return new Date(sale.timestamp).toLocaleDateString() === new Date().toLocaleDateString();
                 } else if (reportRangeText === "Todas las Ventas") {
                     return true;
-                } else { 
+                } else {
                     const [startStr, endStr] = reportRangeText.split(' - ');
                     const startDate = new Date(startStr.split('/').reverse().join('-') + "T00:00:00");
                     const endDate = new Date(endStr.split('/').reverse().join('-') + "T23:59:59");
@@ -1929,7 +2003,7 @@
             pdf.setFont(undefined, 'bold');
             pdf.text("Productos Más Vendidos (en rango):", 10, yPos); yPos += 6;
             pdf.setFont(undefined, 'normal');
-            
+
             const productQuantities = {};
             salesToReport.forEach(sale => {
                 sale.items.forEach(item => {
@@ -1984,16 +2058,16 @@
                     localStorage.removeItem('mockProducts');
                     localStorage.removeItem('salesHistory');
                     localStorage.removeItem('storeInfo');
-                    localStorage.removeItem('mockProductsDefaultLoaded_v7'); 
-                    
-                    mockProducts = []; 
+                    localStorage.removeItem('mockProductsDefaultLoaded_v7');
+
+                    mockProducts = [];
                     salesHistory = [];
                     storeInfo = { name: 'MiniMarket POS', address: 'Tu Dirección Aquí', ruc: '0000000000000' };
                     cart = [];
-                    
+
                     showView(inventoryView);
                     updateCartDisplay();
-                    loadStoreInfo(); 
+                    loadStoreInfo();
                     alert("Todos los datos de la aplicación han sido eliminados. La página se recargará para aplicar los cambios por defecto.");
                     location.reload();
                 }
@@ -2011,18 +2085,79 @@
             if (isDropdownOpen && !dropdownMenu.contains(e.target) && !menuButton.contains(e.target)) {
                 toggleDropdown();
             }
+             // Ocultar resultados de búsqueda si se hace clic fuera
+            if (!barcodeScannerInput.contains(e.target) && !searchResultsContainer.contains(e.target)) {
+                searchResultsContainer.classList.add('hidden');
+            }
         });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isDropdownOpen) toggleDropdown(); });
 
+        // Modificar el event listener para la barra de búsqueda
+        barcodeScannerInput.addEventListener('input', () => {
+            const searchTerm = barcodeScannerInput.value.trim();
+            if (searchTerm.length > 0) {
+                displaySearchResults(searchTerm);
+            } else {
+                searchResultsContainer.classList.add('hidden');
+                searchResultsContainer.innerHTML = ''; // Limpiar resultados
+            }
+        });
+
+        // Modificar el event listener para el formulario de escaneo (Enter)
         scanForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const productId = barcodeScannerInput.value.trim();
             if (productId) {
-                addProductToCart(productId);
-                barcodeScannerInput.value = '';
-                barcodeScannerInput.focus();
+                 // Intentar añadir por ID si es un ID válido
+                const product = findProductById(productId);
+                if (product) {
+                    addProductToCart(productId);
+                    barcodeScannerInput.value = '';
+                    searchResultsContainer.classList.add('hidden'); // Ocultar resultados después de añadir
+                } else {
+                    // Si no es un ID, quizás mostrar un mensaje o no hacer nada
+                    alert("Producto no encontrado con ese ID.");
+                    playErrorSound();
+                }
+                 barcodeScannerInput.focus();
             }
         });
+
+
+        function displaySearchResults(searchTerm) {
+            const lowerSearchTerm = searchTerm.toLowerCase();
+            const filteredProducts = mockProducts.filter(p =>
+                p.name.toLowerCase().includes(lowerSearchTerm) ||
+                p.id.toLowerCase().includes(lowerSearchTerm)
+            );
+
+            searchResultsContainer.innerHTML = ''; // Limpiar resultados anteriores
+
+            if (filteredProducts.length > 0) {
+                filteredProducts.forEach(p => {
+                    const resultItem = document.createElement('div');
+                    resultItem.classList.add('search-result-item');
+                    resultItem.dataset.productId = p.id; // Guardar el ID del producto
+                    resultItem.innerHTML = `<strong>${p.name}</strong> (${p.unit}) - $${p.price.toFixed(2)} <span class="text-gray-500">(ID: ${p.id})</span>`;
+                    resultItem.addEventListener('click', handleSearchResultClick);
+                    searchResultsContainer.appendChild(resultItem);
+                });
+                searchResultsContainer.classList.remove('hidden'); // Mostrar resultados
+            } else {
+                searchResultsContainer.classList.add('hidden'); // Ocultar si no hay resultados
+            }
+        }
+
+        function handleSearchResultClick(e) {
+            const productId = e.currentTarget.dataset.productId;
+            if (productId) {
+                addProductToCart(productId);
+                barcodeScannerInput.value = ''; // Limpiar la barra de búsqueda
+                searchResultsContainer.classList.add('hidden'); // Ocultar los resultados
+                barcodeScannerInput.focus(); // Volver a enfocar la barra de búsqueda
+            }
+        }
+
 
         finalizeSaleBtn.addEventListener('click', openPaymentModal);
         clearCartBtn.addEventListener('click', () => {
@@ -2035,7 +2170,7 @@
                 alert("Carrito limpiado.");
             }
         });
-        
+
         if(previewReceiptBtn) {
             previewReceiptBtn.addEventListener('click', () => {
                 if (cart.length > 0) {
@@ -2076,11 +2211,11 @@
                 alert("No hay productos en el inventario para añadir. Por favor, añade productos en 'Gestionar Productos'.");
             }
         });
-        
+
         if(viewProductListBtn) {
-            viewProductListBtn.addEventListener('click', () => { 
-                openProductListModal(); 
-                searchProductListInput.value = ''; 
+            viewProductListBtn.addEventListener('click', () => {
+                openProductListModal();
+                searchProductListInput.value = '';
             });
         }
         if(appLogo) {
@@ -2092,8 +2227,8 @@
 
         linkVerInventario.addEventListener('click', (e) => {
             e.preventDefault();
-            openProductListModal(); 
-            searchProductListInput.value = ''; 
+            openProductListModal();
+            searchProductListInput.value = '';
         });
 
         closeProductListModal.addEventListener('click', () => productListModal.classList.add('hidden'));
@@ -2101,16 +2236,16 @@
 
         function displayFrequentProducts() {
             frequentProductsContainer.innerHTML = '';
+            // En este modelo simplificado, las sugerencias se basan en mockProducts con stock
             const productsWithStock = mockProducts.filter(p => p.stock > 0);
-            // Lógica simple: tomar los primeros 6 con stock. Podría ser más sofisticada (más vendidos).
-            const suggestions = productsWithStock.slice(0, 6); 
+            const suggestions = productsWithStock.slice(0, 6);
 
             if (suggestions.length === 0 && mockProducts.length > 0) {
-                frequentProductsContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-full text-center">No hay productos con stock para sugerir.</p>';
+                frequentProductsContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-full text-center">No hay productos con stock para sugerir (en inventario principal).</p>';
                 return;
             }
              if (mockProducts.length === 0) {
-                frequentProductsContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-full text-center">Aún no hay productos en el inventario.</p>';
+                frequentProductsContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-full text-center">Aún no hay productos en el inventario principal.</p>';
                 return;
             }
 
@@ -2126,33 +2261,58 @@
             });
         }
 
-        // --- Funciones para Venta por Peso (Genérico) ---
-        function openWeightProductModal() {
-            weightProductNameSelect.innerHTML = ''; 
-            sellByWeightProducts.forEach(p => {
+        // --- Funciones para Venta por Peso ---
+        function openWeightProductModal(preSelectProductKey = null) { // Añadir parámetro para preseleccionar
+            weightProductNameSelect.innerHTML = '';
+            // Convertir el objeto sellByWeightProducts a un array plano para el select
+            const allWeightProducts = Object.values(sellByWeightProducts).flat();
+
+            allWeightProducts.forEach(p => {
                 const option = document.createElement('option');
                 option.value = p.key;
                 option.textContent = p.name;
                 weightProductNameSelect.appendChild(option);
             });
-            
-            if (sellByWeightProducts.length > 0) {
-                loadPriceForWeightedProduct(); 
+
+            if (allWeightProducts.length > 0) {
+                 if (preSelectProductKey) {
+                    weightProductNameSelect.value = preSelectProductKey;
+                 }
+                loadPriceForWeightedProduct();
             }
             weightProductWeightLb.value = '';
-            updateWeightProductTotal();
+            weightProductTotalCalculated.textContent = '$0.00'; // Resetear total calculado
             weightProductModal.classList.remove('hidden');
+            // Enfocar el campo de precio o peso dependiendo de si hay precio guardado
+            if (parseFloat(weightProductPricePerLb.value) > 0) {
+                weightProductWeightLb.focus();
+            } else {
+                weightProductPricePerLb.focus();
+            }
         }
+
 
         function closeWeightProductModal() {
             weightProductModal.classList.add('hidden');
+             // Limpiar campos y estado al cerrar
+            const allWeightProducts = Object.values(sellByWeightProducts).flat();
+            weightProductNameSelect.value = allWeightProducts.length > 0 ? allWeightProducts[0].key : '';
+            weightProductPricePerLb.value = '';
+            weightProductWeightLb.value = '';
+            weightProductTotalCalculated.textContent = '$0.00';
+            // No es necesario resetear el precio guardado aquí, solo el campo de entrada
         }
+
 
         function loadPriceForWeightedProduct() {
             const selectedProductKey = weightProductNameSelect.value;
             if (selectedProductKey) {
+                // Usar una clave de localStorage única para cada producto por peso
                 const savedPrice = localStorage.getItem(`precio_libra_${selectedProductKey}`);
                 weightProductPricePerLb.value = savedPrice ? parseFloat(savedPrice).toFixed(2) : '';
+                updateWeightProductTotal();
+            } else {
+                weightProductPricePerLb.value = '';
                 updateWeightProductTotal();
             }
         }
@@ -2162,10 +2322,13 @@
             const price = parseFloat(weightProductPricePerLb.value);
             if (selectedProductKey && !isNaN(price) && price >= 0) {
                 localStorage.setItem(`precio_libra_${selectedProductKey}`, price.toFixed(2));
+            } else if (selectedProductKey) {
+                 // Si el precio no es válido, eliminar el precio guardado para este producto
+                 localStorage.removeItem(`precio_libra_${selectedProductKey}`);
             }
             updateWeightProductTotal();
         }
-        
+
         function resetSavedPriceForWeightedProduct() {
             const selectedProductKey = weightProductNameSelect.value;
             if (selectedProductKey) {
@@ -2175,6 +2338,8 @@
                     updateWeightProductTotal();
                     alert("Precio restablecido.");
                 }
+            } else {
+                 alert("Por favor, seleccione un producto para restablecer su precio.");
             }
         }
 
@@ -2184,6 +2349,8 @@
             const weight = parseFloat(weightProductWeightLb.value) || 0;
             const total = pricePerLb * weight;
             weightProductTotalCalculated.textContent = `$${total.toFixed(2)}`;
+             // Habilitar/deshabilitar el botón de añadir al carrito
+            addWeightProductToCartBtn.disabled = total <= 0;
         }
 
         function addProductByWeightToCart() {
@@ -2201,46 +2368,66 @@
                 alert("Por favor, ingrese un peso válido."); return;
             }
             const calculatedPrice = pricePerLb * weight;
+            // Usar la clave del producto por peso y el tipo 'weight'
             addProductToCart(selectedProductKey, true, weight, pricePerLb, calculatedPrice, 'weight');
             closeWeightProductModal();
         }
 
-        // --- Funciones para Venta por Valor (Genérico) ---
+        // --- Funciones para Venta por Valor ---
         function openSellByValueModal() {
-            valueProductNameSelect.innerHTML = ''; 
-            sellByWeightProducts.forEach(p => { 
+            valueProductNameSelect.innerHTML = '';
+             // Convertir el objeto sellByWeightProducts a un array plano para el select
+            const allWeightProducts = Object.values(sellByWeightProducts).flat();
+
+            allWeightProducts.forEach(p => {
                 const option = document.createElement('option');
                 option.value = p.key;
                 option.textContent = p.name;
                 valueProductNameSelect.appendChild(option);
             });
-            
-            if (sellByWeightProducts.length > 0) {
-                loadPriceForValueProduct(); 
+
+            if (allWeightProducts.length > 0) {
+                loadPriceForValueProduct();
             }
             valueProductDesiredValue.value = '';
             valueProductCalculatedWeight.textContent = '0.00 lbs';
             sellByValueModal.classList.remove('hidden');
+             // Enfocar el campo de valor deseado
+            valueProductDesiredValue.focus();
         }
 
         function closeSellByValueModal() {
             sellByValueModal.classList.add('hidden');
+             // Limpiar campos y estado al cerrar
+            const allWeightProducts = Object.values(sellByWeightProducts).flat();
+            valueProductNameSelect.value = allWeightProducts.length > 0 ? allWeightProducts[0].key : '';
+            valueProductPricePerLb.value = '';
+            valueProductDesiredValue.value = '';
+            valueProductCalculatedWeight.textContent = '0.00 lbs';
+             // No es necesario resetear el precio guardado aquí
         }
 
         function loadPriceForValueProduct() {
             const selectedProductKey = valueProductNameSelect.value;
             if (selectedProductKey) {
-                const savedPrice = localStorage.getItem(`precio_libra_${selectedProductKey}`); 
+                // Usar una clave de localStorage única para cada producto por peso
+                const savedPrice = localStorage.getItem(`precio_libra_${selectedProductKey}`);
                 valueProductPricePerLb.value = savedPrice ? parseFloat(savedPrice).toFixed(2) : '';
                 calculateWeightFromValue();
+            } else {
+                 valueProductPricePerLb.value = '';
+                 calculateWeightFromValue();
             }
         }
-        
-        function savePriceForValueProduct() { 
+
+        function savePriceForValueProduct() {
             const selectedProductKey = valueProductNameSelect.value;
             const price = parseFloat(valueProductPricePerLb.value);
             if (selectedProductKey && !isNaN(price) && price >= 0) {
                 localStorage.setItem(`precio_libra_${selectedProductKey}`, price.toFixed(2));
+            } else if (selectedProductKey) {
+                 // Si el precio no es válido, eliminar el precio guardado para este producto
+                 localStorage.removeItem(`precio_libra_${selectedProductKey}`);
             }
             calculateWeightFromValue();
         }
@@ -2254,6 +2441,8 @@
                     calculateWeightFromValue();
                     alert("Precio por libra restablecido.");
                 }
+            } else {
+                 alert("Por favor, seleccione un producto para restablecer su precio.");
             }
         }
 
@@ -2265,6 +2454,8 @@
                 calculatedWeight = desiredValue / pricePerLb;
             }
             valueProductCalculatedWeight.textContent = `${calculatedWeight.toFixed(2)} lbs`;
+             // Habilitar/deshabilitar el botón de añadir al carrito
+            addValueProductToCartBtn.disabled = desiredValue <= 0 || pricePerLb <= 0;
         }
 
         function addProductByValueToCart() {
@@ -2282,151 +2473,80 @@
                 alert("Por favor, ingrese un valor deseado válido."); return;
             }
             const calculatedWeight = desiredValue / pricePerLb;
+            // Usar la clave del producto por peso y el tipo 'value'
             addProductToCart(selectedProductKey, true, desiredValue, pricePerLb, calculatedWeight, 'value');
             closeSellByValueModal();
         }
-        
-        // --- Funciones para Venta de Carnes (antes Pollo Amarillo) ---
-        function openMeatSaleModal() {
-            meatProductSelect.innerHTML = ''; // Limpiar opciones anteriores
-            bulkMeatProducts.forEach(p => {
-                const option = document.createElement('option');
-                option.value = p.key; // Usar la clave única
-                option.textContent = p.name;
-                meatProductSelect.appendChild(option);
-            });
-            
-            if (bulkMeatProducts.length > 0) {
-                loadPriceForMeatSale(); // Cargar precio para el primer producto por defecto
-            }
-            meatWeightLb.value = '';
-            meatDesiredValue.value = '';
-            meatWeightLb.disabled = false;
-            meatDesiredValue.disabled = false;
-            updateMeatSaleCalculation();
-            meatSaleModal.classList.remove('hidden');
-        }
 
-        function closeMeatSaleModal() {
-            meatSaleModal.classList.add('hidden');
-        }
+        // --- Funciones para el nuevo modal de productos por peso categorizados ---
+        function openCategorizedWeightProductsModal() {
+            categorizedProductsList.innerHTML = ''; // Limpiar contenido anterior
 
-        function loadPriceForMeatSale() {
-            const selectedProductKey = meatProductSelect.value;
-            if (selectedProductKey) {
-                const savedPrice = localStorage.getItem(`precio_libra_${selectedProductKey}`);
-                meatPricePerLb.value = savedPrice ? parseFloat(savedPrice).toFixed(2) : '';
-                updateMeatSaleCalculation();
-            }
-        }
+            // Iterar sobre las categorías definidas en sellByWeightProducts
+            for (const category in sellByWeightProducts) {
+                if (sellByWeightProducts.hasOwnProperty(category)) {
+                    const productsInCategory = sellByWeightProducts[category];
 
-        function saveMeatPricePerLb() {
-            const selectedProductKey = meatProductSelect.value;
-            const price = parseFloat(meatPricePerLb.value);
-            if (selectedProductKey && !isNaN(price) && price >= 0) {
-                localStorage.setItem(`precio_libra_${selectedProductKey}`, price.toFixed(2));
-            }
-            updateMeatSaleCalculation();
-        }
-        
-        function handleMeatSaleInput(event) {
-            const inputType = event.target.id;
-            if (inputType === 'meatWeightLb' && meatWeightLb.value.trim() !== '') {
-                meatDesiredValue.value = '';
-                meatDesiredValue.disabled = true;
-            } else if (inputType === 'meatDesiredValue' && meatDesiredValue.value.trim() !== '') {
-                meatWeightLb.value = '';
-                meatWeightLb.disabled = true;
-            } else if (meatWeightLb.value.trim() === '' && meatDesiredValue.value.trim() === '') {
-                meatWeightLb.disabled = false;
-                meatDesiredValue.disabled = false;
-            }
-            updateMeatSaleCalculation();
-        }
+                    // Crear encabezado de categoría colapsable
+                    const categoryHeader = document.createElement('div');
+                    categoryHeader.classList.add('category-header');
+                    categoryHeader.innerHTML = `<span>${category}</span> <i class="fas fa-chevron-down"></i>`;
+                    categoryHeader.dataset.target = `category-${category.replace(/\s+/g, '-')}`; // ID para el contenido
 
-        function updateMeatSaleCalculation() {
-            const pricePerLb = parseFloat(meatPricePerLb.value) || 0;
-            const weight = parseFloat(meatWeightLb.value) || 0;
-            const desiredValue = parseFloat(meatDesiredValue.value) || 0;
-            let resultText = "Ingrese peso o valor.";
+                    const categoryContent = document.createElement('div');
+                    categoryContent.classList.add('category-content', 'hidden'); // Oculto por defecto
+                    categoryContent.id = categoryHeader.dataset.target;
 
-            if (pricePerLb > 0) {
-                if (weight > 0) {
-                    const total = pricePerLb * weight;
-                    resultText = `Total: $${total.toFixed(2)} por ${weight.toFixed(2)} lbs`;
-                } else if (desiredValue > 0) {
-                    const calculatedWeight = desiredValue / pricePerLb;
-                    resultText = `Peso: ${calculatedWeight.toFixed(2)} lbs por $${desiredValue.toFixed(2)}`;
+                    // Llenar el contenido de la categoría con productos
+                    productsInCategory.forEach(product => {
+                        const productItem = document.createElement('div');
+                        productItem.classList.add('product-item');
+                        productItem.dataset.productKey = product.key; // Guardar la clave del producto
+                        productItem.innerHTML = `<strong>${product.name}</strong>`;
+                        productItem.addEventListener('click', handleCategorizedProductClick);
+                        categoryContent.appendChild(productItem);
+                    });
+
+                    categorizedProductsList.appendChild(categoryHeader);
+                    categorizedProductsList.appendChild(categoryContent);
+
+                    // Añadir event listener para colapsar/expandir
+                    categoryHeader.addEventListener('click', () => {
+                        const isHidden = categoryContent.classList.contains('hidden');
+                        categoryContent.classList.toggle('hidden', !isHidden);
+                        categoryHeader.querySelector('i').classList.toggle('fa-chevron-down', isHidden);
+                        categoryHeader.querySelector('i').classList.toggle('fa-chevron-up', !isHidden);
+                    });
                 }
             }
-            meatCalculationResult.textContent = resultText;
-        }
-        
-        function addMeatToCart() {
-            const selectedProductKey = meatProductSelect.value;
-            const selectedProductName = meatProductSelect.options[meatProductSelect.selectedIndex].text;
-            const pricePerLb = parseFloat(meatPricePerLb.value);
-            let weight = parseFloat(meatWeightLb.value);
-            let desiredValue = parseFloat(meatDesiredValue.value);
-            let total;
-            let finalWeight;
 
-            if (!selectedProductKey){
-                alert("Por favor seleccione un producto cárnico."); return;
-            }
-            if (isNaN(pricePerLb) || pricePerLb <= 0) {
-                alert("Por favor, ingrese un precio por libra válido para el producto."); return;
-            }
-
-            if (weight > 0) {
-                total = pricePerLb * weight;
-                finalWeight = weight;
-            } else if (desiredValue > 0) {
-                finalWeight = desiredValue / pricePerLb;
-                total = desiredValue;
-            } else {
-                alert("Por favor, ingrese un peso o un valor deseado para el producto."); return;
-            }
-            
-            if (isNaN(finalWeight) || finalWeight <= 0) {
-                 alert("El cálculo resultó en un peso inválido. Verifique el precio y el valor/peso ingresado."); return;
-            }
-
-            // Usar un tipo genérico para los ítems de este modal en el carrito
-            const cartItem = {
-                id: `${selectedProductKey}_${Date.now()}`, // ID único para este item específico
-                name: `${selectedProductName} (${finalWeight.toFixed(2)} lbs)`,
-                price: total, 
-                quantity: 1, 
-                type: 'meat_by_weight_value', // Tipo específico
-                weight: finalWeight,
-                pricePerUnit: pricePerLb, // Precio por libra
-                baseProductKey: selectedProductKey
-            };
-            cart.push(cartItem);
-            updateCartDisplay();
-            playSuccessSound();
-            alert(`Agregado al carrito: ${selectedProductName}`);
-            closeMeatSaleModal();
+            categorizedWeightProductsModal.classList.remove('hidden');
+             if (isDropdownOpen) toggleDropdown(); // Cerrar menú desplegable si está abierto
         }
 
-        function resetMeatSaleForm() {
-            // No restablecer el precio por libra, solo los campos de peso/valor y el resultado
-            meatWeightLb.value = '';
-            meatDesiredValue.value = '';
-            meatWeightLb.disabled = false;
-            meatDesiredValue.disabled = false;
-            if(meatProductSelect.options.length > 0) { // Recargar precio para el producto actualmente seleccionado
-                 loadPriceForMeatSale();
-            } else {
-                 meatPricePerLb.value = '';
-            }
-            updateMeatSaleCalculation();
+        function closeCategorizedWeightProductsModal() {
+            categorizedWeightProductsModal.classList.add('hidden');
+             // Opcional: colapsar todas las secciones al cerrar
+             document.querySelectorAll('#categorizedWeightProductsModal .category-content').forEach(content => content.classList.add('hidden'));
+             document.querySelectorAll('#categorizedWeightProductsModal .category-header i').forEach(icon => {
+                 icon.classList.add('fa-chevron-down');
+                 icon.classList.remove('fa-chevron-up');
+             });
         }
 
-        // Event Listeners para Modales Genéricos de Peso/Valor
+        function handleCategorizedProductClick(e) {
+            const productKey = e.currentTarget.dataset.productKey;
+            if (productKey) {
+                closeCategorizedWeightProductsModal(); // Cerrar este modal
+                openWeightProductModal(productKey); // Abrir el modal de venta por peso con el producto seleccionado
+            }
+        }
+
+
+        // Event listeners para los botones de venta por peso/valor
         if(sellByWeightBtn) {
-            sellByWeightBtn.addEventListener('click', openWeightProductModal);
+            // El botón "PESO LB" ahora también abre el modal categorizado
+            sellByWeightBtn.addEventListener('click', openCategorizedWeightProductsModal);
         }
         if(closeWeightProductModalBtn) {
             closeWeightProductModalBtn.addEventListener('click', closeWeightProductModal);
@@ -2451,7 +2571,7 @@
         }
 
         if(sellByValueBtn) {
-            sellByValueBtn.addEventListener('click', openSellByValueModal);
+            sellByValueBtn.addEventListener('click', openSellByValueModal); // Abrir modal de valor
         }
         if(closeSellByValueModalBtn) {
             closeSellByValueModalBtn.addEventListener('click', closeSellByValueModal);
@@ -2463,7 +2583,7 @@
             valueProductNameSelect.addEventListener('change', loadPriceForValueProduct);
         }
         if(valueProductPricePerLb) {
-            valueProductPricePerLb.addEventListener('input', savePriceForValueProduct); 
+            valueProductPricePerLb.addEventListener('input', savePriceForValueProduct);
         }
         if(valueProductDesiredValue) {
             valueProductDesiredValue.addEventListener('input', calculateWeightFromValue);
@@ -2472,42 +2592,28 @@
             addValueProductToCartBtn.addEventListener('click', addProductByValueToCart);
         }
         if(resetSavedValuePriceBtn) {
-            resetSavedValuePriceBtn.addEventListener('click', resetSavedPriceForValueProduct);
+            resetSavedValuePriceBtn.addEventListener('click', resetSavedValuePriceForValueProduct);
         }
 
-        // Event Listeners para Modal de Venta de Carnes (antes Pollo Amarillo)
-        if(sellMeatSpecialBtn) {
-            sellMeatSpecialBtn.addEventListener('click', openMeatSaleModal);
+        // Modificar el event listener del botón de Pollo Amarillo
+        if(sellPolloAmarilloBtn) {
+             // El botón "POLLO AMARILLO" ahora también abre el modal categorizado
+            sellPolloAmarilloBtn.addEventListener('click', openCategorizedWeightProductsModal);
         }
-        if(closeMeatSaleModalBtn) {
-            closeMeatSaleModalBtn.addEventListener('click', closeMeatSaleModal);
+
+        // Event listeners para el nuevo modal categorizado
+        if(closeCategorizedWeightProductsModalBtn) {
+            closeCategorizedWeightProductsModalBtn.addEventListener('click', closeCategorizedWeightProductsModal);
         }
-        if(closeMeatSaleModalBottomBtn) {
-            closeMeatSaleModalBottomBtn.addEventListener('click', closeMeatSaleModal);
+        if(closeCategorizedWeightProductsModalBottomBtn) {
+            closeCategorizedWeightProductsModalBottomBtn.addEventListener('click', closeCategorizedWeightProductsModal);
         }
-        if(meatProductSelect) {
-            meatProductSelect.addEventListener('change', loadPriceForMeatSale);
-        }
-        if(meatPricePerLb) {
-            meatPricePerLb.addEventListener('input', saveMeatPricePerLb);
-        }
-        if(meatWeightLb) {
-            meatWeightLb.addEventListener('input', handleMeatSaleInput);
-        }
-        if(meatDesiredValue) {
-            meatDesiredValue.addEventListener('input', handleMeatSaleInput);
-        }
-        if(addMeatToCartBtn) {
-            addMeatToCartBtn.addEventListener('click', addMeatToCart);
-        }
-        if(resetMeatSaleFormBtn) {
-            resetMeatSaleFormBtn.addEventListener('click', resetMeatSaleForm);
-        }
+
 
         updateCartDisplay();
         showView(inventoryView);
-        
-        console.log("MiniMarket POS App Inicializada con Venta de Carnes por Peso/Valor.");
+
+        console.log("MiniMarket POS App Inicializada con Venta por Peso/Valor y otras funciones.");
     </script>
 </body>
 </html>
