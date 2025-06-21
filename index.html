@@ -28,7 +28,7 @@
     /* Contenedor de la orden con el video de fondo */
     .order-summary-container {
       position: relative;
-      background: rgba(255, 255, 255, 0.7); /* Fondo blanco ligeramente transparente */
+      background: rgba(255, 255, 255, 0.8); /* Fondo blanco ligeramente transparente */
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -47,8 +47,9 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      opacity: 0.5;
+      opacity: 0.3; /* Hacemos el video más claro */
       z-index: -1; /* Asegura que el video esté detrás del contenido */
+      object-position: center;
     }
 
     /* Estilos del título */
