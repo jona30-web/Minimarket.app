@@ -1,2619 +1,327 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MiniMarket UI - POS Avanzado</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Distribuidora Chacha - Resumen de Compra</title>
+  <style>
+    /* Estilos base */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+    }
 
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        .neon-text-green {
-            text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 15px #00ff00, 0 0 20px #00ff00;
-        }
-        .neon-border-green {
-            box-shadow: 0 0 3px #00ff00, 0 0 5px #00ff00, 0 0 7px #00ff00;
-        }
-        .neon-border-magenta {
-            box-shadow: 0 0 3px #ff00ff, 0 0 5px #ff00ff, 0 0 7px #ff00ff;
-        }
-        .btn-view-list {
-            background-color: rgba(0, 255, 0, 0.1);
-        }
-        .btn-action-magenta {
-            background-color: rgba(255, 0, 255, 0.1);
-        }
-        .btn-action-blue {
-            background-color: rgba(59, 130, 246, 0.1);
-            border-color: #3b82f6;
-            color: #60a5fa;
-        }
-        .btn-action-blue:hover {
-            background-color: rgba(59, 130, 246, 0.2);
-        }
-        .btn-special-yellow {
-            background-color: rgba(234, 179, 8, 0.1);
-            border-color: #eab308;
-            color: #facc15;
-        }
-        .btn-special-yellow:hover {
-             background-color: rgba(234, 179, 8, 0.2);
-        }
+    body {
+      background-color: #f4f4f4;
+      color: #333;
+      line-height: 1.6;
+      font-size: 16px;
+      padding: 0;
+      margin: 0;
+    }
 
-        /* Estilo para aplicar el filtro de color a los logos */
-        .app-logo {
-             /* Ajustado el valor del filtro */
-            filter: hue-rotate(180deg); /* Intentando un tono magenta/morado */
-        }
+    /* Contenedor de la orden con el video de fondo */
+    .order-summary-container {
+      position: relative;
+      background: rgba(255, 255, 255, 0.7); /* Fondo blanco ligeramente transparente para no perder contenido */
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin: 20px;
+      z-index: 2;
+      min-height: 60vh;
+    }
 
+    /* Video de fondo */
+    .order-summary-container video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1; /* Asegura que el video esté detrás del contenido */
+    }
 
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1a1a1a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #00ff00;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #00cc00;
-        }
-        .dropdown-item-hover:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        .cart-item:hover {
-            background-color: #2d2d2d;
-        }
-        .modal {
-            background-color: rgba(0,0,0,0.7);
-        }
+    /* Estilos del título */
+    .order-summary-container h2 {
+      text-align: center;
+      color: #2196f3;
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
 
-        #preloader {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 99999;
-            background-color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
-            visibility: visible;
-            opacity: 1;
-        }
-        #preloader.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-        #preloader img {
-            width: 150px;
-            height: auto;
-             /* Aplicar filtro al logo del preloader */
-            filter: hue-rotate(180deg);
-        }
+    /* Lista de productos */
+    .product-list {
+      margin-bottom: 20px;
+    }
 
-        .input-field {
-            background-color: #2d2d2d;
-            border: 1px solid #4a4a4a;
-            color: white;
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem;
-            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
-        .input-field:focus {
-            border-color: #00ff00;
-            box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.3);
-            outline: none;
-        }
-        .input-field[readonly] {
-            background-color: #4a4a4a;
-            cursor: not-allowed;
-        }
-        .input-field:disabled {
-            background-color: #3f3f46;
-            color: #71717a;
-            cursor: not-allowed;
-        }
-        .date-input-field {
-            background-color: #2d2d2d;
-            border: 1px solid #4a4a4a;
-            color: white;
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem;
-            color-scheme: dark;
-        }
-        .date-input-field:focus {
-            border-color: #00ff00;
-            box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.3);
-            outline: none;
-        }
+    .product-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ccc;
+      padding: 10px 0;
+    }
 
-        #demoProductList .category-title, #currentProductsList .category-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #f0abfc;
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-            padding-bottom: 0.25rem;
-            border-bottom: 1px solid #4a4a4a;
-        }
-        #demoProductList .product-entry, #currentProductsList .product-entry {
-            padding: 0.5rem;
-            border-bottom: 1px solid #3a3a3a;
-        }
-        #demoProductList .product-entry:last-child, #currentProductsList .product-entry:last-child {
-            border-bottom: none;
-        }
-        #demoProductList .product-name, #currentProductsList .product-name {
-            font-weight: 600;
-        }
-        #demoProductList .product-details, #currentProductsList .product-details {
-            font-size: 0.875rem;
-            color: #a0aec0;
-        }
-        .stock-info {
-            font-size: 0.75rem;
-            color: #facc15;
-        }
-        .out-of-stock {
-            color: #f87171;
-            font-weight: bold;
-        }
-        .report-sale-item {
-            background-color: #2a2a2a;
-            padding: 0.75rem;
-            border-radius: 0.375rem;
-            margin-bottom: 0.75rem;
-        }
-        .report-sale-item ul {
-            list-style-type: disc;
-            margin-left: 1.5rem;
-            font-size: 0.875rem;
-        }
-        #receiptPreviewContent {
-            font-family: 'Courier New', Courier, monospace;
-            color: #333;
-            font-size: 12px;
-            line-height: 1.4;
-            white-space: pre-wrap;
-            max-height: 70vh;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 10px;
-            background-color: #fdfdfd;
-        }
-        #receiptPreviewContent hr {
-            border: none;
-            border-top: 1px dashed #888;
-            margin: 8px 0;
-        }
-        #receiptPreviewContent strong {
-            font-weight: bold;
-        }
-        #receiptPreviewContent .text-center { text-align: center; }
-        #receiptPreviewContent .text-right { text-align: right; }
-        #receiptPreviewContent .item-line { display: flex; justify-content: space-between; }
-        #receiptPreviewContent .item-name { flex-grow: 1; }
-        #receiptPreviewContent .item-price { min-width: 60px; text-align: right; }
+    .product-item:last-child {
+      border-bottom: none;
+    }
 
+    .product-name {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #2196f3;
+    }
 
-        .frequent-product-btn {
-            background-color: rgba(0, 128, 0, 0.15);
-            border: 1px solid #00ff00;
-            color: #00ff00;
-            padding: 0.5rem;
-            border-radius: 0.375rem;
-            font-size: 0.75rem; /* text-xs */
-            text-align: center;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .frequent-product-btn:hover {
-            background-color: rgba(0, 255, 0, 0.25);
-        }
-        #appLogo {
-            cursor: pointer;
-        }
+    .product-price {
+      font-size: 1.1rem;
+      color: #4caf50;
+    }
 
-        /* Estilos para el contenedor de resultados de búsqueda */
-        #searchResultsContainer {
-            position: absolute; /* Posicionamiento absoluto para que aparezca sobre otros elementos */
-            top: 100%; /* Debajo de la barra de búsqueda */
-            left: 0;
-            right: 0;
-            background-color: #1a1a1a; /* Fondo oscuro */
-            border: 1px solid #00ff00; /* Borde verde neón */
-            border-radius: 5px;
-            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.5);
-            z-index: 10; /* Asegura que esté por encima del contenido principal */
-            max-height: 200px; /* Altura máxima con scroll */
-            overflow-y: auto;
-            margin-top: 5px; /* Espacio entre la barra de búsqueda y los resultados */
-            width: 100%; /* Ocupa todo el ancho del contenedor padre */
-            max-width: 400px; /* Mismo ancho máximo que la barra de búsqueda */
-            left: 50%; /* Centrar horizontalmente */
-            transform: translateX(-50%); /* Centrar horizontalmente */
-        }
+    .product-quantity {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
 
-        /* Estilos para cada resultado de búsqueda */
-        .search-result-item {
-            padding: 10px 15px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            text-align: left; /* Alinear texto a la izquierda */
-            border-bottom: 1px solid #333; /* Separador */
-        }
-        .search-result-item:last-child {
-            border-bottom: none; /* Eliminar borde del último item */
-        }
-        .search-result-item:hover {
-            background-color: #333; /* Fondo al pasar el ratón */
-        }
-        .search-result-item strong {
-            color: #00ff00; /* Color para el nombre del producto */
-        }
-        .search-result-item span {
-            font-size: 0.9em;
-            color: #ccc; /* Color para los detalles del producto */
-        }
+    .product-quantity button {
+      padding: 5px 10px;
+      font-size: 1.1rem;
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
 
-        /* Estilos para el modal de productos por peso categorizados */
-        #categorizedWeightProductsModal .category-header {
-            background-color: #2a2a2a; /* Fondo oscuro para encabezados */
-            padding: 10px 15px;
-            cursor: pointer;
-            border-bottom: 1px solid #444;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: bold;
-            color: #f0abfc; /* Color magenta */
-            transition: background-color 0.2s ease;
-        }
-        #categorizedWeightProductsModal .category-header:hover {
-            background-color: #3a3a3a;
-        }
-        #categorizedWeightProductsModal .category-content {
-            padding: 10px 15px;
-            background-color: #1a1a1a; /* Fondo más oscuro para el contenido */
-            border-bottom: 1px solid #444;
-        }
-        #categorizedWeightProductsModal .category-content .product-item {
-            padding: 8px 0;
-            cursor: pointer;
-            border-bottom: 1px dashed #555;
-            transition: background-color 0.1s ease;
-            color: #ccc; /* Color de texto para productos */
-        }
-        #categorizedWeightProductsModal .category-content .product-item:last-child {
-            border-bottom: none;
-        }
-        #categorizedWeightProductsModal .category-content .product-item:hover {
-            background-color: #2a2a2a;
-        }
-        #categorizedWeightProductsModal .category-content .product-item strong {
-            color: #00ff00; /* Color verde para el nombre del producto */
-        }
+    .product-quantity button:hover {
+      background-color: #1976d2;
+    }
 
-    </style>
+    .delete-btn {
+      color: red;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    /* Cuadro de subtotal y total */
+    .total-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: 2px solid #2196f3;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #f1f8e9;
+      color: #2196f3;
+    }
+
+    .total-container .subtotal,
+    .total-container .total {
+      font-weight: bold;
+    }
+
+    .final-total {
+      margin-top: 20px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #2196f3;
+      text-align: center;
+    }
+
+    /* Estilos para botones */
+    .action-button {
+      background-color: #4caf50;
+      padding: 10px;
+      font-size: 1.2rem;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+    }
+
+    .action-button:hover {
+      background-color: #388e3c;
+    }
+
+    /* Estilos para pantallas pequeñas */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      .order-summary-container {
+        padding: 15px;
+      }
+
+      .total-container {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .total-container .subtotal,
+      .total-container .total {
+        margin-bottom: 10px;
+      }
+    }
+  </style>
 </head>
-<body class="bg-black text-white min-h-screen flex flex-col items-center pt-4 sm:pt-8 px-4">
+<body>
 
-    <div id="preloader">
-        <img src="https://raw.githubusercontent.com/jona30-web/Minimarket.app/032d691df1461e1c933efb7be1a82ed963380606/loader.png.jpg" alt="Cargando..." onerror="this.src='https://placehold.co/150x150/000000/FFFFFF?text=Error+Loader+URL'; console.error('Error al cargar el loader desde GitHub.')" class="app-logo"/>
-    </div>
+  <!-- Contenedor de la orden con el video de fondo -->
+  <div class="order-summary-container">
+    <!-- Video de fondo -->
+    <video id="videoDisplay" muted loop autoplay>
+      <source src="https://drive.google.com/uc?export=download&id=1ZaCvE-ZlNswPLTRXoCgLa64xIek0fsYl" type="video/mp4">
+      Tu navegador no soporta el video.
+    </video>
 
-    <header class="w-full max-w-4xl flex justify-between items-center mb-8 sm:mb-12">
-        <button id="addProductManuallyBtn" class="p-2 sm:p-3 border-2 border-fuchsia-500 neon-border-magenta rounded-lg text-fuchsia-500 hover:bg-fuchsia-700 hover:text-white transition-all" title="Añadir Producto Aleatorio (Demo)">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 sm:w-6 sm:h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-        </button>
-        <img src="https://raw.githubusercontent.com/jona30-web/Minimarket.app/032d691df1461e1c933efb7be1a82ed963380606/logosinfondo.png.png" alt="MiniMarket Logo" id="appLogo" class="h-12 sm:h-14 object-contain cursor-pointer app-logo" onerror="this.src='https://placehold.co/120x50/000000/808080?text=Error+Logo+URL'; console.error('Error al cargar el logo desde GitHub.')"/>
-        <div class="relative">
-            <button id="menuButton" class="p-2 sm:p-3 border-2 border-fuchsia-500 neon-border-magenta rounded-lg text-fuchsia-500 hover:bg-fuchsia-700 hover:text-white transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 sm:w-6 sm:h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                </svg>
-            </button>
-            <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-64 sm:w-72 bg-neutral-900 border-2 border-fuchsia-500 neon-border-magenta rounded-lg shadow-xl z-20 overflow-hidden">
-                <a href="#" id="linkPOSView" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
-                    <i class="fas fa-shopping-cart w-5 h-5 mr-3 text-fuchsia-400"></i> Carrito / Modo Venta
-                </a>
-                <a href="#" id="linkVerInventario" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
-                    <i class="fas fa-eye w-5 h-5 mr-3 text-fuchsia-400"></i> Ver Inventario
-                </a>
-                <a href="#" id="linkReporte" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
-                    <i class="fas fa-chart-line w-5 h-5 mr-3 text-fuchsia-400"></i> Reporte de Ventas
-                </a>
-                 <a href="#" id="linkManageProducts" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
-                    <i class="fas fa-box w-5 h-5 mr-3 text-fuchsia-400"></i> Gestionar Productos
-                </a>
-                <a href="#" id="linkConfiguracion" class="flex items-center px-4 py-3 text-sm sm:text-base text-gray-200 hover:bg-neutral-800 dropdown-item-hover transition-colors">
-                    <i class="fas fa-cog w-5 h-5 mr-3 text-fuchsia-400"></i> Configuración
-                </a>
-            </div>
+    <!-- Contenido del resumen de la orden -->
+    <h2>Resumen de la Compra</h2>
+
+    <!-- Lista de productos disponibles -->
+    <div class="product-list">
+      <!-- Producto 1 -->
+      <div class="product-item">
+        <div class="product-name">Laptop HP EliteBook</div>
+        <div class="product-price">$1,299.99</div>
+        <div class="product-quantity">
+          <button>-</button>
+          <span id="quantity-laptop">1</span>
+          <button>+</button>
         </div>
-    </header>
+        <span class="delete-btn">Eliminar</span>
+      </div>
 
-    <div id="mainContentArea" class="w-full opacity-0 transition-opacity duration-500">
-        <main id="inventoryView" class="w-full max-w-4xl mx-auto flex flex-col lg:flex-row gap-6 items-start">
-            <div class="w-full lg:w-1/2 flex flex-col items-center text-center">
-                <h1 class="text-4xl sm:text-5xl font-bold text-green-400 neon-text-green mb-3 sm:mb-4">
-                    Bienvenido a <br class="sm:hidden"> <span id="headerStoreName">MiniMarket POS</span>
-                </h1>
-                <p class="text-base sm:text-lg text-gray-300 mb-6 sm:mb-8">
-                    Sistema de venta y gestión
-                </p>
-                <div class="flex flex-wrap justify-center items-center gap-3 mb-6 sm:mb-8 w-full">
-                     <button id="viewProductListBtn" class="btn-view-list flex items-center justify-center gap-2 px-4 py-3 text-xs sm:text-sm font-semibold text-green-400 border-2 border-green-400 neon-border-green rounded-lg hover:bg-green-600 hover:text-black hover:border-green-600 transition-all">
-                         <i class="fas fa-list-ul mr-2"></i>VER LISTA
-                    </button>
-                    <button id="sellByWeightBtn" class="btn-action-magenta flex items-center justify-center gap-2 px-4 py-3 text-xs sm:text-sm font-semibold text-fuchsia-400 border-2 border-fuchsia-400 neon-border-magenta rounded-lg hover:bg-fuchsia-600 hover:text-black hover:border-fuchsia-600 transition-all">
-                         <i class="fas fa-balance-scale-right mr-2"></i>PESO LB
-                    </button>
-                    <button id="sellByValueBtn" class="btn-action-blue flex items-center justify-center gap-2 px-4 py-3 text-xs sm:text-sm font-semibold border-2 neon-border-green rounded-lg hover:bg-blue-600 hover:text-black hover:border-blue-600 transition-all">
-                         <i class="fas fa-dollar-sign mr-2"></i>VALOR $
-                    </button>
-                    <button id="sellPolloAmarilloBtn" class="btn-special-yellow flex items-center justify-center gap-2 px-4 py-3 text-xs sm:text-sm font-semibold border-2 neon-border-green rounded-lg hover:bg-yellow-500 hover:text-black hover:border-yellow-500 transition-all">
-                         <i class="fas fa-drumstick-bite mr-2"></i>PRODUCTOS POR PESO
-                    </button>
-                </div>
-
-                <div class="w-full max-w-md mb-2 relative"> <form id="scanForm">
-                        <input type="text" id="barcodeScannerInput" placeholder="Buscar producto por nombre o ID..." class="w-full px-5 py-3 sm:py-4 bg-neutral-800 border-2 border-green-400 neon-border-green rounded-full text-gray-200 placeholder-gray-500 focus:outline-none focus:border-green-300 focus:ring-1 focus:ring-green-300 transition-all text-sm sm:text-base">
-                    </form>
-                    <div id="searchResultsContainer" class="hidden">
-                        </div>
-                </div>
-                <div class="w-full max-w-md mb-6 mt-4">
-                     <button id="clearCartBtn" class="w-full btn-action-magenta flex items-center justify-center gap-2 sm:gap-3 px-6 py-3 text-base sm:text-lg font-semibold text-fuchsia-400 border-2 border-fuchsia-400 neon-border-magenta rounded-xl hover:bg-fuchsia-600 hover:text-black hover:border-fuchsia-600 transition-all">
-                         <i class="fas fa-trash-alt"></i> LIMPIAR CARRITO
-                    </button>
-                </div>
-
-                <div class="w-full max-w-md mb-6 mt-4">
-                    <h3 class="text-xl text-fuchsia-400 mb-2">Productos Sugeridos</h3>
-                    <div id="frequentProductsContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    </div>
-                </div>
-
-
-                <div id="productListModal" class="hidden fixed inset-0 modal flex items-center justify-center z-30 p-4">
-                    <div class="bg-neutral-900 p-4 sm:p-6 rounded-lg shadow-xl max-w-xl w-full max-h-[90vh] flex flex-col border-2 border-fuchsia-500 neon-border-magenta">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-2xl font-bold text-green-400 neon-text-green">Inventario de Productos</h3>
-                            <button id="closeProductListModal" class="text-fuchsia-400 hover:text-fuchsia-300 text-2xl">
-                                <i class="fas fa-times-circle"></i>
-                            </button>
-                        </div>
-                        <input type="text" id="searchProductListInput" placeholder="Buscar por nombre o ID..." class="w-full input-field mb-4">
-                        <div id="demoProductList" class="text-left overflow-y-auto flex-grow pr-2">
-                        </div>
-                        <button id="closeProductListModalBottom" class="mt-4 bg-fuchsia-500 text-white px-6 py-2 rounded-lg hover:bg-fuchsia-600 transition-colors w-full sm:w-auto mx-auto block">Cerrar</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="w-full lg:w-1/2 bg-neutral-800 p-4 sm:p-6 rounded-lg border-2 border-fuchsia-500 neon-border-magenta">
-                <h2 class="text-2xl sm:text-3xl font-bold text-fuchsia-400 neon-text-green mb-4 text-center">Carrito de Compras</h2>
-                <div id="cartItemsContainer" class="max-h-64 sm:max-h-80 overflow-y-auto mb-4 pr-2">
-                    <p id="emptyCartMessage" class="text-gray-400 text-center">El carrito está vacío.</p>
-                </div>
-                <div class="border-t-2 border-fuchsia-400 pt-4">
-                    <div class="flex justify-between items-center text-xl sm:text-2xl font-bold mb-2">
-                        <span class="text-green-400">TOTAL:</span>
-                        <span id="cartTotal" class="text-green-400">$0.00</span>
-                    </div>
-                    <button id="previewReceiptBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2.5 px-4 rounded-lg text-base transition-all mb-3 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                        <i class="fas fa-receipt mr-2"></i>Vista Previa Recibo
-                    </button>
-                    <button id="finalizeSaleBtn" class="w-full bg-green-500 hover:bg-green-600 text-black font-bold py-3 sm:py-4 rounded-lg text-lg sm:text-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                        <i class="fas fa-check-circle mr-2"></i> FINALIZAR VENTA
-                    </button>
-                </div>
-            </div>
-        </main>
-
-        <section id="reportView" class="hidden w-full max-w-3xl mx-auto mt-10 p-6 bg-neutral-800 rounded-lg border-2 border-green-500 neon-border-green">
-            <h1 class="text-3xl sm:text-4xl font-bold text-green-400 neon-text-green mb-6 text-center">Reporte de Ventas</h1>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 items-end">
-                <div>
-                    <label for="reportStartDate" class="block text-sm font-medium text-gray-300 mb-1">Fecha Inicio:</label>
-                    <input type="date" id="reportStartDate" class="w-full date-input-field">
-                </div>
-                <div>
-                    <label for="reportEndDate" class="block text-sm font-medium text-gray-300 mb-1">Fecha Fin:</label>
-                    <input type="date" id="reportEndDate" class="w-full date-input-field">
-                </div>
-                <button id="filterReportBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2.5 px-4 rounded-lg transition-all h-fit">
-                    <i class="fas fa-filter mr-2"></i>Filtrar Reporte
-                </button>
-            </div>
-            <div class="flex flex-col sm:flex-row gap-4 mb-6">
-                 <button id="showTodayReportBtn" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 px-4 rounded-lg transition-all">
-                    <i class="fas fa-calendar-day mr-2"></i>Reporte de Hoy
-                </button>
-                <button id="showAllSalesReportBtn" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2.5 px-4 rounded-lg transition-all">
-                    <i class="fas fa-history mr-2"></i>Mostrar Todas las Ventas
-                </button>
-            </div>
-
-
-            <div class="space-y-4 text-lg mb-6">
-                <p><strong>Mostrando Reporte Para:</strong> <span id="reportDateRange" class="text-gray-300">Hoy</span></p>
-                <p><strong>Total Recaudado:</strong> <span id="dailyTotalRevenue" class="text-green-400 font-bold"></span></p>
-                <p><strong>Cantidad de Productos Vendidos:</strong> <span id="dailyTotalProductsSold" class="text-fuchsia-400 font-bold"></span></p>
-                <p><strong>Cantidad de Ventas Realizadas:</strong> <span id="dailyTotalSalesCount" class="text-fuchsia-400 font-bold"></span></p>
-            </div>
-            <div class="mb-6">
-                <h3 class="text-xl text-fuchsia-400 mb-2">Detalle de Ventas:</h3>
-                <div id="dailySalesDetails" class="max-h-96 overflow-y-auto space-y-3 pr-2">
-                </div>
-            </div>
-            <div class="mb-8">
-                <h3 class="text-xl text-fuchsia-400 mb-2">Productos Más Vendidos (en rango):</h3>
-                <div id="topSellingProducts" class="space-y-1 text-sm">
-                </div>
-            </div>
-            <div class="text-center">
-                <button id="downloadReportPdfBtn" class="bg-fuchsia-500 hover:bg-fuchsia-600 text-white font-bold py-3 px-6 rounded-lg text-lg transition-all">
-                    <i class="fas fa-file-pdf mr-2"></i> Descargar Reporte PDF
-                </button>
-            </div>
-             <div class="mt-6 text-sm text-gray-400">
-                <p>Nota: Este reporte se basa en las ventas registradas en el almacenamiento local del navegador.</p>
-            </div>
-        </section>
-
-        <section id="manageProductsView" class="hidden w-full max-w-3xl mx-auto mt-10 p-6 bg-neutral-800 rounded-lg border-2 border-green-500 neon-border-green">
-            <h1 class="text-3xl sm:text-4xl font-bold text-green-400 neon-text-green mb-6 text-center">Gestionar Productos</h1>
-            <div class="mb-6">
-                <h3 id="formProductTitle" class="text-xl text-fuchsia-400 mb-2">Añadir Nuevo Producto</h3>
-                <form id="addProductForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
-                    <div>
-                        <label for="newProductName" class="block text-sm font-medium text-gray-300 mb-1">Nombre:</label>
-                        <input type="text" id="newProductName" required class="w-full input-field">
-                    </div>
-                    <div>
-                        <label for="newProductId" class="block text-sm font-medium text-gray-300 mb-1">ID (Código de Barras):</label>
-                        <input type="text" id="newProductId" required class="w-full input-field">
-                    </div>
-                     <div>
-                        <label for="newProductCategory" class="block text-sm font-medium text-gray-300 mb-1">Categoría:</label>
-                        <input type="text" id="newProductCategory" required class="w-full input-field" placeholder="Ej: Bebidas, Confiteria">
-                    </div>
-                    <div>
-                        <label for="newProductUnit" class="block text-sm font-medium text-gray-300 mb-1">Unidad (Ej: 500ml, 1kg, und):</label>
-                        <input type="text" id="newProductUnit" required class="w-full input-field">
-                    </div>
-                    <div>
-                        <label for="newProductPrice" class="block text-sm font-medium text-gray-300 mb-1">Precio ($):</label>
-                        <input type="number" id="newProductPrice" step="0.01" min="0" required class="w-full input-field">
-                    </div>
-                    <div>
-                        <label for="newProductStock" class="block text-sm font-medium text-gray-300 mb-1">Stock (Cantidad):</label>
-                        <input type="number" id="newProductStock" step="1" min="0" required class="w-full input-field">
-                    </div>
-                    <button type="submit" id="submitProductFormBtn" class="sm:col-span-2 bg-green-500 hover:bg-green-600 text-black font-bold py-2.5 px-4 rounded-lg transition-all h-fit mt-4">
-                        <i class="fas fa-plus-circle mr-2"></i>Añadir Producto
-                    </button>
-                    <button type="button" id="cancelEditBtn" class="hidden sm:col-span-2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2.5 px-4 rounded-lg transition-all h-fit mt-2">
-                        Cancelar Edición
-                    </button>
-                </form>
-            </div>
-            <div>
-                <h3 class="text-xl text-fuchsia-400 mb-2">Lista de Productos Actuales</h3>
-                <input type="text" id="searchCurrentProductsInput" placeholder="Buscar por nombre o ID..." class="w-full input-field mb-4">
-                <div id="currentProductsList" class="max-h-96 overflow-y-auto pr-2 space-y-2">
-                    <p class="text-gray-400">Cargando productos...</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="configuracionView" class="hidden w-full max-w-xl mx-auto mt-10 p-6 bg-neutral-800 rounded-lg border-2 border-green-500 neon-border-green">
-            <h1 class="text-3xl sm:text-4xl font-bold text-green-400 neon-text-green mb-6 text-center">Configuración de la Tienda</h1>
-            <form id="storeConfigForm" class="space-y-4">
-                <div>
-                    <label for="storeNameInput" class="block text-sm font-medium text-gray-300 mb-1">Nombre de la Tienda:</label>
-                    <input type="text" id="storeNameInput" class="w-full input-field" placeholder="Mi MiniMarket">
-                </div>
-                <div>
-                    <label for="storeAddressInput" class="block text-sm font-medium text-gray-300 mb-1">Dirección:</label>
-                    <input type="text" id="storeAddressInput" class="w-full input-field" placeholder="Calle Falsa 123, Ciudad">
-                </div>
-                <div>
-                    <label for="storeRucInput" class="block text-sm font-medium text-gray-300 mb-1">RUC / CI:</label>
-                    <input type="text" id="storeRucInput" class="w-full input-field" placeholder="9999999999001">
-                </div>
-                <button type="submit" class="w-full bg-fuchsia-500 hover:bg-fuchsia-600 text-white font-bold py-2.5 px-4 rounded-lg transition-all">
-                    <i class="fas fa-save mr-2"></i>Guardar Configuración
-                </button>
-            </form>
-            <div class="mt-8 pt-6 border-t border-neutral-700">
-                <h3 class="text-xl text-red-500 mb-2">Zona Peligrosa</h3>
-                <button id="clearAllDataBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-lg transition-all">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>Limpiar Todos los Datos de la Aplicación
-                </button>
-                <p class="text-xs text-gray-400 mt-2">Esto eliminará todos los productos, historial de ventas y configuraciones guardadas. Esta acción no se puede deshacer.</p>
-            </div>
-        </section>
-    </div>
-
-    <div id="weightProductModal" class="hidden fixed inset-0 modal flex items-center justify-center z-40 p-4">
-        <div class="bg-neutral-900 p-6 rounded-lg shadow-xl max-w-md w-full border-2 border-green-500 neon-border-green">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-2xl font-bold text-green-400 neon-text-green">Vender Producto por Peso</h3>
-                <button id="closeWeightProductModalBtn" class="text-fuchsia-400 hover:text-fuchsia-300 text-2xl">
-                    <i class="fas fa-times-circle"></i>
-                </button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label for="weightProductNameSelect" class="block text-sm font-medium text-gray-300 mb-1">Producto:</label>
-                    <select id="weightProductNameSelect" class="w-full input-field">
-                        </select>
-                </div>
-                <div>
-                    <label for="weightProductPricePerLb" class="block text-sm font-medium text-gray-300 mb-1">Precio por Libra ($):</label>
-                    <input type="number" id="weightProductPricePerLb" step="0.01" min="0" class="w-full input-field" placeholder="0.00">
-                </div>
-                <div>
-                    <label for="weightProductWeightLb" class="block text-sm font-medium text-gray-300 mb-1">Peso (Libras):</label>
-                    <input type="number" id="weightProductWeightLb" step="0.01" min="0" class="w-full input-field" placeholder="0.00">
-                </div>
-                <div class="text-lg">
-                    Precio Total Calculado: <strong id="weightProductTotalCalculated" class="text-green-400">$0.00</strong>
-                </div>
-            </div>
-            <div class="mt-6 flex flex-col sm:flex-row gap-3">
-                <button id="addWeightProductToCartBtn" class="flex-1 bg-green-500 hover:bg-green-600 text-black font-bold py-2.5 px-4 rounded-lg transition-all">
-                    <i class="fas fa-cart-plus mr-2"></i>Añadir al Carrito
-                </button>
-                <button id="resetSavedPriceBtn" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2.5 px-4 rounded-lg transition-all">
-                    <i class="fas fa-undo mr-2"></i>Restablecer Precio
-                </button>
-            </div>
-             <button id="closeWeightProductModalBottomBtn" class="mt-4 bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors w-full">Cerrar</button>
+      <!-- Producto 2 -->
+      <div class="product-item">
+        <div class="product-name">Mouse Inalámbrico</div>
+        <div class="product-price">$99.99</div>
+        <div class="product-quantity">
+          <button>-</button>
+          <span id="quantity-mouse">1</span>
+          <button>+</button>
         </div>
+        <span class="delete-btn">Eliminar</span>
+      </div>
     </div>
 
-    <div id="sellByValueModal" class="hidden fixed inset-0 modal flex items-center justify-center z-40 p-4">
-        <div class="bg-neutral-900 p-6 rounded-lg shadow-xl max-w-md w-full border-2 border-blue-500 neon-border-green">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-2xl font-bold text-blue-400 neon-text-green">Vender Producto por Valor</h3>
-                <button id="closeSellByValueModalBtn" class="text-fuchsia-400 hover:text-fuchsia-300 text-2xl">
-                    <i class="fas fa-times-circle"></i>
-                </button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label for="valueProductNameSelect" class="block text-sm font-medium text-gray-300 mb-1">Producto:</label>
-                    <select id="valueProductNameSelect" class="w-full input-field">
-                        </select>
-                </div>
-                <div>
-                    <label for="valueProductPricePerLb" class="block text-sm font-medium text-gray-300 mb-1">Precio por Libra ($):</label>
-                    <input type="number" id="valueProductPricePerLb" step="0.01" min="0" class="w-full input-field" placeholder="0.00">
-                </div>
-                <div>
-                    <label for="valueProductDesiredValue" class="block text-sm font-medium text-gray-300 mb-1">Valor Deseado ($):</label>
-                    <input type="number" id="valueProductDesiredValue" step="0.01" min="0" class="w-full input-field" placeholder="5.00">
-                </div>
-                <div class="text-lg">
-                    Peso Calculado: <strong id="valueProductCalculatedWeight" class="text-blue-400">0.00 lbs</strong>
-                </div>
-            </div>
-            <div class="mt-6 flex flex-col sm:flex-row gap-3">
-                <button id="addValueProductToCartBtn" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2.5 px-4 rounded-lg transition-all">
-                    <i class="fas fa-cart-plus mr-2"></i>Añadir al Carrito
-                </button>
-                <button id="resetSavedValuePriceBtn" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2.5 px-4 rounded-lg transition-all">
-                    <i class="fas fa-undo mr-2"></i>Restablecer Precio
-                </button>
-            </div>
-             <button id="closeSellByValueModalBottomBtn" class="mt-4 bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors w-full">Cerrar</button>
-        </div>
+    <!-- Cuadro de subtotal -->
+    <div class="total-container">
+      <div class="subtotal">Subtotal</div>
+      <div class="subtotal" id="subtotal">0.00</div>
     </div>
 
-    <div id="categorizedWeightProductsModal" class="hidden fixed inset-0 modal flex items-center justify-center z-40 p-4">
-        <div class="bg-neutral-900 p-4 sm:p-6 rounded-lg shadow-xl max-w-xl w-full max-h-[90vh] flex flex-col border-2 border-fuchsia-500 neon-border-magenta">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-2xl font-bold text-green-400 neon-text-green">Productos por Peso</h3>
-                <button id="closeCategorizedWeightProductsModalBtn" class="text-fuchsia-400 hover:text-fuchsia-300 text-2xl">
-                    <i class="fas fa-times-circle"></i>
-                </button>
-            </div>
-            <div id="categorizedProductsList" class="text-left overflow-y-auto flex-grow pr-2">
-                </div>
-             <button id="closeCategorizedWeightProductsModalBottomBtn" class="mt-4 bg-fuchsia-500 text-white px-6 py-2 rounded-lg hover:bg-fuchsia-600 transition-colors w-full sm:w-auto mx-auto block">Cerrar</button>
-        </div>
+    <!-- Cuadro de total -->
+    <div class="total-container">
+      <div class="total">Total</div>
+      <div class="total" id="total">0.00</div>
     </div>
 
-
-    <div id="receiptPreviewModal" class="hidden fixed inset-0 modal flex items-center justify-center z-40 p-4">
-        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-neutral-800">Vista Previa del Recibo</h3>
-                <button id="closeReceiptPreviewModalBtn" class="text-neutral-500 hover:text-neutral-700 text-2xl">
-                    <i class="fas fa-times-circle"></i>
-                </button>
-            </div>
-            <div id="receiptPreviewContent" class="text-sm">
-            </div>
-            <button id="closeReceiptPreviewModalBottomBtn" class="mt-4 bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors w-full">Cerrar</button>
-        </div>
+    <!-- Total final -->
+    <div class="final-total">
+      Total: <span id="final-total">0.00</span>
     </div>
 
-    <div id="paymentModal" class="hidden fixed inset-0 modal flex items-center justify-center z-30 p-4">
-        <div class="bg-neutral-800 p-6 rounded-lg shadow-xl max-w-md w-full">
-            <h3 class="text-2xl font-bold text-green-400 neon-text-green mb-4">Procesar Pago</h3>
-            <p class="text-xl mb-2">Total a Pagar: <span id="paymentModalTotal" class="font-bold text-green-400"></span></p>
+    <!-- Botones de acciones -->
+    <button class="action-button" id="view-receipt">Vista previa recibo</button>
+    <button class="action-button" id="finalize-sale">Finalizar venta</button>
+
+    <!-- Selección de video -->
+    <input type="file" id="videoInput" accept="video/*" />
+  </div>
+
+  <script>
+    // Variables para el subtotal y el total
+    let subtotal = 0;
+    let total = 0;
+
+    // Precios de los productos
+    const productPrices = {
+      laptop: 1299.99,
+      mouse: 99.99
+    };
+
+    // Actualizar total al modificar cantidad de productos
+    function updateTotal() {
+      const laptopQuantity = parseInt(document.getElementById("quantity-laptop").textContent);
+      const mouseQuantity = parseInt(document.getElementById("quantity-mouse").textContent);
+
+      subtotal = (laptopQuantity * productPrices.laptop) + (mouseQuantity * productPrices.mouse);
+      total = subtotal; // Aquí se puede agregar impuestos si es necesario
+
+      // Actualizar en la interfaz
+      document.getElementById("subtotal").textContent = subtotal.toFixed(2);
+      document.getElementById("total").textContent = total.toFixed(2);
+      document.getElementById("final-total").textContent = total.toFixed(2);
+    }
+
+    // Función para aumentar o disminuir cantidad de productos
+    function updateQuantity(product, delta) {
+      const quantityElement = document.getElementById(`quantity-${product}`);
+      let quantity = parseInt(quantityElement.textContent);
+
+      if (quantity + delta >= 0) {
+        quantity += delta;
+        quantityElement.textContent = quantity;
+        updateTotal();
+      }
+    }
+
+    // Función para eliminar producto de la venta
+    function deleteProduct(product) {
+      const quantityElement = document.getElementById(`quantity-${product}`);
+      quantityElement.textContent = 0;
+      updateTotal();
+    }
+
+    // Asignar eventos a los botones
+    document.querySelectorAll('.product-quantity button').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const product = e.target.closest('.product-item').querySelector('.product-name').textContent.toLowerCase().replace(' ', '-');
+        const action = e.target.textContent === '+' ? 1 : -1;
+        updateQuantity(product, action);
+      });
+    });
+
+    // Asignar evento de eliminación de producto
+    document.querySelectorAll('.delete-btn').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const product = e.target.closest('.product-item').querySelector('.product-name').textContent.toLowerCase().replace(' ', '-');
+        deleteProduct(product);
+      });
+    });
+
+    // Acciones de botones
+    document.getElementById('view-receipt').addEventListener('click', () => {
+      alert("Vista previa recibo.");
+    });
+
+    document.getElementById('finalize-sale').addEventListener('click', () => {
+      alert("Venta finalizada.");
+    });
+
+    // Seleccionar el video de la galería
+    const videoInput = document.getElementById('videoInput');
+    const videoDisplay = document.getElementById('videoDisplay');
+
+    videoInput.addEventListener('change', function(event) {
+      const file = event.target.files[0]; // Obtener el archivo seleccionado
+
+      if (file) {
+        const videoUrl = URL.createObjectURL(file); // Crear una URL para el video
+        videoDisplay.src = videoUrl; // Establecer el video como fuente
+      }
+    });
+  </script>
 
-            <div class="mb-4">
-                <label for="paymentMethodSelect" class="block text-sm font-medium text-gray-300 mb-1">Método de Pago:</label>
-                <select id="paymentMethodSelect" class="w-full input-field">
-                    <option value="Efectivo">Efectivo</option>
-                    <option value="Tarjeta">Tarjeta</option>
-                    <option value="Otro">Otro</option>
-                </select>
-            </div>
-             <div class="mb-4">
-                <label for="saleNoteInput" class="block text-sm font-medium text-gray-300 mb-1">Nota de la Venta (Opcional):</label>
-                <textarea id="saleNoteInput" rows="2" class="w-full input-field" placeholder="Ej: Cliente VIP, Para llevar..."></textarea>
-            </div>
-
-            <div class="mb-4">
-                <label for="amountPaidInput" class="block text-sm font-medium text-gray-300 mb-1">Monto Pagado por Cliente:</label>
-                <input type="number" id="amountPaidInput" step="0.01" class="w-full input-field" placeholder="0.00">
-            </div>
-            <p class="text-lg mb-4">Cambio: <span id="changeDue" class="font-bold text-fuchsia-400">$0.00</span></p>
-            <div class="flex justify-end gap-4">
-                <button id="cancelPaymentBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors">Cancelar</button>
-                <button id="confirmPaymentBtn" class="bg-green-500 hover:bg-green-600 text-black px-6 py-2 rounded-lg transition-colors disabled:opacity-50" disabled>Confirmar Pago</button>
-            </div>
-        </div>
-    </div>
-
-    <footer class="w-full text-center text-gray-500 text-xs sm:text-sm py-6 mt-auto">
-        &copy; <span id="currentYear"></span> <span id="footerStoreName">MiniMarket</span> | Creado y desarrollado por Jonathan Tuquerrez
-    </footer>
-
-    <script>
-        const { jsPDF } = window.jspdf;
-        let synth;
-
-        // Lista expandida de productos para venta por peso, organizada por categorías
-        const sellByWeightProducts = {
-            "Fideos": [
-                { key: 'fideo_lazo', name: 'Lazo (Fideo)' },
-                { key: 'fideo_tornillo', name: 'Tornillo (Fideo)' },
-                { key: 'fideo_macarron', name: 'Macarrón (Fideo)' },
-                { key: 'fideo_tallarin', name: 'Tallarín (Fideo)' },
-                { key: 'fideo_cabello_angel', name: 'Cabello de Ángel (Fideo)' },
-                { key: 'fideo_broca', name: 'Broca (Fideo)' },
-                { key: 'fideo_chino', name: 'Fideo Chino' },
-                { key: 'fideo_figuras', name: 'Figuras (Fideo)' }
-            ],
-            "Harinas": [
-                { key: 'harina_trigo', name: 'Harina de Trigo' },
-                { key: 'harina_maiz', name: 'Harina de Maíz' },
-                { key: 'harina_integral', name: 'Harina Integral' },
-                { key: 'harina_polvo_hornear', name: 'Harina con Polvo de Hornear' },
-                { key: 'harina_sin_polvo_hornear', name: 'Harina sin Polvo de Hornear' },
-                { key: 'harina_haba', name: 'Harina de Haba' },
-                { key: 'harina_maiz_morado', name: 'Harina de Maíz Morado' },
-                { key: 'harina_maiz_tostado', name: 'Harina de Maíz Tostado' },
-                { key: 'harina_platano', name: 'Harina de Plátano' },
-                { key: 'harina_quinua', name: 'Harina de Quinua' },
-                { key: 'harina_arveja', name: 'Harina de Arveja' },
-                { key: 'harina_centeno', name: 'Harina de Centeno' },
-                { key: 'harina_yuca', name: 'Harina de Yuca (Almidón de Yuca)' },
-                { key: 'harina_arroz', name: 'Harina de Arroz' },
-                { key: 'harina_amaranto', name: 'Harina de Amaranto' },
-                { key: 'harina_lentejas', name: 'Harina de Lentejas' },
-                { key: 'harina_almendras', name: 'Harina de Almendras' },
-                { key: 'harina_coco', name: 'Harina de Coco' },
-                { key: 'machica', name: 'Máchica (Harina de cebada tostada)' },
-                { key: 'maicena', name: 'Maicena (Almidón de maíz)' }
-            ],
-             "Pollo": [
-                { key: 'pollo_entero_granel', name: 'Pollo entero' },
-                { key: 'pechuga_pollo_granel', name: 'Pechuga de pollo' },
-                { key: 'pierna_muslo_pollo_granel', name: 'Pierna con Muslo de pollo' },
-                { key: 'alas_pollo_granel', name: 'Alas de pollo' },
-                { key: 'menudencias_pollo_granel', name: 'Menudencias de pollo' },
-                { key: 'pollo_troceado_granel', name: 'Pollo troceado' },
-                { key: 'pollo_amarillo_campero_granel', name: 'Pollo amarillo (campero)' }
-            ],
-            "Res": [
-                { key: 'carne_molida_res_granel', name: 'Carne Molida de res' },
-                { key: 'carne_segunda_res_granel', name: 'Carne de segunda (Res)' },
-                { key: 'carne_primera_res_granel', name: 'Carne de Primera (Res)' },
-                { key: 'bistec_res_granel', name: 'Bistec de res' },
-                { key: 'costilla_res_granel', name: 'Costilla de res' },
-                { key: 'hueso_carne_res_granel', name: 'Hueso con carne (Res, para caldo)' },
-                { key: 'visceras_res_granel', name: 'Vísceras de Res (Hígado, corazón, lengua)' }
-            ],
-            "Cerdo": [
-                { key: 'chuleta_cerdo_granel', name: 'Chuleta de cerdo' },
-                { key: 'costilla_cerdo_granel', name: 'Costilla de cerdo' },
-                { key: 'lomo_cerdo_granel', name: 'Lomo de cerdo' },
-                { key: 'pierna_cerdo_granel', name: 'Pierna de cerdo' },
-                { key: 'patas_cerdo_granel', name: 'Patas de cerdo' },
-                { key: 'hueso_carnudo_cerdo_granel', name: 'Hueso carnudo de cerdo' },
-                { key: 'tocino_grasa_cerdo_granel', name: 'Tocino / grasa de cerdo' },
-                { key: 'chorizo_criollo_granel', name: 'Chorizo criollo' },
-                { key: 'longaniza_granel', name: 'Longaniza' },
-                { key: 'salchicha_vienesa_granel', name: 'Salchicha Vienesa (a granel/por libra)' },
-                { key: 'carne_picada_seco_granel', name: 'Carne picada para seco (Res o Cerdo)' },
-                { key: 'carne_guatita_res_granel', name: 'Carne para guatita (Res)' },
-                { key: 'cueros_tripas_cerdo_granel', name: 'Cueros / tripas para hornado o fritada (Cerdo)' },
-                { key: 'panceta_cerdo_granel', name: 'Panceta (Cerdo)' },
-                { key: 'chicharron_crudo_cerdo_granel', name: 'Chicharrón crudo (Cerdo)' },
-                { key: 'carne_chancho_fritada_granel', name: 'Carne de chancho para fritada' }
-            ],
-            "Pescados y Mariscos": [
-                { key: 'camaron_granel', name: 'Camarón' },
-                { key: 'tilapia_granel', name: 'Tilapia' },
-                { key: 'corvina_granel', name: 'Corvina' }
-            ]
-        };
-
-
-        let mockProducts = JSON.parse(localStorage.getItem('mockProducts')) || [
-            // ... (lista de productos extensa omitida por brevedad, pero está en el código completo con 'stock') ...
-            { id: "P001", name: "Aldor Play Gusanos Gomitas Saborizadas", unit: "55g", price: 1.00, category: "Confiteria", stock: 20 },
-            { id: "P002", name: "Arcor El Chavo Chupetes Saborizados", unit: "11g", price: 0.15, category: "Confiteria", stock: 50 },
-            { id: "P003", name: "Arcor El Chavo Chupetes Pack", unit: "528g", price: 4.00, category: "Confiteria", stock: 10 },
-            { id: "P004", name: "Colombina Bon Bon Bum Chupetes Fresa Pack x24", unit: "480g", price: 3.70, category: "Confiteria", stock: 15 },
-            { id: "P005", name: "Colombina Bon Bon Bum Chupete Sabor Fresa x u", unit: "20g", price: 0.15, category: "Confiteria", stock: 100 },
-            { id: "P006", name: "Colombina Bon Bon Bum Chupetes Surtido Pack x24", unit: "480g", price: 3.70, category: "Confiteria", stock: 12 },
-            { id: "P007", name: "Confiteca Plop Chupetes Surtidos x u", unit: "20g", price: 0.15, category: "Confiteria", stock: 80 },
-            { id: "P008", name: "Confiteca Plop Chupetes Fresa Ácida Pack x24", unit: "480g", price: 2.70, category: "Confiteria", stock: 10 },
-            { id: "P009", name: "Confiteca Plop Chupete Fresa Ácida x u", unit: "20g", price: 0.15, category: "Confiteria", stock: 70 },
-            { id: "P067", name: "Nestlé Galleta Amor Rellena Vainilla", unit: "Paquete 6und", price: 0.75, category: "Confiteria", stock: 30},
-            { id: "P068", name: "Chicle Trident Menta Individual", unit: "1 und", price: 0.10, category: "Confiteria", stock: 200},
-            { id: "P010", name: "Protex Fresh Jabón de Tocador Antibacterial Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex", stock: 10 },
-            { id: "P011", name: "Protex Herbal Jabón Antibacterial x u", unit: "110g", price: 1.25, category: "Jabonería Protex", stock: 25 },
-            { id: "P012", name: "Protex Herbal Jabón de Tocador Antibacterial Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex", stock: 8 },
-            { id: "P013", name: "Protex Jabón Aceite de Macadamia", unit: "110g", price: 1.25, category: "Jabonería Protex", stock: 22 },
-            { id: "P014", name: "Protex Jabón Antibacterial Omega 3", unit: "110g", price: 1.25, category: "Jabonería Protex", stock: 18 },
-            { id: "P015", name: "Protex Jabón Limpieza Profunda Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex", stock: 9 },
-            { id: "P016", name: "Protex Jabón Omega 3 Pack x3u", unit: "330g", price: 3.45, category: "Jabonería Protex", stock: 7 },
-            { id: "P017", name: "Aje Sporade Bebida Hidratante Cereza", unit: "500 ml", price: 0.55, category: "Hidratación", stock: 40 },
-            { id: "P018", name: "Aje Sporade Bebida Hidratante Tropical", unit: "1200 ml", price: 1.00, category: "Hidratación", stock: 20 },
-            { id: "P019", name: "Aje Sporade Bebida Hidratante Uva", unit: "500 ml", price: 0.55, category: "Hidratación", stock: 35 },
-            { id: "P020", name: "Aje Sporade Bebida Hidratante Manzana", unit: "1.2 lt", price: 1.00, category: "Hidratación", stock: 18 },
-            { id: "P021", name: "Aje Volt Bebida Energizante Frambuesa Ginseng", unit: "650 ml", price: 1.00, category: "Energizantes", stock: 20 },
-            { id: "P022", name: "Aje Volt Bebida Energizante Maca Arándano", unit: "400 ml", price: 0.50, category: "Energizantes", stock: 30 },
-            { id: "P023", name: "Aje Volt Bebida Energizante Uva Colágeno Aloe Vera", unit: "400 ml", price: 0.50, category: "Energizantes", stock: 28 },
-            { id: "P024", name: "Aroma Melis Té de Hierba Luisa Pack 20u", unit: "24 g", price: 1.15, category: "Jugos y Té", stock: 15 },
-            { id: "P025", name: "Aroma Melis Té de Hierbas Aromáticas Horchata Pack 20u", unit: "24 g", price: 1.15, category: "Jugos y Té", stock: 12 },
-            { id: "P069", name: "Coca-Cola Sabor Original", unit: "500 ml", price: 0.75, category: "Gaseosas", stock: 60},
-            { id: "P070", name: "Agua Dasani Sin Gas", unit: "600 ml", price: 0.50, category: "Hidratación", stock: 50},
-            { id: "P071", name: "Red Bull Energy Drink", unit: "250 ml", price: 2.50, category: "Energizantes", stock: 25},
-            { id: "P026", name: "Alpina Regeneris Yogurt con Frutas Trozos de Frutilla", unit: "150 g", price: 0.70, category: "Lácteos", stock: 20 },
-            { id: "P027", name: "Alpina Regeneris Yogurt con Frutas Trozos de Mora", unit: "150 g", price: 0.70, category: "Lácteos", stock: 18 },
-            { id: "P028", name: "Alpina Regeneris Yogurt con Frutas Trozos de Durazno", unit: "150 g", price: 0.70, category: "Lácteos", stock: 22 },
-            { id: "P029", name: "Chivería Yogurt Mix Sin Azúcar Vainilla Granola", unit: "170 g", price: 1.00, category: "Lácteos", stock: 15 },
-            { id: "P030", name: "Kiosko Premio Sorpresa Yogurt Bebible Frutilla", unit: "180 g", price: 0.75, category: "Lácteos", stock: 30 },
-            { id: "P031", name: "Toni Yogurt Bebible Natural Sin Azúcar", unit: "950 g", price: 3.15, category: "Lácteos", stock: 10 },
-            { id: "P032", name: "Toni Yogurt en Postre Natural Griego Semidescremado", unit: "150 g", price: 1.45, category: "Lácteos", stock: 25 },
-            { id: "P033", name: "Toni Yogurt Mix con Cereal Durazno", unit: "190 g", price: 0.85, category: "Lácteos", stock: 30 },
-            { id: "P034", name: "Toni Yogurt Mix con Cereal Frutilla", unit: "190 g", price: 0.85, category: "Lácteos", stock: 32 },
-            { id: "P035", name: "Pasta de Tomate Pronaca", unit: "250g", price: 1.82, category: "Despensa", stock: 20 },
-            { id: "P036", name: "Salsa Pizza Pronaca", unit: "490g", price: 2.68, category: "Despensa", stock: 15 },
-            { id: "P037", name: "Salsa Spaghetti Pronaca", unit: "490g", price: 2.77, category: "Despensa", stock: 16 },
-            { id: "P038", name: "Salsa Spaghetti Napolitana Pronaca", unit: "500g", price: 3.65, category: "Despensa", stock: 10 },
-            { id: "P039", name: "Ají Indio Bravo", unit: "100ml", price: 0.66, category: "Despensa", stock: 40 },
-            { id: "P040", name: "Fritada Funda Pronaca", unit: "1 kg", price: 6.31, category: "Carnes y Embutidos", stock: 5 },
-            { id: "P041", name: "Cuero en Rollos Pronaca", unit: "1 kg", price: 4.85, category: "Carnes y Embutidos", stock: 6 },
-            { id: "P042", name: "Chuletas Bandeja 4 Unidades Pronaca", unit: "1 kg", price: 10.95, category: "Carnes y Embutidos", stock: 4 },
-            { id: "P043", name: "Chuletas Funda Marinadas 4 unidades Pronaca", unit: "1 kg", price: 5.50, category: "Carnes y Embutidos", stock: 7 },
-            { id: "P044", name: "Jamón Sanduchero Fritz", unit: "200 g", price: 3.00, category: "Carnes y Embutidos", stock: 15 },
-            { id: "P045", name: "Jamón Light Pechuga de Pavo Fritz", unit: "200 g", price: 3.60, category: "Carnes y Embutidos", stock: 12 },
-            { id: "P046", name: "Chuleta de Chancho Ahumada a Pork", unit: "500 g", price: 18.67, category: "Carnes y Embutidos", stock: 3 },
-            { id: "P047", name: "Longaniza Fritz", unit: "300 g", price: 4.00, category: "Carnes y Embutidos", stock: 10 },
-            { id: "P048", name: "Chorizo Fritz", unit: "300 g", price: 2.61, category: "Carnes y Embutidos", stock: 14 },
-            { id: "P049", name: "Ranchera Desayuno Fritz", unit: "1 und", price: 3.34, category: "Carnes y Embutidos", stock: 18 },
-            { id: "P050", name: "Jamón Mr Pollo", unit: "200 g", price: 3.49, category: "Carnes y Embutidos", stock: 16 },
-            { id: "P051", name: "Salchicha Salchipollo", unit: "1 und", price: 1.52, category: "Carnes y Embutidos", stock: 25 },
-            { id: "P052", name: "Salchicha Vienesa x 1", unit: "1 und", price: 0.65, category: "Carnes y Embutidos", stock: 50 },
-            { id: "P053", name: "Tocineta Ahumada Rebanada 2x2", unit: "1 und", price: 14.98, category: "Carnes y Embutidos", stock: 8 },
-            { id: "P054", name: "Jamón de Espaldazo", unit: "1 und", price: 9.55, category: "Carnes y Embutidos", stock: 9 },
-            { id: "P055", name: "Jamón Línea Diaria 85 g", unit: "1 und", price: 1.00, category: "Carnes y Embutidos", stock: 30 },
-            { id: "P056", name: "Salchichas Frankfurt x 5", unit: "1 und", price: 2.50, category: "Carnes y Embutidos", stock: 20 },
-            { id: "P057", name: "Chorizo de Pollo 500 g", unit: "1 und", price: 3.20, category: "Carnes y Embutidos", stock: 12 },
-            { id: "P058", name: "Chorizo Línea Diaria 130 g", unit: "1 und", price: 1.00, category: "Carnes y Embutidos", stock: 28 },
-            { id: "P059", name: "Pepperoni Plumrose", unit: "1 und", price: 3.00, category: "Carnes y Embutidos", stock: 10 },
-            { id: "P060", name: "Jamón de Pierna 200 g", unit: "1 und", price: 3.84, category: "Carnes y Embutidos", stock: 13 },
-            { id: "P061", name: "Chorizo Argentino 300 g", unit: "1 und", price: 4.50, category: "Carnes y Embutidos", stock: 9 },
-            { id: "P062", name: "Avena YA", unit: "1 kg", price: 1.82, category: "Despensa", stock: 25 },
-            { id: "P063", name: "Fideos Cayambe Broca", unit: "400 g", price: 1.00, category: "Despensa", stock: 40 },
-            { id: "P064", name: "Fideos Cayambe Cabello de Ángel", unit: "400 g", price: 1.00, category: "Despensa", stock: 38 },
-            { id: "P065", name: "Fideos Cayambe Tallarín", unit: "400 g", price: 1.00, category: "Despensa", stock: 35 },
-            { id: "P066", name: "Harina YA", unit: "1 kg", price: 2.85, category: "Despensa", stock: 20 },
-            { id: "P072", name: "Arroz Flor", unit: "1 kg", price: 1.50, category: "Despensa", stock: 50},
-            { id: "P073", name: "Azúcar Blanca San Carlos", unit: "1 kg", price: 1.20, category: "Despensa", stock: 60},
-            { id: "P074", name: "Aceite Girasol", unit: "1 lt", price: 2.80, category: "Despensa", stock: 30},
-            { id: "P075", name: "Colgate Triple Acción Pasta Dental", unit: "75 ml", price: 1.80, category: "Cuidado Personal", stock: 25},
-            { id: "P076", name: "Shampoo Head & Shoulders Limpieza Renovadora", unit: "375 ml", price: 4.50, category: "Cuidado Personal", stock: 15},
-            { id: "P077", name: "Desodorante Rexona Men V8 Roll-on", unit: "50 ml", price: 2.20, category: "Cuidado Personal", stock: 30},
-            { id: "P078", name: "Papel Higiénico Familia Acolchamax", unit: "Paquete 4 rollos", price: 2.00, category: "Cuidado Personal", stock: 40},
-            { id: "P079", name: "Papas Fritas Ruffles Queso", unit: "40g", price: 0.50, category: "Snacks", stock: 70},
-            { id: "P080", name: "Doritos Nacho Queso", unit: "45g", price: 0.60, category: "Snacks", stock: 65},
-            { id: "P081", name: "Cheetos Horneados Queso", unit: "30g", price: 0.45, category: "Snacks", stock: 75},
-            { id: "P082", name: "Maní Salado Universal", unit: "100g", price: 0.70, category: "Snacks", stock: 50},
-            { id: "P083", name: "Coca-Cola Sabor Original 1250 ML Retornable UIO", unit: "1250 ML", price: 1.00, category: "Gaseosas", stock: 20 },
-            { id: "P084", name: "Coca-Cola Sabor Original 2000 ML Retornable", unit: "2000 ML", price: 1.60, category: "Gaseosas", stock: 15 },
-            { id: "P085", name: "Coca-Cola Sabor Original 300 ML Retornable", unit: "300 ML", price: 0.30, category: "Gaseosas", stock: 50 },
-            { id: "P086", name: "Coca-Cola Sin Azucar 1000 ML Retornable", unit: "1000 ML", price: 0.50, category: "Gaseosas", stock: 18 },
-            { id: "P087", name: "Coca-Cola Sin Azúcar 2000 ML Retornable", unit: "2000 ML", price: 1.10, category: "Gaseosas", stock: 12 },
-            { id: "P088", name: "Coca-Cola Sin Azúcar 300 ML Retornable", unit: "300 ML", price: 0.30, category: "Gaseosas", stock: 45 },
-            { id: "P089", name: "Fanta Naranja 2000 ML Retornable", unit: "2000 ML", price: 1.10, category: "Gaseosas", stock: 10 },
-            { id: "P090", name: "Fanta Naranja 300 ML Retornable", unit: "300 ML", price: 0.30, category: "Gaseosas", stock: 40 },
-            { id: "P091", name: "Fioravanti Fresa 2000 ML Retornable", unit: "2000 ML", price: 1.10, category: "Gaseosas", stock: 9 },
-            { id: "P092", name: "Fioravanti Fresa 300 ML Retornable", unit: "300 ML", price: 0.30, category: "Gaseosas", stock: 38 },
-            { id: "P093", name: "Fioravanti Manzana 300 ML Retornable", unit: "300 ML", price: 0.30, category: "Gaseosas", stock: 35 },
-            { id: "P094", name: "Inca Kola 300 ML Retornable", unit: "300 ML", price: 0.30, category: "Gaseosas", stock: 30 },
-            { id: "P095", name: "Sprite 1000 ML Retornable", unit: "1000 ML", price: 0.50, category: "Gaseosas", stock: 14 },
-            { id: "P096", name: "Sprite Limon 2000 ML Retornable", unit: "2000 ML", price: 1.10, category: "Gaseosas", stock: 11 },
-            { id: "P097", name: "Sprite Limon 300 ML Retornable", unit: "300 ML", price: 0.30, category: "Gaseosas", stock: 33 },
-            { id: "P098", name: "Coca-Cola Sabor Original 1250 ML", unit: "1250 ML", price: 1.50, category: "Gaseosas", stock: 22 },
-            { id: "P101", name: "Coca-Cola Sabor Ligero 2000 ML", unit: "2000 ML", price: 2.20, category: "Gaseosas", stock: 8 },
-            { id: "P102", name: "Coca-Cola Sabor Ligero 500 ML", unit: "500 ML", price: 0.75, category: "Gaseosas", stock: 28 },
-            { id: "P103", name: "Coca-Cola Sabor Original 1000 ML", unit: "1000 ML", price: 1.20, category: "Gaseosas", stock: 25 },
-            { id: "P104", name: "Coca-Cola Sabor Original 1350 ML", unit: "1350 ML", price: 1.50, category: "Gaseosas", stock: 18 },
-            { id: "P105", name: "Coca-Cola Sabor Original 2000 ML", unit: "2000 ML", price: 2.20, category: "Gaseosas", stock: 20 },
-            { id: "P106", name: "Coca-Cola Sabor Original 300 ML", unit: "300 ML", price: 0.50, category: "Gaseosas", stock: 55 },
-            { id: "P107", name: "Coca-Cola Sabor Original 3000 ML", unit: "3000 ML", price: 3.10, category: "Gaseosas", stock: 10 },
-            { id: "P108", name: "Coca-Cola Sabor Original 350 ML Lata", unit: "350 ML", price: 1.30, category: "Gaseosas", stock: 40 },
-            { id: "P109", name: "Coca-Cola Sin Azúcar 1000 ML", unit: "1000 ML", price: 0.75, category: "Gaseosas", stock: 22 },
-            { id: "P110", name: "Coca-Cola Sin Azúcar 1600ml", unit: "1600ml", price: 1.00, category: "Gaseosas", stock: 15 },
-            { id: "P111", name: "Coca-Cola Sin Azúcar 2750 ML", unit: "2750 ML", price: 1.75, category: "Gaseosas", stock: 12 },
-            { id: "P112", name: "Coca-Cola Sin Azúcar 410ml", unit: "410ml", price: 0.40, category: "Gaseosas", stock: 30 },
-            { id: "P113", name: "Coca-Cola Sin azúcar 350 ML Lata", unit: "350 ML", price: 1.30, category: "Gaseosas", stock: 35 },
-            { id: "P114", name: "Fanta 350Ml Lata", unit: "350 ML", price: 1.30, category: "Gaseosas", stock: 30 },
-            { id: "P115", name: "Fanta Naranja 1350 ML", unit: "1350 ML", price: 1.15, category: "Gaseosas", stock: 15 },
-            { id: "P116", name: "Fanta Naranja 250 ML", unit: "250 ML", price: 0.30, category: "Gaseosas", stock: 50 },
-            { id: "P117", name: "Fanta Naranja 3000 ML", unit: "3000 ML", price: 3.10, category: "Gaseosas", stock: 8 },
-            { id: "P118", name: "Fanta Naranja 500 ML", unit: "500 ML", price: 0.60, category: "Gaseosas", stock: 40 },
-            { id: "P119", name: "Fioravanti Fresa 1000 ML", unit: "1000 ML", price: 0.65, category: "Gaseosas", stock: 20 },
-            { id: "P120", name: "Fioravanti Fresa 1350 ML", unit: "1350 ML", price: 1.15, category: "Gaseosas", stock: 14 },
-            { id: "P121", name: "Fioravanti Fresa 2000 ML", unit: "2000 ML", price: 1.60, category: "Gaseosas", stock: 18 },
-            { id: "P122", name: "Fioravanti Fresa 250 ML", unit: "250 ML", price: 0.30, category: "Gaseosas", stock: 45 },
-            { id: "P123", name: "Fioravanti Fresa 3000 ML", unit: "3000 ML", price: 3.10, category: "Gaseosas", stock: 7 },
-            { id: "P124", name: "Fioravanti Fresa 500 ML", unit: "500 ML", price: 0.60, category: "Gaseosas", stock: 38 },
-            { id: "P125", name: "Fioravanti Manzana 250 ML", unit: "250 ML", price: 0.30, category: "Gaseosas", stock: 42 },
-            { id: "P126", name: "Fioravanti Manzana 3000 ML", unit: "3000 ML", price: 3.10, category: "Gaseosas", stock: 6 },
-            { id: "P127", name: "Inca Kola 1000 ML", unit: "1000 ML", price: 0.60, category: "Gaseosas", stock: 22 },
-            { id: "P128", name: "Inca Kola 1350 ML", unit: "1350 ML", price: 1.15, category: "Gaseosas", stock: 16 },
-            { id: "P129", name: "Inca Kola 2000 ML", unit: "2000 ML", price: 1.25, category: "Gaseosas", stock: 19 },
-            { id: "P130", name: "Inca Kola 250 ML", unit: "250 ML", price: 0.30, category: "Gaseosas", stock: 48 },
-            { id: "P131", name: "Inca Kola 3000 ML", unit: "3000 ML", price: 3.10, category: "Gaseosas", stock: 5 },
-            { id: "P132", name: "Inca Kola 500 ML", unit: "500 ML", price: 0.60, category: "Gaseosas", stock: 36 },
-            { id: "P133", name: "Sprite 350ML Lata", unit: "350 ML", price: 1.30, category: "Gaseosas", stock: 28 },
-            { id: "P134", name: "Sprite Limon 1000 ML", unit: "1000 ML", price: 0.65, category: "Gaseosas", stock: 20 },
-            { id: "P135", name: "Sprite Limon 1350 ML", unit: "1350 ML", price: 1.15, category: "Gaseosas", stock: 13 },
-            { id: "P136", name: "Sprite Limon 250 ML", unit: "250 ML", price: 0.30, category: "Gaseosas", stock: 44 },
-            { id: "P137", name: "Sprite Limon 3000 ML", unit: "3000 ML", price: 3.10, category: "Gaseosas", stock: 4 },
-            { id: "P219", name: "Toni de Almendra Vainilla 1lt", unit: "1 L", price: 4.10, category: "Lácteos", stock: 6 },
-            { id: "P220", name: "Toni de Almendra Natural 750ml", unit: "750 ml", price: 2.50, category: "Lácteos", stock: 7 },
-            { id: "P221", name: "Toni de Almendra Vainilla 750ml", unit: "750 ml", price: 2.50, category: "Lácteos", stock: 8 },
-            { id: "P222", name: "Yogurt Toni Griego Frutilla 150G", unit: "150g", price: 1.65, category: "Lácteos", stock: 20 },
-            { id: "P223", name: "Yogurt Toni Griego Limoncoco 150G", unit: "150g", price: 1.65, category: "Lácteos", stock: 18 },
-            { id: "P224", name: "Yogur Durazno Toni 110 GR", unit: "110 GR", price: 0.50, category: "Lácteos", stock: 40 },
-            { id: "P225", name: "Yogur Frutilla Toni 110 GR", unit: "110 GR", price: 0.50, category: "Lácteos", stock: 42 },
-            { id: "P226", name: "Yogur Mora Toni 110 GR", unit: "110 GR", price: 0.50, category: "Lácteos", stock: 38 },
-            { id: "P227", name: "Yogur Bebible Durazno Toni 1700ML", unit: "1700 ML", price: 5.40, category: "Lácteos", stock: 5 },
-            { id: "P228", name: "Yogur Bebible Frutilla Toni 1700ML", unit: "1700 ML", price: 5.40, category: "Lácteos", stock: 6 },
-            { id: "P229", name: "Yogur Bebible Mora Toni 1700ML", unit: "1700 ML", price: 5.40, category: "Lácteos", stock: 4 },
-            { id: "P230", name: "Yogur Mix Frootloops Vainilla Toni 175G", unit: "175g", price: 0.90, category: "Lácteos", stock: 25 },
-            { id: "P231", name: "Yogur Mix Zucaritas Mora Toni 175G", unit: "175g", price: 0.90, category: "Lácteos", stock: 22 },
-            { id: "P232", name: "Yogurt Cremoso Trozos Durazno Toni 150 GR", unit: "150 GR", price: 0.90, category: "Lácteos", stock: 20 },
-            { id: "P233", name: "Yogurt Cremoso Trozos Frutilla Toni 150 GR", unit: "150 GR", price: 0.90, category: "Lácteos", stock: 18 },
-            { id: "P234", name: "Yogurt Durazno Toni 190 GR", unit: "190 GR", price: 1.00, category: "Lácteos", stock: 30 },
-            { id: "P235", name: "Yogurt Durazno Toni 950 GR", unit: "950 GR", price: 3.45, category: "Lácteos", stock: 10 },
-            { id: "P236", name: "Yogurt Frush Frutos Amarillos Toni 900 ML", unit: "900 ML", price: 1.40, category: "Lácteos", stock: 12 },
-            { id: "P237", name: "Yogurt Frush Frutos Rojos Toni 900 ML", unit: "900 ML", price: 1.40, category: "Lácteos", stock: 14 },
-            { id: "P238", name: "Yogurt Frush Frutos Verdes Toni 900 ML", unit: "900 ML", price: 1.40, category: "Lácteos", stock: 13 },
-            { id: "P239", name: "Yogurt Frutilla Toni 190 GR", unit: "190 GR", price: 1.00, category: "Lácteos", stock: 28 },
-            { id: "P240", name: "Yogurt Frutilla Toni 950 GR", unit: "950 GR", price: 3.20, category: "Lácteos", stock: 9 },
-            { id: "P241", name: "Yogurt Light Durazno Toni 950 GR", unit: "950 GR", price: 3.45, category: "Lácteos", stock: 7 },
-            { id: "P242", name: "Yogurt Light Frutilla Toni 950 GR", unit: "950 GR", price: 3.45, category: "Lácteos", stock: 8 },
-            { id: "P243", name: "Yogurt Light Mora Toni 950 GR", unit: "950 GR", price: 3.45, category: "Lácteos", stock: 6 },
-            { id: "P244", name: "Yogurt Light Vainilla Toni 950 GR", unit: "950 GR", price: 3.45, category: "Lácteos", stock: 5 },
-            { id: "P245", name: "Yogurt Mix Bolitas Chocolate Toni 180 ML", unit: "180 ML", price: 1.00, category: "Lácteos", stock: 25 },
-            { id: "P246", name: "Yogurt Mix Bolitas Vainilla Toni 180 ML", unit: "180 ML", price: 1.00, category: "Lácteos", stock: 23 },
-            { id: "P247", name: "Yogurt Mix Chiqui Hojuelas Durazno Toni 92G", unit: "92g", price: 0.50, category: "Lácteos", stock: 35 },
-            { id: "P248", name: "Yogurt Mix Chiqui Arroz Crocante Toni 97 GR", unit: "97 GR", price: 0.50, category: "Lácteos", stock: 33 },
-            { id: "P249", name: "Yogurt Mix Chiqui Hojuelas Toni 97 GR", unit: "97 GR", price: 0.50, category: "Lácteos", stock: 36 },
-            { id: "P250", name: "Yogurt Mix Chiqui-Bolitas Toni 97 GR", unit: "97 GR", price: 0.50, category: "Lácteos", stock: 32 },
-            { id: "P251", name: "Yogurt Mix Chiqui-Galletas Chocolate Toni 97 GR", unit: "97 GR", price: 0.50, category: "Lácteos", stock: 30 },
-            { id: "P252", name: "Yogurt Mix Choco Chispa Toni 175 GR", unit: "175 GR", price: 1.00, category: "Lácteos", stock: 20 },
-            { id: "P253", name: "Yogurt Mix Durazno Toni 180 ML", unit: "180 ML", price: 1.00, category: "Lácteos", stock: 22 },
-            { id: "P254", name: "Yogurt Mix Frutilla Toni 180 ML", unit: "180 ML", price: 1.00, category: "Lácteos", stock: 24 },
-            { id: "P255", name: "Yogurt Mix Vainilla Toni 180 ML", unit: "180 ML", price: 1.00, category: "Lácteos", stock: 18 },
-            { id: "P256", name: "Yogurt Mora Toni 190 GR", unit: "190 GR", price: 1.00, category: "Lácteos", stock: 26 },
-            { id: "P257", name: "Yogurt Mora Toni 950 GR", unit: "950 GR", price: 3.20, category: "Lácteos", stock: 11 },
-            { id: "P258", name: "Yogurt Trozo de Frutas Toni 950ml", unit: "950ml", price: 3.20, category: "Lácteos", stock: 10 },
-            { id: "P259", name: "Yogurt Toni Griego Frutos Rojos 150 GR", unit: "150 GR", price: 1.65, category: "Lácteos", stock: 19 },
-            { id: "P260", name: "Yogurt Toni Griego Mora 150 GR", unit: "150 GR", price: 1.65, category: "Lácteos", stock: 17 },
-            { id: "P261", name: "Yogurt Toni Griego Natural 150 GR", unit: "150 GR", price: 1.65, category: "Lácteos", stock: 21 },
-            { id: "P262", name: "Yogurt Toni Griego Mango 150G", unit: "150g", price: 1.65, category: "Lácteos", stock: 16 },
-            { id: "P263", name: "Yogurt Toni Griego Maracuya 150G", unit: "150g", price: 1.65, category: "Lácteos", stock: 14 },
-            { id: "P264", name: "Atun Real 180 GR", unit: "180 GR", price: 2.02, category: "Despensa", stock: 20 },
-            { id: "P265", name: "Atún Lomito en aceite 80 GR", unit: "80 GR", price: 3.30, category: "Despensa", stock: 15 },
-            { id: "P266", name: "Atún Lomito en agua 80GR", unit: "80 GR", price: 3.33, category: "Despensa", stock: 16 },
-            { id: "P267", name: "Azucar Morena 1KG", unit: "1 KG", price: 1.30, category: "Despensa", stock: 30 },
-            { id: "P268", name: "Azucar San Carlos 2K", unit: "2 KG", price: 2.40, category: "Despensa", stock: 15 },
-            { id: "P269", name: "Bizcotelas Vainilla 150GR", unit: "150 GR", price: 2.50, category: "Snacks", stock: 20 },
-            { id: "P270", name: "Bizcotelas Vainilla 75GR", unit: "75 GR", price: 1.70, category: "Snacks", stock: 25 },
-            { id: "P271", name: "Bony Manjar 50GR", unit: "50 GR", price: 0.60, category: "Snacks", stock: 40 },
-            { id: "P272", name: "CanguiPop Mantequilla 134G", unit: "134g", price: 1.50, category: "Snacks", stock: 18 },
-            { id: "P273", name: "Chicharrones Original 100GR", unit: "100 GR", price: 2.20, category: "Snacks", stock: 22 },
-            { id: "P274", name: "Chicharrones Original 30GR", unit: "30 GR", price: 1.00, category: "Snacks", stock: 35 },
-            { id: "P275", name: "Chicharrones Picante 100GR", unit: "100 GR", price: 2.20, category: "Snacks", stock: 20 },
-            { id: "P276", name: "Chicharrones Picante 30GR", unit: "30 GR", price: 1.00, category: "Snacks", stock: 33 },
-            { id: "P277", name: "Chococake 100 GR", unit: "100 GR", price: 1.00, category: "Snacks", stock: 28 },
-            { id: "P278", name: "Chococake Red Velvet 50G", unit: "50g", price: 0.50, category: "Snacks", stock: 32 },
-            { id: "P279", name: "Inacake Gemelo 80 GR", unit: "80 GR", price: 0.75, category: "Snacks", stock: 26 },
-            { id: "P280", name: "Inacake Mini Chocolate 55Gr", unit: "55 Gr", price: 0.50, category: "Snacks", stock: 38 },
-            { id: "P281", name: "Inacake Mini Vainilla 55G", unit: "55g", price: 0.50, category: "Snacks", stock: 36 },
-            { id: "P282", name: "Lonchys Camaron 64 GR", unit: "64 GR", price: 0.95, category: "Snacks", stock: 24 },
-            { id: "P283", name: "Lonchys Carne Res 64 GR", unit: "64 GR", price: 0.95, category: "Snacks", stock: 23 },
-            { id: "P284", name: "Lonchys Pollo 64 GR", unit: "64 GR", price: 0.95, category: "Snacks", stock: 25 },
-            { id: "P287", name: "Mama Fanny Tortillas De Trigo 250GR", unit: "250 GR", price: 2.15, category: "Despensa", stock: 12 },
-            { id: "P288", name: "Mama Fanny Tortillas De Trigo 400GR", unit: "400 GR", price: 2.70, category: "Despensa", stock: 10 },
-            { id: "P289", name: "Mayonesa 200GR", unit: "200 GR", price: 1.28, category: "Despensa", stock: 30 },
-            { id: "P291", name: "Mostaza 200GR", unit: "200 GR", price: 1.00, category: "Despensa", stock: 28 },
-            { id: "P292", name: "Nachos Queso 300GR", unit: "300 GR", price: 2.85, category: "Snacks", stock: 15 },
-            { id: "P293", name: "Oreo Mini 54 GR", unit: "54 GR", price: 0.52, category: "Snacks", stock: 50 },
-            { id: "P294", name: "Panchito Natural 170G", unit: "170g", price: 0.75, category: "Snacks", stock: 30 },
-            { id: "P295", name: "Panchito Pican 163G", unit: "163g", price: 0.75, category: "Snacks", stock: 28 },
-            { id: "P296", name: "Pringles Cebolla 124 GR", unit: "124 GR", price: 5.13, category: "Snacks", stock: 10 },
-            { id: "P297", name: "Pringles Original 124 GR", unit: "124 GR", price: 5.13, category: "Snacks", stock: 12 },
-            { id: "P298", name: "Pringles Queso 124 GR", unit: "124 GR", price: 5.13, category: "Snacks", stock: 11 },
-            { id: "P299", name: "Rebanada Chocolate/Vainilla 80GR", unit: "80 GR", price: 0.75, category: "Snacks", stock: 20 },
-            { id: "P300", name: "Rebanada Vainilla 80GR", unit: "80 GR", price: 0.75, category: "Snacks", stock: 22 },
-            { id: "P301", name: "Relleno De Vainilla 100 GR", unit: "100 GR", price: 1.00, category: "Snacks", stock: 18 },
-            { id: "P302", name: "Ritz Taco 67G", unit: "67g", price: 0.45, category: "Snacks", stock: 40 },
-            { id: "P303", name: "Ronditos 150GR", unit: "150 GR", price: 1.75, category: "Snacks", stock: 20 },
-            { id: "P304", name: "Ronditos Fiesta 300 GR", unit: "300 GR", price: 2.85, category: "Snacks", stock: 12 },
-            { id: "P305", name: "Rosquita Natural 34 G", unit: "34g", price: 0.25, category: "Snacks", stock: 60 },
-            { id: "P306", name: "Rosquita Picantitos 40 G", unit: "40g", price: 0.25, category: "Snacks", stock: 55 },
-            { id: "P307", name: "Ryskos Queso 50 GR", unit: "50 GR", price: 0.60, category: "Snacks", stock: 45 },
-            { id: "P308", name: "Ryskos Queso Fiesta 350GR", unit: "350 GR", price: 2.80, category: "Snacks", stock: 14 },
-            { id: "P309", name: "Sal Ecuasal 1K", unit: "1 KG", price: 0.58, category: "Despensa", stock: 50 },
-            { id: "P310", name: "Sal Ecuasal 2K", unit: "2 KG", price: 0.92, category: "Despensa", stock: 25 },
-            { id: "P311", name: "Salsa de Tomate 200GR", unit: "200 GR", price: 1.05, category: "Despensa", stock: 30 },
-            { id: "P312", name: "Sardina 425GR", unit: "425 GR", price: 2.28, category: "Despensa", stock: 18 },
-            { id: "P313", name: "Sarita Rizada Cebolla 100GR", unit: "100 GR", price: 1.50, category: "Snacks", stock: 20 },
-            { id: "P314", name: "Sarita Rizada Cebolla 300 GR", unit: "300 GR", price: 3.50, category: "Snacks", stock: 10 },
-            { id: "P315", name: "Sarita Rizada Natural 100GR", unit: "100 GR", price: 1.50, category: "Snacks", stock: 22 },
-            { id: "P316", name: "Sarita Rizada Natural 300GR", unit: "300 GR", price: 3.50, category: "Snacks", stock: 11 },
-            { id: "P317", name: "Sarita Rizadas Natural 30 GR", unit: "30 GR", price: 0.50, category: "Snacks", stock: 40 },
-            { id: "P318", name: "Tigreton Chocolate 50 GR", unit: "50 GR", price: 0.75, category: "Snacks", stock: 30 },
-            { id: "P319", name: "Tortolines 45 GR", unit: "45 GR", price: 0.60, category: "Snacks", stock: 35 },
-            { id: "P320", name: "Tortolines Familiar 300 GR", unit: "300 GR", price: 2.60, category: "Snacks", stock: 14 },
-            { id: "P321", name: "Tortolines Picantes 300GR", unit: "300 GR", price: 2.60, category: "Snacks", stock: 13 },
-            { id: "P322", name: "Tortolines Picantes 45Gr", unit: "45 Gr", price: 0.55, category: "Snacks", stock: 33 },
-            { id: "P323", name: "Tostachos Picante 100GR", unit: "100 GR", price: 2.05, category: "Snacks", stock: 16 },
-            { id: "P324", name: "Tostachos Picante 180GR", unit: "180 GR", price: 2.50, category: "Snacks", stock: 10 },
-            { id: "P325", name: "Tostitos 300 GR", unit: "300 GR", price: 2.85, category: "Snacks", stock: 12 },
-            { id: "P326", name: "Tostitos 45 GR", unit: "45 GR", price: 0.60, category: "Snacks", stock: 30 },
-            { id: "P327", name: "Tostitos Jalapeños 150Gr", unit: "150 Gr", price: 1.75, category: "Snacks", stock: 18 },
-            { id: "P328", name: "Tostitos Jalapeños 45Gr", unit: "45 Gr", price: 0.55, category: "Snacks", stock: 28 }
-        ];
-
-        let storeInfo = JSON.parse(localStorage.getItem('storeInfo')) || {
-            name: 'MiniMarket POS',
-            address: 'Tu Dirección Aquí',
-            ruc: '0000000000000'
-        };
-
-        function saveProductsToLocalStorage() {
-            localStorage.setItem('mockProducts', JSON.stringify(mockProducts));
-        }
-        function saveStoreInfoToLocalStorage() {
-            localStorage.setItem('storeInfo', JSON.stringify(storeInfo));
-        }
-
-        if (!localStorage.getItem('mockProductsDefaultLoaded_v7')) {
-             localStorage.setItem('mockProducts', JSON.stringify(mockProducts));
-             localStorage.setItem('storeInfo', JSON.stringify(storeInfo));
-             localStorage.setItem('mockProductsDefaultLoaded_v7', 'true');
-        }
-
-
-        let cart = [];
-        let salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
-        let editingProductId = null;
-
-        const preloader = document.getElementById('preloader');
-        const mainContentArea = document.getElementById('mainContentArea');
-        const menuButton = document.getElementById('menuButton');
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        const barcodeScannerInput = document.getElementById('barcodeScannerInput'); // Ahora también para búsqueda
-        const scanForm = document.getElementById('scanForm'); // Se mantiene para la acción de Enter
-        const searchResultsContainer = document.getElementById('searchResultsContainer'); // Nuevo contenedor para resultados
-        const cartItemsContainer = document.getElementById('cartItemsContainer');
-        const cartTotalElement = document.getElementById('cartTotal');
-        const emptyCartMessage = document.getElementById('emptyCartMessage');
-        const finalizeSaleBtn = document.getElementById('finalizeSaleBtn');
-        const clearCartBtn = document.getElementById('clearCartBtn');
-        const addProductManuallyBtn = document.getElementById('addProductManuallyBtn');
-        const viewProductListBtn = document.getElementById('viewProductListBtn');
-        const sellByWeightBtn = document.getElementById('sellByWeightBtn');
-        const sellByValueBtn = document.getElementById('sellByValueBtn');
-        const sellPolloAmarilloBtn = document.getElementById('sellPolloAmarilloBtn'); // Botón de Pollo Amarillo
-
-        const paymentModal = document.getElementById('paymentModal');
-        const paymentModalTotal = document.getElementById('paymentModalTotal');
-        const paymentMethodSelect = document.getElementById('paymentMethodSelect');
-        const saleNoteInput = document.getElementById('saleNoteInput');
-        const amountPaidInput = document.getElementById('amountPaidInput');
-        const changeDue = document.getElementById('changeDue');
-        const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
-        const cancelPaymentBtn = document.getElementById('cancelPaymentBtn');
-
-        const inventoryView = document.getElementById('inventoryView');
-        const reportView = document.getElementById('reportView');
-        const manageProductsView = document.getElementById('manageProductsView');
-        const configuracionView = document.getElementById('configuracionView');
-        const linkPOSView = document.getElementById('linkPOSView');
-        const linkVerInventario = document.getElementById('linkVerInventario');
-        const linkReporte = document.getElementById('linkReporte');
-        const linkManageProducts = document.getElementById('linkManageProducts');
-        const linkConfiguracion = document.getElementById('linkConfiguracion');
-
-        const reportDateRange = document.getElementById('reportDateRange');
-        const reportStartDateInput = document.getElementById('reportStartDate');
-        const reportEndDateInput = document.getElementById('reportEndDate');
-        const filterReportBtn = document.getElementById('filterReportBtn');
-        const showTodayReportBtn = document.getElementById('showTodayReportBtn');
-        const showAllSalesReportBtn = document.getElementById('showAllSalesReportBtn');
-
-        const dailyTotalRevenue = document.getElementById('dailyTotalRevenue');
-        const dailyTotalProductsSold = document.getElementById('dailyTotalProductsSold');
-        const dailyTotalSalesCount = document.getElementById('dailyTotalSalesCount');
-        const downloadReportPdfBtn = document.getElementById('downloadReportPdfBtn');
-        const dailySalesDetails = document.getElementById('dailySalesDetails');
-        const topSellingProducts = document.getElementById('topSellingProducts');
-
-
-        const productListModal = document.getElementById('productListModal');
-        const demoProductList = document.getElementById('demoProductList');
-        const closeProductListModal = document.getElementById('closeProductListModal');
-        const closeProductListModalBottom = document.getElementById('closeProductListModalBottom');
-        const searchProductListInput = document.getElementById('searchProductListInput');
-
-        const addProductForm = document.getElementById('addProductForm');
-        const currentProductsList = document.getElementById('currentProductsList');
-        const newProductNameInput = document.getElementById('newProductName');
-        const newProductIdInput = document.getElementById('newProductId');
-        const newProductPriceInput = document.getElementById('newProductPrice');
-        const newProductCategoryInput = document.getElementById('newProductCategory');
-        const newProductUnitInput = document.getElementById('newProductUnit');
-        const newProductStockInput = document.getElementById('newProductStock');
-        const submitProductFormBtn = document.getElementById('submitProductFormBtn');
-        const cancelEditBtn = document.getElementById('cancelEditBtn');
-        const formProductTitle = document.getElementById('formProductTitle');
-        const searchCurrentProductsInput = document.getElementById('searchCurrentProductsInput');
-
-        const storeConfigForm = document.getElementById('storeConfigForm');
-        const storeNameInput = document.getElementById('storeNameInput');
-        const storeAddressInput = document.getElementById('storeAddressInput');
-        const storeRucInput = document.getElementById('storeRucInput');
-        const clearAllDataBtn = document.getElementById('clearAllDataBtn');
-        const footerStoreName = document.getElementById('footerStoreName');
-        const headerStoreName = document.getElementById('headerStoreName');
-
-        const receiptPreviewModal = document.getElementById('receiptPreviewModal');
-        const receiptPreviewContent = document.getElementById('receiptPreviewContent');
-        const closeReceiptPreviewModalBtn = document.getElementById('closeReceiptPreviewModalBtn');
-        const closeReceiptPreviewModalBottomBtn = document.getElementById('closeReceiptPreviewModalBottomBtn');
-        const previewReceiptBtn = document.getElementById('previewReceiptBtn');
-        const frequentProductsContainer = document.getElementById('frequentProductsContainer');
-
-        const weightProductModal = document.getElementById('weightProductModal');
-        const closeWeightProductModalBtn = document.getElementById('closeWeightProductModalBtn');
-        const closeWeightProductModalBottomBtn = document.getElementById('closeWeightProductModalBottomBtn');
-        const weightProductNameSelect = document.getElementById('weightProductNameSelect');
-        const weightProductPricePerLb = document.getElementById('weightProductPricePerLb');
-        const weightProductWeightLb = document.getElementById('weightProductWeightLb');
-        const weightProductTotalCalculated = document.getElementById('weightProductTotalCalculated');
-        const addWeightProductToCartBtn = document.getElementById('addWeightProductToCartBtn');
-        const resetSavedPriceBtn = document.getElementById('resetSavedPriceBtn');
-
-        const sellByValueModal = document.getElementById('sellByValueModal');
-        const closeSellByValueModalBtn = document.getElementById('closeSellByValueModalBtn');
-        const closeSellByValueModalBottomBtn = document.getElementById('closeSellByValueModalBottomBtn');
-        const valueProductNameSelect = document.getElementById('valueProductNameSelect');
-        const valueProductPricePerLb = document.getElementById('valueProductPricePerLb');
-        const valueProductDesiredValue = document.getElementById('valueProductDesiredValue');
-        const valueProductCalculatedWeight = document.getElementById('valueProductCalculatedWeight');
-        const addValueProductToCartBtn = document.getElementById('addValueProductToCartBtn');
-        const resetSavedValuePriceBtn = document.getElementById('resetSavedValuePriceBtn');
-
-        // Referencias al nuevo modal categorizado
-        const categorizedWeightProductsModal = document.getElementById('categorizedWeightProductsModal');
-        const categorizedProductsList = document.getElementById('categorizedProductsList');
-        const closeCategorizedWeightProductsModalBtn = document.getElementById('closeCategorizedWeightProductsModalBtn');
-        const closeCategorizedWeightProductsModalBottomBtn = document.getElementById('closeCategorizedWeightProductsModalBottomBtn');
-
-
-        document.getElementById('currentYear').textContent = new Date().getFullYear();
-
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                preloader.classList.add('hidden');
-                mainContentArea.style.opacity = '1';
-            }, 500);
-            loadStoreInfo();
-            displayFrequentProducts();
-        });
-
-        function initializeAudio() {
-            if (!synth && window.Tone) {
-                synth = new Tone.Synth().toDestination();
-            }
-        }
-        document.body.addEventListener('click', initializeAudio, { once: true });
-
-        function playBeepSound() {
-            if (synth) {
-                try { synth.triggerAttackRelease("C5", "8n"); }
-                catch (error) { console.error("Error al reproducir sonido:", error); }
-            }
-        }
-        function playSuccessSound() {
-            if(synth) {
-                try { synth.triggerAttackRelease("G5", "8n"); }
-                catch (e) { console.error("Error al reproducir sonido de éxito:", e); }
-            }
-        }
-        function playErrorSound() {
-             if(synth) {
-                try { synth.triggerAttackRelease("A2", "8n"); }
-                catch (e) { console.error("Error al reproducir sonido de error:", e); }
-            }
-        }
-
-        function displayCurrentProducts(searchTerm = '') {
-            currentProductsList.innerHTML = '';
-            const lowerSearchTerm = searchTerm.toLowerCase();
-            const filteredProducts = mockProducts.filter(p =>
-                p.name.toLowerCase().includes(lowerSearchTerm) ||
-                p.id.toLowerCase().includes(lowerSearchTerm)
-            );
-
-            if (filteredProducts.length === 0) {
-                currentProductsList.innerHTML = `<p class="text-gray-400">No se encontraron productos ${searchTerm ? 'con ese criterio' : 'registrados'}.</p>`;
-                return;
-            }
-
-            const grouped = filteredProducts.reduce((acc, product) => {
-                acc[product.category] = acc[product.category] || [];
-                acc[product.category].push(product);
-                return acc;
-            }, {});
-
-            Object.keys(grouped).sort().forEach(category => {
-                const categoryHeader = document.createElement('h4');
-                categoryHeader.className = 'category-title';
-                categoryHeader.textContent = category;
-                currentProductsList.appendChild(categoryHeader);
-
-                grouped[category].sort((a,b) => a.name.localeCompare(b.name)).forEach((p) => {
-                    const productElement = document.createElement('div');
-                    productElement.classList.add('product-entry', 'p-3', 'bg-neutral-700', 'rounded-md', 'flex', 'justify-between', 'items-center');
-                    const stockClass = p.stock <= 0 ? 'out-of-stock' : (p.stock < 5 ? 'text-orange-400' : 'text-green-400');
-                    productElement.innerHTML = `
-                        <div>
-                            <p class="font-semibold product-name">${p.name} (ID: ${p.id})</p>
-                            <p class="text-sm text-gray-400 product-details">Unidad: ${p.unit} - Categoría: ${p.category}</p>
-                            <p class="text-sm stock-info ${stockClass}">Stock: ${p.stock}</p>
-                            <p class="text-sm text-green-400">$${p.price.toFixed(2)}</p>
-                        </div>
-                        <div>
-                            <button class="text-blue-400 hover:text-blue-300 mr-2 edit-product-btn" data-id="${p.id}" title="Editar Producto">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="text-red-500 hover:text-red-400 remove-product-btn" data-id="${p.id}" title="Eliminar Producto">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    `;
-                    currentProductsList.appendChild(productElement);
-                });
-            });
-
-            document.querySelectorAll('.edit-product-btn').forEach(button => {
-                button.addEventListener('click', handleEditProduct);
-            });
-            document.querySelectorAll('.remove-product-btn').forEach(button => {
-                button.addEventListener('click', handleRemoveProduct);
-            });
-        }
-
-        searchCurrentProductsInput.addEventListener('input', (e) => {
-            displayCurrentProducts(e.target.value);
-        });
-
-        function handleEditProduct(e) {
-            const productIdToEdit = e.currentTarget.dataset.id;
-            const product = mockProducts.find(p => p.id === productIdToEdit);
-            if (product) {
-                editingProductId = productIdToEdit;
-                newProductNameInput.value = product.name;
-                newProductIdInput.value = product.id;
-                newProductIdInput.setAttribute('readonly', true);
-                newProductCategoryInput.value = product.category;
-                newProductUnitInput.value = product.unit;
-                newProductPriceInput.value = product.price.toFixed(2);
-                newProductStockInput.value = product.stock;
-
-                formProductTitle.textContent = "Editar Producto";
-                submitProductFormBtn.innerHTML = '<i class="fas fa-save mr-2"></i>Guardar Cambios';
-                cancelEditBtn.classList.remove('hidden');
-                window.scrollTo(0, addProductForm.offsetTop - 20);
-            }
-        }
-
-        function handleRemoveProduct(e) {
-            const productIdToRemove = e.currentTarget.dataset.id;
-            const productIndex = mockProducts.findIndex(p => p.id === productIdToRemove);
-            if (productIndex > -1) {
-                if (confirm(`¿Seguro que quieres eliminar "${mockProducts[productIndex].name}"?`)) {
-                    mockProducts.splice(productIndex, 1);
-                    saveProductsToLocalStorage();
-                    displayCurrentProducts(searchCurrentProductsInput.value);
-                    alert("Producto eliminado.");
-                }
-            }
-        }
-
-        cancelEditBtn.addEventListener('click', () => {
-            editingProductId = null;
-            addProductForm.reset();
-            newProductIdInput.removeAttribute('readonly');
-            formProductTitle.textContent = "Añadir Nuevo Producto";
-            submitProductFormBtn.innerHTML = '<i class="fas fa-plus-circle mr-2"></i>Añadir Producto';
-            cancelEditBtn.classList.add('hidden');
-        });
-
-        addProductForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = newProductNameInput.value.trim();
-            const id = newProductIdInput.value.trim();
-            const price = parseFloat(newProductPriceInput.value);
-            const category = newProductCategoryInput.value.trim() || "General";
-            const unit = newProductUnitInput.value.trim() || "und";
-            const stock = parseInt(newProductStockInput.value, 10);
-
-            if (editingProductId) {
-                const productIndex = mockProducts.findIndex(p => p.id === editingProductId);
-                if (productIndex > -1) {
-                    if (name && unit && category && !isNaN(price) && price >= 0 && !isNaN(stock) && stock >= 0) {
-                        mockProducts[productIndex] = { ...mockProducts[productIndex], name, price, category, unit, stock };
-                        saveProductsToLocalStorage();
-                        displayCurrentProducts(searchCurrentProductsInput.value);
-                        alert("Producto actualizado exitosamente.");
-                        cancelEditBtn.click();
-                    } else {
-                        alert("Por favor, completa todos los campos correctamente para actualizar (incluyendo stock válido).");
-                    }
-                }
-            } else {
-                if (mockProducts.find(p => p.id === id)) {
-                    alert("Error: Ya existe un producto con ese ID.");
-                    return;
-                }
-                if (name && id && unit && category && !isNaN(price) && price >= 0 && !isNaN(stock) && stock >= 0) {
-                    mockProducts.push({ id, name, price, category, unit, stock });
-                    saveProductsToLocalStorage();
-                    displayCurrentProducts(searchCurrentProductsInput.value);
-                    addProductForm.reset();
-                    alert("Producto añadido exitosamente.");
-                } else {
-                    alert("Por favor, completa todos los campos correctamente para añadir (incluyendo stock válido).");
-                }
-            }
-        });
-
-
-        function openProductListModal(searchTerm = '') {
-            demoProductList.innerHTML = '';
-            const lowerSearchTerm = searchTerm.toLowerCase();
-            const filteredProducts = mockProducts.filter(p =>
-                p.name.toLowerCase().includes(lowerSearchTerm) ||
-                p.id.toLowerCase().includes(lowerSearchTerm)
-            );
-
-            const groupedProducts = filteredProducts.reduce((acc, product) => {
-                const category = product.category || "Sin Categoría";
-                acc[category] = acc[category] || [];
-                acc[category].push(product);
-                return acc;
-            }, {});
-
-            const sortedCategories = Object.keys(groupedProducts).sort();
-
-            if (sortedCategories.length === 0) {
-                demoProductList.innerHTML = `<p class="text-gray-400">No se encontraron productos ${searchTerm ? 'con ese criterio' : 'definidos'}.</p>`;
-            } else {
-                sortedCategories.forEach(category => {
-                    const categoryTitle = document.createElement('h4');
-                    categoryTitle.className = 'category-title';
-                    categoryTitle.textContent = category;
-                    demoProductList.appendChild(categoryTitle);
-
-                    groupedProducts[category].sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
-                        const pElement = document.createElement('div');
-                        pElement.className = 'product-entry';
-                        const stockClass = p.stock <= 0 ? 'out-of-stock' : (p.stock < 5 ? 'text-orange-400' : 'text-green-400');
-                        pElement.innerHTML = `
-                            <strong class="product-name">${p.name}</strong> (ID: ${p.id})
-                            <br>
-                            <span class="product-details">Unidad: ${p.unit} - Precio: $${p.price.toFixed(2)}</span>
-                            <br>
-                            <span class="product-details stock-info ${stockClass}">Stock: ${p.stock > 0 ? p.stock : 'Agotado'}</span>
-                        `;
-                        demoProductList.appendChild(pElement);
-                    });
-                });
-            }
-            productListModal.classList.remove('hidden');
-            if (isDropdownOpen) toggleDropdown();
-        }
-
-        searchProductListInput.addEventListener('input', (e) => {
-            openProductListModal(e.target.value);
-        });
-
-
-        function findProductById(id) {
-            return mockProducts.find(p => p.id.toLowerCase() === id.toLowerCase());
-        }
-
-        function addProductToCart(productId, isWeightedOrValue = false, weightOrValue = 0, pricePerUnit = 0, calculatedPrice = 0, type = 'unit') {
-            const productBase = findProductById(productId);
-
-            if (type === 'unit' && !productBase) {
-                alert("Producto no encontrado. Verifica el ID.");
-                playErrorSound();
-                return;
-            }
-
-            if (type === 'unit') {
-                const existingCartItem = cart.find(item => item.type === 'unit' && item.product.id === productId);
-                const currentQuantityInCart = existingCartItem ? existingCartItem.quantity : 0;
-
-                if (productBase.stock <= currentQuantityInCart) {
-                    alert(`¡Stock insuficiente para "${productBase.name}"! Disponible: ${productBase.stock}, en carrito: ${currentQuantityInCart}.`);
-                    playErrorSound();
-                    return;
-                }
-                playBeepSound();
-                if (existingCartItem) {
-                    existingCartItem.quantity++;
-                } else {
-                    cart.push({ product: productBase, quantity: 1, type: 'unit', price: productBase.price });
-                }
-            } else if (type === 'weight' || type === 'value' || type === 'pollo_amarillo_granel') { // Manejar todos los productos por peso/valor aquí
-                 // Encontrar el producto en la lista de productos por peso
-                 let productInfo = null;
-                 for (const category in sellByWeightProducts) {
-                     const found = sellByWeightProducts[category].find(p => p.key === productId);
-                     if (found) {
-                         productInfo = found;
-                         break;
-                     }
-                 }
-                 const itemName = productInfo ? productInfo.name : 'Producto por Peso/Valor'; // Usar nombre de la lista de peso
-
-
-                 const cartItem = {
-                    id: `${productId}_${Date.now()}`, // ID único para este item específico
-                    name: `${itemName} (${parseFloat(weightOrValue).toFixed(2)} ${type === 'value' ? '$' : 'lbs'})`,
-                    price: calculatedPrice,
-                    quantity: 1,
-                    type: type, // Mantener el tipo original (weight, value, pollo_amarillo_granel)
-                    weight: type === 'value' ? calculatedPrice : parseFloat(weightOrValue), // Peso calculado si es por valor, sino el peso ingresado
-                    pricePerUnit: pricePerUnit,
-                    desiredValue: type === 'value' ? parseFloat(weightOrValue) : undefined, // Valor deseado si es por valor
-                    calculatedWeight: type === 'value' ? calculatedPrice : undefined, // Peso calculado si es por valor
-                    baseProductKey: productId // Mantener la clave del producto por peso
-                };
-                cart.push(cartItem);
-                playBeepSound(); // Puedes usar un sonido diferente si quieres
-            }
-            updateCartDisplay();
-        }
-
-
-        function updateCartDisplay() {
-            cartItemsContainer.innerHTML = '';
-            if (cart.length === 0) {
-                emptyCartMessage.style.display = 'block';
-                finalizeSaleBtn.disabled = true;
-                previewReceiptBtn.disabled = true;
-            } else {
-                emptyCartMessage.style.display = 'none';
-                finalizeSaleBtn.disabled = false;
-                previewReceiptBtn.disabled = false;
-                cart.forEach((item, index) => {
-                    const itemElement = document.createElement('div');
-                    itemElement.classList.add('cart-item', 'flex', 'justify-between', 'items-center', 'p-2', 'border-b', 'border-neutral-700', 'hover:bg-neutral-700', 'transition-colors', 'rounded');
-
-                    let itemNameDisplay, itemPriceDetails, itemTotalPrice;
-
-                    if (item.type === 'weight' || item.type === 'pollo_amarillo_granel') {
-                        itemNameDisplay = item.name;
-                        itemPriceDetails = `(${item.weight.toFixed(2)} lbs x $${item.pricePerUnit.toFixed(2)}/lb)`;
-                        itemTotalPrice = item.price.toFixed(2);
-                    } else if (item.type === 'value') {
-                        itemNameDisplay = item.name;
-                        itemPriceDetails = `${item.calculatedWeight.toFixed(2)} lbs @ $${item.pricePerUnit.toFixed(2)}/lb`;
-                        itemTotalPrice = item.price.toFixed(2);
-                    } else { // type 'unit'
-                        itemNameDisplay = item.product.name;
-                        itemPriceDetails = `(${item.quantity} x $${item.product.price.toFixed(2)})`;
-                        itemTotalPrice = (item.product.price * item.quantity).toFixed(2);
-                    }
-
-                    itemElement.innerHTML = `
-                        <div class="flex-grow">
-                            <span class="font-semibold text-sm">${itemNameDisplay}</span>
-                            <span class="text-xs text-gray-400 block">${itemPriceDetails}</span>
-                        </div>
-                        <span class="font-bold text-green-400 text-sm">$${itemTotalPrice}</span>
-                        <button class="ml-2 text-red-500 hover:text-red-400 remove-item-btn" data-index="${index}" title="Eliminar item">
-                            <i class="fas fa-times-circle"></i>
-                        </button>
-                    `;
-                    cartItemsContainer.appendChild(itemElement);
-                });
-                document.querySelectorAll('.remove-item-btn').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const indexToRemove = parseInt(e.currentTarget.dataset.index);
-                        cart.splice(indexToRemove, 1);
-                        updateCartDisplay();
-                    });
-                });
-            }
-            calculateAndDisplayTotals();
-        }
-
-        function calculateAndDisplayTotals() {
-            const total = cart.reduce((sum, item) => {
-                return sum + item.price;
-            }, 0);
-            cartTotalElement.textContent = `$${total.toFixed(2)}`;
-            return total;
-        }
-
-        function clearCart() {
-            cart = [];
-            updateCartDisplay();
-        }
-
-        function openPaymentModal() {
-            const total = calculateAndDisplayTotals();
-            paymentModalTotal.textContent = `$${total.toFixed(2)}`;
-
-            amountPaidInput.value = '';
-            changeDue.textContent = '$0.00';
-            document.getElementById('saleNoteInput').value = '';
-            confirmPaymentBtn.disabled = true;
-            paymentModal.classList.remove('hidden');
-            amountPaidInput.focus();
-        }
-
-        function closePaymentModal() {
-            paymentModal.classList.add('hidden');
-        }
-
-        amountPaidInput.addEventListener('input', () => {
-            const total = parseFloat(paymentModalTotal.textContent.replace('$', ''));
-            const paid = parseFloat(amountPaidInput.value) || 0;
-            const change = paid - total;
-            changeDue.textContent = `$${change >= 0 ? change.toFixed(2) : '0.00'}`;
-            confirmPaymentBtn.disabled = paid < total;
-        });
-
-        function finalizeSale() {
-            const total = parseFloat(paymentModalTotal.textContent.replace('$', ''));
-            const amountPaid = parseFloat(amountPaidInput.value);
-            const change = amountPaid - total;
-            const paymentMethod = paymentMethodSelect.value;
-            const saleNote = document.getElementById('saleNoteInput').value.trim();
-
-            if (amountPaid < total) {
-                alert("El monto pagado es insuficiente.");
-                playErrorSound();
-                return;
-            }
-
-            // No necesitamos verificar stock para productos por peso/valor en este modelo simple
-            // for (const cartItem of cart) {
-            //     if (cartItem.type === 'unit') {
-            //         const productInDb = mockProducts.find(p => p.id === cartItem.product.id);
-            //         if (!productInDb || productInDb.stock < cartItem.quantity) {
-            //             alert(`¡Stock insuficiente para "${cartItem.product.name}" al momento de finalizar! Disponible: ${productInDb ? productInDb.stock : 0}. Venta cancelada.`);
-            //             playErrorSound();
-            //             return;
-            //         }
-            //     }
-            // }
-
-            // No descontamos stock para productos por peso/valor en este modelo simple
-            // cart.forEach(cartItem => {
-            //     if (cartItem.type === 'unit') {
-            //         const productIndex = mockProducts.findIndex(p => p.id === cartItem.product.id);
-            //         if (productIndex > -1) {
-            //             mockProducts[productIndex].stock -= cartItem.quantity;
-            //         }
-            //     }
-            // });
-            // saveProductsToLocalStorage(); // Guardar cambios en stock si se implementa
-
-            const saleData = {
-                id: `VEN-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-                items: cart.map(item => {
-                    // Adaptar la estructura del item para el reporte/historial
-                    if (item.type === 'weight' || item.type === 'pollo_amarillo_granel') {
-                        return {
-                            name: item.name,
-                            quantity: item.weight, // Cantidad es el peso
-                            price: item.pricePerUnit, // Precio es el precio por unidad
-                            subtotal: item.price, // Subtotal es el precio total del item
-                            isWeighted: true,
-                            unit: 'lbs'
-                        };
-                    } else if (item.type === 'value') {
-                         return {
-                            name: item.name,
-                            quantity: item.calculatedWeight, // Cantidad es el peso calculado
-                            price: item.pricePerUnit, // Precio es el precio por unidad
-                            subtotal: item.price, // Subtotal es el valor deseado
-                            isWeighted: true,
-                            unit: 'lbs (valor)'
-                        };
-                    }
-                    else { // type 'unit'
-                        return {
-                            id: item.product.id,
-                            name: item.product.name,
-                            quantity: item.quantity, // Cantidad es unidades
-                            price: item.product.price, // Precio es precio por unidad
-                            subtotal: item.product.price * item.quantity, // Subtotal es precio * cantidad
-                            isWeighted: false,
-                            unit: item.product.unit
-                        };
-                    }
-                }),
-                totalAmount: total,
-                amountPaid: amountPaid,
-                changeGiven: change,
-                paymentMethod: paymentMethod,
-                note: saleNote,
-                timestamp: new Date().toISOString()
-            };
-
-            generateInvoicePDF(saleData);
-            saveSaleToHistory(saleData);
-            playSuccessSound();
-            alert(`Venta completada!\nTotal: $${total.toFixed(2)}\nPagado: $${amountPaid.toFixed(2)}\nCambio: $${change.toFixed(2)}\nMétodo: ${paymentMethod}${saleNote ? '\nNota: ' + saleNote : ''}`);
-            clearCart();
-            closePaymentModal();
-            // displayCurrentProducts(searchCurrentProductsInput.value); // No es necesario actualizar stock en este modelo
-            displayFrequentProducts(); // Puede que quieras actualizar sugerencias si implementas stock para peso
-        }
-
-        function saveSaleToHistory(saleData) {
-            salesHistory.push(saleData);
-            localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
-        }
-
-        function generateReceiptPreviewHTML() {
-            if (cart.length === 0) {
-                receiptPreviewContent.innerHTML = '<p class="text-center">El carrito está vacío.</p>';
-                return;
-            }
-            const now = new Date();
-            const formattedDate = `${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-            let currentTotal = 0;
-
-            let html = `<div class="text-center"><strong>${storeInfo.name || "MiniMarket POS"}</strong></div>`;
-            html += `<div class="text-center text-xs">${storeInfo.address || "Dirección no especificada"}</div>`;
-            html += `<div class="text-center text-xs">RUC/CI: ${storeInfo.ruc || "No especificado"}</div>`;
-            html += `<hr>`;
-            html += `<div class="text-xs">Fecha: ${formattedDate}</div>`;
-            html += `<hr>`;
-            html += `<div><strong>DETALLE:</strong></div>`;
-
-            cart.forEach(item => {
-                let itemName, itemDetails, itemSubtotal;
-                if (item.type === 'weight' || item.type === 'pollo_amarillo_granel') {
-                    itemName = item.name;
-                    itemDetails = `${item.weight.toFixed(2)} lbs @ $${item.pricePerUnit.toFixed(2)}/lb`;
-                    itemSubtotal = item.price;
-                } else if (item.type === 'value') {
-                    itemName = item.name;
-                    itemDetails = `${item.calculatedWeight.toFixed(2)} lbs (Valor: $${item.desiredValue.toFixed(2)}) @ $${item.pricePerUnit.toFixed(2)}/lb`;
-                    itemSubtotal = item.price;
-                }
-                else {
-                    itemName = `${item.quantity}x ${item.product.name}`;
-                    itemDetails = `@ $${item.product.price.toFixed(2)}`;
-                    itemSubtotal = item.product.price * item.quantity;
-                }
-                currentTotal += itemSubtotal;
-                html += `<div class="item-line">
-                            <span class="item-name">${itemName} ${ (item.type !== 'value' && item.type !== 'weight' && item.type !== 'pollo_amarillo_granel') ? `<span class="text-xs text-gray-500">${itemDetails}</span>` : ''}</span>
-                            <span class="item-price">$${itemSubtotal.toFixed(2)}</span>
-                           </div>`;
-                 if(item.type === 'weight' || item.type === 'value' || item.type === 'pollo_amarillo_granel') {
-                     html += `<div class="item-line" style="font-size:10px; padding-left:10px;">
-                                 <span>&nbsp;&nbsp;${itemDetails}</span>
-                              </div>`;
-                 }
-            });
-
-            html += `<hr>`;
-            html += `<div class="item-line"><strong>TOTAL:</strong> <strong class="item-price">$${currentTotal.toFixed(2)}</strong></div>`;
-            html += `<hr>`;
-            html += `<div class="text-center text-xs mt-2">¡Gracias por su compra!</div>`;
-
-            receiptPreviewContent.innerHTML = html;
-        }
-
-
-        function generateInvoicePDF(saleData) {
-            const receiptWidthMm = 80;
-            const leftMarginMm = 5;
-            const rightMarginMm = 5;
-            const contentWidthMm = receiptWidthMm - leftMarginMm - rightMarginMm;
-            const lineSpacing = 4.5;
-            let yPos = 10;
-
-            const pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: [receiptWidthMm, 297]
-            });
-
-            function addText(text, x, y, options = {}, isBold = false) {
-                if (isBold) pdf.setFont(undefined, 'bold');
-                pdf.text(text, x, y, options);
-                if (isBold) pdf.setFont(undefined, 'normal');
-            }
-
-            pdf.setFontSize(10);
-            pdf.setFont(undefined, 'bold');
-            addText(storeInfo.name || "MiniMarket POS", receiptWidthMm / 2, yPos, { align: 'center' }, true);
-            yPos += lineSpacing -1;
-
-            pdf.setFontSize(7);
-            pdf.setFont(undefined, 'normal');
-            const addressLines = pdf.splitTextToSize(storeInfo.address || "Dirección no especificada", contentWidthMm);
-            addText(addressLines, receiptWidthMm / 2, yPos, { align: 'center', maxWidth: contentWidthMm });
-            yPos += (addressLines.length * (lineSpacing - 2));
-
-            addText(`RUC/CI: ${storeInfo.ruc || "No especificado"}`, receiptWidthMm / 2, yPos, { align: 'center' });
-            yPos += lineSpacing -1;
-            pdf.line(leftMarginMm, yPos, receiptWidthMm - rightMarginMm, yPos);
-            yPos += lineSpacing - 2;
-
-            const now = new Date(saleData.timestamp);
-            const formattedDate = `${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-            addText(`Fecha: ${formattedDate}`, leftMarginMm, yPos);
-            yPos += lineSpacing - 2;
-            addText(`Venta ID: ${saleData.id}`, leftMarginMm, yPos);
-            yPos += lineSpacing - 2;
-            addText(`Método: ${saleData.paymentMethod}`, leftMarginMm, yPos);
-            if (saleData.note) {
-                yPos += lineSpacing - 2;
-                const noteLines = pdf.splitTextToSize(`Nota: ${saleData.note}`, contentWidthMm);
-                addText(noteLines, leftMarginMm, yPos);
-                yPos += (noteLines.length * (lineSpacing - 2.5));
-            }
-            yPos += lineSpacing -1;
-            pdf.line(leftMarginMm, yPos, receiptWidthMm - rightMarginMm, yPos);
-            yPos += lineSpacing - 2;
-
-            pdf.setFontSize(10);
-            pdf.setFont(undefined, 'bold');
-            addText("Cant/Peso Descripción", leftMarginMm, yPos, {}, true);
-            addText("Total", receiptWidthMm - rightMarginMm, yPos, { align: 'right' }, true);
-            pdf.setFont(undefined, 'normal');
-            yPos += lineSpacing -1;
-             pdf.line(leftMarginMm, yPos, receiptWidthMm - rightMarginMm, yPos);
-            yPos += lineSpacing - 2;
-
-            pdf.setFontSize(7);
-            saleData.items.forEach(item => {
-                if (yPos > 270) {
-                    pdf.addPage();
-                    yPos = 10;
-                }
-                const productNameMaxWidth = contentWidthMm - 20;
-                let productText;
-                if (item.isWeighted) {
-                     productText = `${item.quantity.toFixed(2)} ${item.unit || 'lbs'} ${item.name.split('(')[0].trim()} @ $${item.price.toFixed(2)}/${item.unit || 'lb'}`;
-                } else {
-                    productText = `${item.quantity}x ${item.name}`;
-                }
-                const productLines = pdf.splitTextToSize(productText, productNameMaxWidth);
-
-                addText(productLines.join('\n'), leftMarginMm, yPos);
-                addText(`$${item.subtotal.toFixed(2)}`, receiptWidthMm - rightMarginMm, yPos, { align: 'right' });
-                yPos += (productLines.length * (lineSpacing - 2.5));
-                 yPos += 1;
-            });
-            yPos += lineSpacing - 3;
-            pdf.line(leftMarginMm, yPos, receiptWidthMm - rightMarginMm, yPos);
-            yPos += lineSpacing - 2;
-
-            pdf.setFontSize(8);
-            addText("TOTAL:", leftMarginMm, yPos, {}, true);
-            addText(`$${saleData.totalAmount.toFixed(2)}`, receiptWidthMm - rightMarginMm, yPos, { align: 'right' }, true);
-            yPos += lineSpacing -1;
-
-            pdf.setFontSize(7);
-            addText("Pagado:", leftMarginMm, yPos);
-            addText(`$${saleData.amountPaid.toFixed(2)}`, receiptWidthMm - rightMarginMm, yPos, { align: 'right' });
-            yPos += lineSpacing - 2;
-
-            addText("Cambio:", leftMarginMm, yPos);
-            addText(`$${saleData.changeGiven.toFixed(2)}`, receiptWidthMm - rightMarginMm, yPos, { align: 'right' });
-            yPos += lineSpacing;
-
-            pdf.setFontSize(8);
-            addText("¡Gracias por su compra!", receiptWidthMm / 2, yPos, { align: 'center' }, true);
-            yPos += lineSpacing - 2;
-            addText((storeInfo.name || "MiniMarket POS"), receiptWidthMm / 2, yPos, { align: 'center' });
-
-
-            const fileName = `Ticket-${storeInfo.name.replace(/\s+/g, '_')}-${saleData.id.substring(0,8)}.pdf`;
-            pdf.save(fileName);
-        }
-
-
-        function showView(viewToShow) {
-            [inventoryView, reportView, manageProductsView, configuracionView].forEach(view => view.classList.add('hidden'));
-            viewToShow.classList.remove('hidden');
-            dropdownMenu.classList.add('hidden');
-            isDropdownOpen = false;
-
-            if (viewToShow === manageProductsView) {
-                displayCurrentProducts();
-                searchCurrentProductsInput.value = '';
-            }
-            if (viewToShow === reportView) {
-                loadAndDisplayDailyReport({ type: 'today' });
-                reportStartDateInput.value = '';
-                reportEndDateInput.value = '';
-            }
-            if (viewToShow === inventoryView) {
-                searchProductListInput.value = '';
-                displayFrequentProducts();
-            }
-            if (viewToShow === configuracionView) {
-                loadStoreInfoToForm();
-            }
-        }
-
-        function loadAndDisplayDailyReport(filterOptions = { type: 'today' }) {
-            let filteredSales = [];
-            let dateRangeText = "Hoy";
-            const today = new Date();
-            const todayLocaleString = today.toLocaleDateString('en-CA');
-
-            if (filterOptions.type === 'today') {
-                filteredSales = salesHistory.filter(sale => new Date(sale.timestamp).toLocaleDateString('en-CA') === todayLocaleString);
-            } else if (filterOptions.type === 'all') {
-                filteredSales = [...salesHistory];
-                dateRangeText = "Todas las Ventas";
-            } else if (filterOptions.type === 'range' && filterOptions.startDate && filterOptions.endDate) {
-                const start = new Date(filterOptions.startDate + "T00:00:00");
-                const end = new Date(filterOptions.endDate + "T23:59:59");
-
-                if (start > end) {
-                    alert("La fecha de inicio no puede ser posterior a la fecha de fin.");
-                    return;
-                }
-
-                filteredSales = salesHistory.filter(sale => {
-                    const saleDate = new Date(sale.timestamp);
-                    return saleDate >= start && saleDate <= end;
-                });
-                dateRangeText = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
-            }
-
-            document.getElementById('reportDateRange').textContent = dateRangeText;
-
-            let totalRevenue = 0;
-            let totalProductsSold = 0;
-            const productQuantities = {};
-
-            dailySalesDetails.innerHTML = '';
-
-            if (filteredSales.length === 0) {
-                dailySalesDetails.innerHTML = '<p class="text-gray-400">No hay ventas registradas para el periodo seleccionado.</p>';
-            }
-
-            filteredSales.forEach(sale => {
-                totalRevenue += sale.totalAmount;
-
-                const saleDetailDiv = document.createElement('div');
-                saleDetailDiv.className = 'report-sale-item';
-                let saleItemsHtml = `<strong>Venta ID: ${sale.id.substring(0,8)} (${new Date(sale.timestamp).toLocaleString()})</strong><br>
-                                         Total: $${sale.totalAmount.toFixed(2)} | Pagado con: ${sale.paymentMethod}
-                                        ${sale.note ? `<br><span class="text-xs text-gray-400">Nota: ${sale.note}</span>` : ''}
-                                         <ul>`;
-                sale.items.forEach(item => {
-                    totalProductsSold += item.quantity;
-                    productQuantities[item.name] = (productQuantities[item.name] || 0) + item.quantity;
-                    saleItemsHtml += `<li>${item.quantity}${item.unit || 'x'} ${item.name.split('(')[0].trim()} ($${item.price.toFixed(2)} ${item.isWeighted ? '/'+item.unit : 'c/u'}) = $${item.subtotal.toFixed(2)}</li>`;
-                });
-                saleItemsHtml += '</ul>';
-                saleDetailDiv.innerHTML = saleItemsHtml;
-                dailySalesDetails.appendChild(saleDetailDiv);
-            });
-
-            dailyTotalRevenue.textContent = `$${totalRevenue.toFixed(2)}`;
-            dailyTotalProductsSold.textContent = totalProductsSold;
-            dailyTotalSalesCount.textContent = filteredSales.length;
-
-            topSellingProducts.innerHTML = '';
-            const sortedTopProducts = Object.entries(productQuantities)
-                .sort(([,a],[,b]) => b-a)
-                .slice(0, 5);
-
-            if (sortedTopProducts.length === 0 && filteredSales.length > 0) {
-                topSellingProducts.innerHTML = '<p class="text-gray-400">No hay productos suficientes para mostrar un top.</p>';
-            } else if (sortedTopProducts.length === 0) {
-                 topSellingProducts.innerHTML = '<p class="text-gray-400">No hay productos vendidos en este periodo.</p>';
-            }else {
-                sortedTopProducts.forEach(([name, quantity]) => {
-                    const p = document.createElement('p');
-                    p.textContent = `${name}: ${quantity.toFixed(2)} ${name.includes('lbs') || name.includes('(Valor: $') ? 'lbs' : 'unidades'}`;
-                    topSellingProducts.appendChild(p);
-                });
-            }
-        }
-
-        if(filterReportBtn) {
-            filterReportBtn.addEventListener('click', () => {
-                const startDate = reportStartDateInput.value;
-                const endDate = reportEndDateInput.value;
-                if (startDate && endDate) {
-                    loadAndDisplayDailyReport({ type: 'range', startDate, endDate });
-                } else {
-                    alert("Por favor, seleccione ambas fechas para filtrar.");
-                }
-            });
-        }
-
-        if(showTodayReportBtn) {
-            showTodayReportBtn.addEventListener('click', () => {
-                reportStartDateInput.value = '';
-                reportEndDateInput.value = '';
-                loadAndDisplayDailyReport({ type: 'today' });
-            });
-        }
-        if(showAllSalesReportBtn){
-             showAllSalesReportBtn.addEventListener('click', () => {
-                reportStartDateInput.value = '';
-                reportEndDateInput.value = '';
-                loadAndDisplayDailyReport({ type: 'all' });
-            });
-        }
-
-        function generateDailyReportPDF() {
-            const pdf = new jsPDF();
-            const reportTitleDate = document.getElementById('reportDateRange').textContent;
-            const fileName = `Reporte-${storeInfo.name.replace(/\s+/g, '_')}-${reportTitleDate.replace(/\s-\s/g, '_to_').replace(/\//g, '-')}.pdf`;
-
-            pdf.setFontSize(16);
-            pdf.setFont(undefined, 'bold');
-            pdf.text(storeInfo.name || "MiniMarket POS", 105, 15, null, null, "center");
-            pdf.setFontSize(10);
-            pdf.setFont(undefined, 'normal');
-            pdf.text(storeInfo.address || "Dirección no especificada", 105, 22, null, null, "center");
-            pdf.text(`RUC/CI: ${storeInfo.ruc || "No especificado"}`, 105, 29, null, null, "center");
-
-            pdf.setFontSize(18);
-            pdf.setFont(undefined, 'bold');
-            pdf.text(`Reporte de Ventas (${reportTitleDate})`, 105, 40, null, null, "center");
-            pdf.setFontSize(12);
-            pdf.setFont(undefined, 'normal');
-            let yPos = 50;
-            pdf.text(`Total Recaudado: ${dailyTotalRevenue.textContent}`, 10, yPos); yPos += 7;
-            pdf.text(`Cantidad de Productos Vendidos: ${dailyTotalProductsSold.textContent}`, 10, yPos); yPos += 7;
-            pdf.text(`Cantidad de Ventas Realizadas: ${dailyTotalSalesCount.textContent}`, 10, yPos); yPos += 10;
-
-            pdf.setFontSize(11);
-            pdf.setFont(undefined, 'bold');
-            pdf.text("Detalle de Ventas:", 10, yPos); yPos += 6;
-
-            const salesToReport = salesHistory.filter(sale => {
-                const reportRangeText = document.getElementById('reportDateRange').textContent;
-                if (reportRangeText === "Hoy") {
-                    return new Date(sale.timestamp).toLocaleDateString() === new Date().toLocaleDateString();
-                } else if (reportRangeText === "Todas las Ventas") {
-                    return true;
-                } else {
-                    const [startStr, endStr] = reportRangeText.split(' - ');
-                    const startDate = new Date(startStr.split('/').reverse().join('-') + "T00:00:00");
-                    const endDate = new Date(endStr.split('/').reverse().join('-') + "T23:59:59");
-                    const saleDate = new Date(sale.timestamp);
-                    return saleDate >= startDate && saleDate <= endDate;
-                }
-            });
-
-
-            if (salesToReport.length === 0) {
-                pdf.setFont(undefined, 'normal');
-                pdf.text("No se registraron ventas para este periodo.", 15, yPos);
-                yPos += 10;
-            } else {
-                salesToReport.forEach(sale => {
-                    if (yPos > 260) { pdf.addPage(); yPos = 20; }
-                    pdf.setFont(undefined, 'bold');
-                    pdf.text(`Venta ID: ${sale.id.substring(0,8)} (${new Date(sale.timestamp).toLocaleString()}) - Total: $${sale.totalAmount.toFixed(2)} (Pago: ${sale.paymentMethod})`, 15, yPos);
-                    yPos += 6;
-                    pdf.setFont(undefined, 'normal');
-                    if (sale.note) {
-                         const noteLines = pdf.splitTextToSize(`Nota: ${sale.note}`, 180);
-                         pdf.text(noteLines, 20, yPos);
-                         yPos += (noteLines.length * 4);
-                    }
-                    sale.items.forEach(item => {
-                        if (yPos > 270) { pdf.addPage(); yPos = 20; }
-                        pdf.text(`  - ${item.quantity}${item.unit || 'x'} ${item.name.split('(')[0].trim()} ($${item.price.toFixed(2)} ${item.isWeighted ? '/'+item.unit : 'c/u'}) = $${item.subtotal.toFixed(2)}`, 20, yPos);
-                        yPos += 5;
-                    });
-                    yPos += 3;
-                });
-            }
-
-            if (yPos > 250) { pdf.addPage(); yPos = 20; }
-            pdf.setFontSize(11);
-            pdf.setFont(undefined, 'bold');
-            pdf.text("Productos Más Vendidos (en rango):", 10, yPos); yPos += 6;
-            pdf.setFont(undefined, 'normal');
-
-            const productQuantities = {};
-            salesToReport.forEach(sale => {
-                sale.items.forEach(item => {
-                    productQuantities[item.name] = (productQuantities[item.name] || 0) + item.quantity;
-                });
-            });
-            const sortedTopProducts = Object.entries(productQuantities)
-                .sort(([,a],[,b]) => b-a)
-                .slice(0, 5);
-
-            if (sortedTopProducts.length === 0) {
-                pdf.text("No hay productos vendidos en este periodo.", 15, yPos);
-            } else {
-                sortedTopProducts.forEach(([name, quantity]) => {
-                    if (yPos > 270) { pdf.addPage(); yPos = 20; }
-                    pdf.text(`- ${name}: ${quantity.toFixed(2)} ${name.includes('lbs') || name.includes('(Valor: $') ? 'lbs' : 'unidades'}`, 15, yPos);
-                    yPos += 5;
-                });
-            }
-            pdf.save(fileName);
-        }
-
-        function loadStoreInfoToForm() {
-            storeNameInput.value = storeInfo.name;
-            storeAddressInput.value = storeInfo.address;
-            storeRucInput.value = storeInfo.ruc;
-        }
-
-        function loadStoreInfo() {
-            const savedInfo = localStorage.getItem('storeInfo');
-            if (savedInfo) {
-                storeInfo = JSON.parse(savedInfo);
-            }
-            footerStoreName.textContent = storeInfo.name;
-            headerStoreName.textContent = storeInfo.name;
-        }
-
-        storeConfigForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            storeInfo.name = storeNameInput.value.trim() || "MiniMarket POS";
-            storeInfo.address = storeAddressInput.value.trim() || "Dirección no especificada";
-            storeInfo.ruc = storeRucInput.value.trim() || "0000000000000";
-            saveStoreInfoToLocalStorage();
-            footerStoreName.textContent = storeInfo.name;
-            headerStoreName.textContent = storeInfo.name;
-            alert("Configuración guardada exitosamente.");
-        });
-
-        clearAllDataBtn.addEventListener('click', () => {
-            if (confirm("¿ESTÁS ABSOLUTAMENTE SEGURO de que quieres borrar TODOS los datos? (Productos, Ventas, Configuración). Esta acción es IRREVERSIBLE.")) {
-                if (confirm("ÚLTIMA ADVERTENCIA: ¿Realmente quieres proceder? Todos los datos se perderán.")) {
-                    localStorage.removeItem('mockProducts');
-                    localStorage.removeItem('salesHistory');
-                    localStorage.removeItem('storeInfo');
-                    localStorage.removeItem('mockProductsDefaultLoaded_v7');
-
-                    mockProducts = [];
-                    salesHistory = [];
-                    storeInfo = { name: 'MiniMarket POS', address: 'Tu Dirección Aquí', ruc: '0000000000000' };
-                    cart = [];
-
-                    showView(inventoryView);
-                    updateCartDisplay();
-                    loadStoreInfo();
-                    alert("Todos los datos de la aplicación han sido eliminados. La página se recargará para aplicar los cambios por defecto.");
-                    location.reload();
-                }
-            }
-        });
-
-
-        let isDropdownOpen = false;
-        function toggleDropdown() {
-            isDropdownOpen = !isDropdownOpen;
-            dropdownMenu.classList.toggle('hidden', !isDropdownOpen);
-        }
-        menuButton.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(); });
-        document.addEventListener('click', (e) => {
-            if (isDropdownOpen && !dropdownMenu.contains(e.target) && !menuButton.contains(e.target)) {
-                toggleDropdown();
-            }
-             // Ocultar resultados de búsqueda si se hace clic fuera
-            if (!barcodeScannerInput.contains(e.target) && !searchResultsContainer.contains(e.target)) {
-                searchResultsContainer.classList.add('hidden');
-            }
-        });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isDropdownOpen) toggleDropdown(); });
-
-        // Modificar el event listener para la barra de búsqueda
-        barcodeScannerInput.addEventListener('input', () => {
-            const searchTerm = barcodeScannerInput.value.trim();
-            if (searchTerm.length > 0) {
-                displaySearchResults(searchTerm);
-            } else {
-                searchResultsContainer.classList.add('hidden');
-                searchResultsContainer.innerHTML = ''; // Limpiar resultados
-            }
-        });
-
-        // Modificar el event listener para el formulario de escaneo (Enter)
-        scanForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const productId = barcodeScannerInput.value.trim();
-            if (productId) {
-                 // Intentar añadir por ID si es un ID válido
-                const product = findProductById(productId);
-                if (product) {
-                    addProductToCart(productId);
-                    barcodeScannerInput.value = '';
-                    searchResultsContainer.classList.add('hidden'); // Ocultar resultados después de añadir
-                } else {
-                    // Si no es un ID, quizás mostrar un mensaje o no hacer nada
-                    alert("Producto no encontrado con ese ID.");
-                    playErrorSound();
-                }
-                 barcodeScannerInput.focus();
-            }
-        });
-
-
-        function displaySearchResults(searchTerm) {
-            const lowerSearchTerm = searchTerm.toLowerCase();
-            const filteredProducts = mockProducts.filter(p =>
-                p.name.toLowerCase().includes(lowerSearchTerm) ||
-                p.id.toLowerCase().includes(lowerSearchTerm)
-            );
-
-            searchResultsContainer.innerHTML = ''; // Limpiar resultados anteriores
-
-            if (filteredProducts.length > 0) {
-                filteredProducts.forEach(p => {
-                    const resultItem = document.createElement('div');
-                    resultItem.classList.add('search-result-item');
-                    resultItem.dataset.productId = p.id; // Guardar el ID del producto
-                    resultItem.innerHTML = `<strong>${p.name}</strong> (${p.unit}) - $${p.price.toFixed(2)} <span class="text-gray-500">(ID: ${p.id})</span>`;
-                    resultItem.addEventListener('click', handleSearchResultClick);
-                    searchResultsContainer.appendChild(resultItem);
-                });
-                searchResultsContainer.classList.remove('hidden'); // Mostrar resultados
-            } else {
-                searchResultsContainer.classList.add('hidden'); // Ocultar si no hay resultados
-            }
-        }
-
-        function handleSearchResultClick(e) {
-            const productId = e.currentTarget.dataset.productId;
-            if (productId) {
-                addProductToCart(productId);
-                barcodeScannerInput.value = ''; // Limpiar la barra de búsqueda
-                searchResultsContainer.classList.add('hidden'); // Ocultar los resultados
-                barcodeScannerInput.focus(); // Volver a enfocar la barra de búsqueda
-            }
-        }
-
-
-        finalizeSaleBtn.addEventListener('click', openPaymentModal);
-        clearCartBtn.addEventListener('click', () => {
-            if (cart.length === 0) {
-                alert("El carrito ya está vacío.");
-                return;
-            }
-            if (confirm("¿Estás seguro de que quieres limpiar el carrito?")) {
-                clearCart();
-                alert("Carrito limpiado.");
-            }
-        });
-
-        if(previewReceiptBtn) {
-            previewReceiptBtn.addEventListener('click', () => {
-                if (cart.length > 0) {
-                    generateReceiptPreviewHTML();
-                    receiptPreviewModal.classList.remove('hidden');
-                } else {
-                    alert("El carrito está vacío. Añade productos para ver la vista previa.");
-                }
-            });
-        }
-        if(closeReceiptPreviewModalBtn) {
-            closeReceiptPreviewModalBtn.addEventListener('click', () => receiptPreviewModal.classList.add('hidden'));
-        }
-        if(closeReceiptPreviewModalBottomBtn) {
-            closeReceiptPreviewModalBottomBtn.addEventListener('click', () => receiptPreviewModal.classList.add('hidden'));
-        }
-
-
-        confirmPaymentBtn.addEventListener('click', finalizeSale);
-        cancelPaymentBtn.addEventListener('click', closePaymentModal);
-
-        linkPOSView.addEventListener('click', (e) => { e.preventDefault(); showView(inventoryView); });
-        linkReporte.addEventListener('click', (e) => { e.preventDefault(); showView(reportView); });
-        linkManageProducts.addEventListener('click', (e) => { e.preventDefault(); showView(manageProductsView); });
-        linkConfiguracion.addEventListener('click', (e) => { e.preventDefault(); showView(configuracionView); });
-        downloadReportPdfBtn.addEventListener('click', generateDailyReportPDF);
-
-        addProductManuallyBtn.addEventListener('click', () => {
-            if (mockProducts.length > 0) {
-                const availableProducts = mockProducts.filter(p => p.stock > 0);
-                if (availableProducts.length > 0) {
-                    const randomProduct = availableProducts[Math.floor(Math.random() * availableProducts.length)];
-                    addProductToCart(randomProduct.id);
-                } else {
-                    alert("Todos los productos están agotados. Repón el stock en 'Gestionar Productos'.");
-                }
-            } else {
-                alert("No hay productos en el inventario para añadir. Por favor, añade productos en 'Gestionar Productos'.");
-            }
-        });
-
-        if(viewProductListBtn) {
-            viewProductListBtn.addEventListener('click', () => {
-                openProductListModal();
-                searchProductListInput.value = '';
-            });
-        }
-        if(appLogo) {
-            appLogo.addEventListener('click', () => {
-                showView(inventoryView);
-            });
-        }
-
-
-        linkVerInventario.addEventListener('click', (e) => {
-            e.preventDefault();
-            openProductListModal();
-            searchProductListInput.value = '';
-        });
-
-        closeProductListModal.addEventListener('click', () => productListModal.classList.add('hidden'));
-        closeProductListModalBottom.addEventListener('click', () => productListModal.classList.add('hidden'));
-
-        function displayFrequentProducts() {
-            frequentProductsContainer.innerHTML = '';
-            // En este modelo simplificado, las sugerencias se basan en mockProducts con stock
-            const productsWithStock = mockProducts.filter(p => p.stock > 0);
-            const suggestions = productsWithStock.slice(0, 6);
-
-            if (suggestions.length === 0 && mockProducts.length > 0) {
-                frequentProductsContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-full text-center">No hay productos con stock para sugerir (en inventario principal).</p>';
-                return;
-            }
-             if (mockProducts.length === 0) {
-                frequentProductsContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-full text-center">Aún no hay productos en el inventario principal.</p>';
-                return;
-            }
-
-            suggestions.forEach(product => {
-                const btn = document.createElement('button');
-                btn.className = 'frequent-product-btn p-2 rounded-md text-xs truncate transition-all hover:neon-border-green';
-                btn.textContent = `${product.name} ($${product.price.toFixed(2)})`;
-                btn.title = `${product.name} - $${product.price.toFixed(2)} (Stock: ${product.stock})`;
-                btn.addEventListener('click', () => {
-                    addProductToCart(product.id);
-                });
-                frequentProductsContainer.appendChild(btn);
-            });
-        }
-
-        // --- Funciones para Venta por Peso ---
-        function openWeightProductModal(preSelectProductKey = null) { // Añadir parámetro para preseleccionar
-            weightProductNameSelect.innerHTML = '';
-            // Convertir el objeto sellByWeightProducts a un array plano para el select
-            const allWeightProducts = Object.values(sellByWeightProducts).flat();
-
-            allWeightProducts.forEach(p => {
-                const option = document.createElement('option');
-                option.value = p.key;
-                option.textContent = p.name;
-                weightProductNameSelect.appendChild(option);
-            });
-
-            if (allWeightProducts.length > 0) {
-                 if (preSelectProductKey) {
-                    weightProductNameSelect.value = preSelectProductKey;
-                 }
-                loadPriceForWeightedProduct();
-            }
-            weightProductWeightLb.value = '';
-            weightProductTotalCalculated.textContent = '$0.00'; // Resetear total calculado
-            weightProductModal.classList.remove('hidden');
-            // Enfocar el campo de precio o peso dependiendo de si hay precio guardado
-            if (parseFloat(weightProductPricePerLb.value) > 0) {
-                weightProductWeightLb.focus();
-            } else {
-                weightProductPricePerLb.focus();
-            }
-        }
-
-
-        function closeWeightProductModal() {
-            weightProductModal.classList.add('hidden');
-             // Limpiar campos y estado al cerrar
-            const allWeightProducts = Object.values(sellByWeightProducts).flat();
-            weightProductNameSelect.value = allWeightProducts.length > 0 ? allWeightProducts[0].key : '';
-            weightProductPricePerLb.value = '';
-            weightProductWeightLb.value = '';
-            weightProductTotalCalculated.textContent = '$0.00';
-            // No es necesario resetear el precio guardado aquí, solo el campo de entrada
-        }
-
-
-        function loadPriceForWeightedProduct() {
-            const selectedProductKey = weightProductNameSelect.value;
-            if (selectedProductKey) {
-                // Usar una clave de localStorage única para cada producto por peso
-                const savedPrice = localStorage.getItem(`precio_libra_${selectedProductKey}`);
-                weightProductPricePerLb.value = savedPrice ? parseFloat(savedPrice).toFixed(2) : '';
-                updateWeightProductTotal();
-            } else {
-                weightProductPricePerLb.value = '';
-                updateWeightProductTotal();
-            }
-        }
-
-        function savePriceForWeightedProduct() {
-            const selectedProductKey = weightProductNameSelect.value;
-            const price = parseFloat(weightProductPricePerLb.value);
-            if (selectedProductKey && !isNaN(price) && price >= 0) {
-                localStorage.setItem(`precio_libra_${selectedProductKey}`, price.toFixed(2));
-            } else if (selectedProductKey) {
-                 // Si el precio no es válido, eliminar el precio guardado para este producto
-                 localStorage.removeItem(`precio_libra_${selectedProductKey}`);
-            }
-            updateWeightProductTotal();
-        }
-
-        function resetSavedPriceForWeightedProduct() {
-            const selectedProductKey = weightProductNameSelect.value;
-            if (selectedProductKey) {
-                if (confirm(`¿Seguro que quieres restablecer el precio guardado para "${weightProductNameSelect.options[weightProductNameSelect.selectedIndex].text}"?`)) {
-                    localStorage.removeItem(`precio_libra_${selectedProductKey}`);
-                    weightProductPricePerLb.value = '';
-                    updateWeightProductTotal();
-                    alert("Precio restablecido.");
-                }
-            } else {
-                 alert("Por favor, seleccione un producto para restablecer su precio.");
-            }
-        }
-
-
-        function updateWeightProductTotal() {
-            const pricePerLb = parseFloat(weightProductPricePerLb.value) || 0;
-            const weight = parseFloat(weightProductWeightLb.value) || 0;
-            const total = pricePerLb * weight;
-            weightProductTotalCalculated.textContent = `$${total.toFixed(2)}`;
-             // Habilitar/deshabilitar el botón de añadir al carrito
-            addWeightProductToCartBtn.disabled = total <= 0;
-        }
-
-        function addProductByWeightToCart() {
-            const selectedProductKey = weightProductNameSelect.value;
-            const pricePerLb = parseFloat(weightProductPricePerLb.value);
-            const weight = parseFloat(weightProductWeightLb.value);
-
-            if (!selectedProductKey) {
-                alert("Por favor, seleccione un producto."); return;
-            }
-            if (isNaN(pricePerLb) || pricePerLb <= 0) {
-                alert("Por favor, ingrese un precio por libra válido."); return;
-            }
-            if (isNaN(weight) || weight <= 0) {
-                alert("Por favor, ingrese un peso válido."); return;
-            }
-            const calculatedPrice = pricePerLb * weight;
-            // Usar la clave del producto por peso y el tipo 'weight'
-            addProductToCart(selectedProductKey, true, weight, pricePerLb, calculatedPrice, 'weight');
-            closeWeightProductModal();
-        }
-
-        // --- Funciones para Venta por Valor ---
-        function openSellByValueModal() {
-            valueProductNameSelect.innerHTML = '';
-             // Convertir el objeto sellByWeightProducts a un array plano para el select
-            const allWeightProducts = Object.values(sellByWeightProducts).flat();
-
-            allWeightProducts.forEach(p => {
-                const option = document.createElement('option');
-                option.value = p.key;
-                option.textContent = p.name;
-                valueProductNameSelect.appendChild(option);
-            });
-
-            if (allWeightProducts.length > 0) {
-                loadPriceForValueProduct();
-            }
-            valueProductDesiredValue.value = '';
-            valueProductCalculatedWeight.textContent = '0.00 lbs';
-            sellByValueModal.classList.remove('hidden');
-             // Enfocar el campo de valor deseado
-            valueProductDesiredValue.focus();
-        }
-
-        function closeSellByValueModal() {
-            sellByValueModal.classList.add('hidden');
-             // Limpiar campos y estado al cerrar
-            const allWeightProducts = Object.values(sellByWeightProducts).flat();
-            valueProductNameSelect.value = allWeightProducts.length > 0 ? allWeightProducts[0].key : '';
-            valueProductPricePerLb.value = '';
-            valueProductDesiredValue.value = '';
-            valueProductCalculatedWeight.textContent = '0.00 lbs';
-             // No es necesario resetear el precio guardado aquí
-        }
-
-        function loadPriceForValueProduct() {
-            const selectedProductKey = valueProductNameSelect.value;
-            if (selectedProductKey) {
-                // Usar una clave de localStorage única para cada producto por peso
-                const savedPrice = localStorage.getItem(`precio_libra_${selectedProductKey}`);
-                valueProductPricePerLb.value = savedPrice ? parseFloat(savedPrice).toFixed(2) : '';
-                calculateWeightFromValue();
-            } else {
-                 valueProductPricePerLb.value = '';
-                 calculateWeightFromValue();
-            }
-        }
-
-        function savePriceForValueProduct() {
-            const selectedProductKey = valueProductNameSelect.value;
-            const price = parseFloat(valueProductPricePerLb.value);
-            if (selectedProductKey && !isNaN(price) && price >= 0) {
-                localStorage.setItem(`precio_libra_${selectedProductKey}`, price.toFixed(2));
-            } else if (selectedProductKey) {
-                 // Si el precio no es válido, eliminar el precio guardado para este producto
-                 localStorage.removeItem(`precio_libra_${selectedProductKey}`);
-            }
-            calculateWeightFromValue();
-        }
-
-        function resetSavedPriceForValueProduct() {
-            const selectedProductKey = valueProductNameSelect.value;
-            if (selectedProductKey) {
-                if (confirm(`¿Seguro que quieres restablecer el precio por libra guardado para "${valueProductNameSelect.options[valueProductNameSelect.selectedIndex].text}"?`)) {
-                    localStorage.removeItem(`precio_libra_${selectedProductKey}`);
-                    valueProductPricePerLb.value = '';
-                    calculateWeightFromValue();
-                    alert("Precio por libra restablecido.");
-                }
-            } else {
-                 alert("Por favor, seleccione un producto para restablecer su precio.");
-            }
-        }
-
-        function calculateWeightFromValue() {
-            const pricePerLb = parseFloat(valueProductPricePerLb.value) || 0;
-            const desiredValue = parseFloat(valueProductDesiredValue.value) || 0;
-            let calculatedWeight = 0;
-            if (pricePerLb > 0 && desiredValue > 0) {
-                calculatedWeight = desiredValue / pricePerLb;
-            }
-            valueProductCalculatedWeight.textContent = `${calculatedWeight.toFixed(2)} lbs`;
-             // Habilitar/deshabilitar el botón de añadir al carrito
-            addValueProductToCartBtn.disabled = desiredValue <= 0 || pricePerLb <= 0;
-        }
-
-        function addProductByValueToCart() {
-            const selectedProductKey = valueProductNameSelect.value;
-            const pricePerLb = parseFloat(valueProductPricePerLb.value);
-            const desiredValue = parseFloat(valueProductDesiredValue.value);
-
-            if (!selectedProductKey) {
-                alert("Por favor, seleccione un producto."); return;
-            }
-            if (isNaN(pricePerLb) || pricePerLb <= 0) {
-                alert("Por favor, ingrese un precio por libra válido."); return;
-            }
-            if (isNaN(desiredValue) || desiredValue <= 0) {
-                alert("Por favor, ingrese un valor deseado válido."); return;
-            }
-            const calculatedWeight = desiredValue / pricePerLb;
-            // Usar la clave del producto por peso y el tipo 'value'
-            addProductToCart(selectedProductKey, true, desiredValue, pricePerLb, calculatedWeight, 'value');
-            closeSellByValueModal();
-        }
-
-        // --- Funciones para el nuevo modal de productos por peso categorizados ---
-        function openCategorizedWeightProductsModal() {
-            categorizedProductsList.innerHTML = ''; // Limpiar contenido anterior
-
-            // Iterar sobre las categorías definidas en sellByWeightProducts
-            for (const category in sellByWeightProducts) {
-                if (sellByWeightProducts.hasOwnProperty(category)) {
-                    const productsInCategory = sellByWeightProducts[category];
-
-                    // Crear encabezado de categoría colapsable
-                    const categoryHeader = document.createElement('div');
-                    categoryHeader.classList.add('category-header');
-                    categoryHeader.innerHTML = `<span>${category}</span> <i class="fas fa-chevron-down"></i>`;
-                    categoryHeader.dataset.target = `category-${category.replace(/\s+/g, '-')}`; // ID para el contenido
-
-                    const categoryContent = document.createElement('div');
-                    categoryContent.classList.add('category-content', 'hidden'); // Oculto por defecto
-                    categoryContent.id = categoryHeader.dataset.target;
-
-                    // Llenar el contenido de la categoría con productos
-                    productsInCategory.forEach(product => {
-                        const productItem = document.createElement('div');
-                        productItem.classList.add('product-item');
-                        productItem.dataset.productKey = product.key; // Guardar la clave del producto
-                        productItem.innerHTML = `<strong>${product.name}</strong>`;
-                        productItem.addEventListener('click', handleCategorizedProductClick);
-                        categoryContent.appendChild(productItem);
-                    });
-
-                    categorizedProductsList.appendChild(categoryHeader);
-                    categorizedProductsList.appendChild(categoryContent);
-
-                    // Añadir event listener para colapsar/expandir
-                    categoryHeader.addEventListener('click', () => {
-                        const isHidden = categoryContent.classList.contains('hidden');
-                        categoryContent.classList.toggle('hidden', !isHidden);
-                        categoryHeader.querySelector('i').classList.toggle('fa-chevron-down', isHidden);
-                        categoryHeader.querySelector('i').classList.toggle('fa-chevron-up', !isHidden);
-                    });
-                }
-            }
-
-            categorizedWeightProductsModal.classList.remove('hidden');
-             if (isDropdownOpen) toggleDropdown(); // Cerrar menú desplegable si está abierto
-        }
-
-        function closeCategorizedWeightProductsModal() {
-            categorizedWeightProductsModal.classList.add('hidden');
-             // Opcional: colapsar todas las secciones al cerrar
-             document.querySelectorAll('#categorizedWeightProductsModal .category-content').forEach(content => content.classList.add('hidden'));
-             document.querySelectorAll('#categorizedWeightProductsModal .category-header i').forEach(icon => {
-                 icon.classList.add('fa-chevron-down');
-                 icon.classList.remove('fa-chevron-up');
-             });
-        }
-
-        function handleCategorizedProductClick(e) {
-            const productKey = e.currentTarget.dataset.productKey;
-            if (productKey) {
-                closeCategorizedWeightProductsModal(); // Cerrar este modal
-                openWeightProductModal(productKey); // Abrir el modal de venta por peso con el producto seleccionado
-            }
-        }
-
-
-        // Event listeners para los botones de venta por peso/valor
-        if(sellByWeightBtn) {
-            // El botón "PESO LB" ahora también abre el modal categorizado
-            sellByWeightBtn.addEventListener('click', openCategorizedWeightProductsModal);
-        }
-        if(closeWeightProductModalBtn) {
-            closeWeightProductModalBtn.addEventListener('click', closeWeightProductModal);
-        }
-        if(closeWeightProductModalBottomBtn) {
-            closeWeightProductModalBottomBtn.addEventListener('click', closeWeightProductModal);
-        }
-        if(weightProductNameSelect) {
-            weightProductNameSelect.addEventListener('change', loadPriceForWeightedProduct);
-        }
-        if(weightProductPricePerLb) {
-            weightProductPricePerLb.addEventListener('input', savePriceForWeightedProduct);
-        }
-        if(weightProductWeightLb) {
-            weightProductWeightLb.addEventListener('input', updateWeightProductTotal);
-        }
-        if(addWeightProductToCartBtn) {
-            addWeightProductToCartBtn.addEventListener('click', addProductByWeightToCart);
-        }
-        if(resetSavedPriceBtn) {
-            resetSavedPriceBtn.addEventListener('click', resetSavedPriceForWeightedProduct);
-        }
-
-        if(sellByValueBtn) {
-            sellByValueBtn.addEventListener('click', openSellByValueModal); // Abrir modal de valor
-        }
-        if(closeSellByValueModalBtn) {
-            closeSellByValueModalBtn.addEventListener('click', closeSellByValueModal);
-        }
-        if(closeSellByValueModalBottomBtn) {
-            closeSellByValueModalBottomBtn.addEventListener('click', closeSellByValueModal);
-        }
-        if(valueProductNameSelect) {
-            valueProductNameSelect.addEventListener('change', loadPriceForValueProduct);
-        }
-        if(valueProductPricePerLb) {
-            valueProductPricePerLb.addEventListener('input', savePriceForValueProduct);
-        }
-        if(valueProductDesiredValue) {
-            valueProductDesiredValue.addEventListener('input', calculateWeightFromValue);
-        }
-        if(addValueProductToCartBtn) {
-            addValueProductToCartBtn.addEventListener('click', addProductByValueToCart);
-        }
-        if(resetSavedValuePriceBtn) {
-            resetSavedValuePriceBtn.addEventListener('click', resetSavedValuePriceForValueProduct);
-        }
-
-        // Modificar el event listener del botón de Pollo Amarillo
-        if(sellPolloAmarilloBtn) {
-             // El botón "POLLO AMARILLO" ahora también abre el modal categorizado
-            sellPolloAmarilloBtn.addEventListener('click', openCategorizedWeightProductsModal);
-        }
-
-        // Event listeners para el nuevo modal categorizado
-        if(closeCategorizedWeightProductsModalBtn) {
-            closeCategorizedWeightProductsModalBtn.addEventListener('click', closeCategorizedWeightProductsModal);
-        }
-        if(closeCategorizedWeightProductsModalBottomBtn) {
-            closeCategorizedWeightProductsModalBottomBtn.addEventListener('click', closeCategorizedWeightProductsModal);
-        }
-
-
-        updateCartDisplay();
-        showView(inventoryView);
-
-        console.log("MiniMarket POS App Inicializada con Venta por Peso/Valor y otras funciones.");
-    </script>
 </body>
 </html>
