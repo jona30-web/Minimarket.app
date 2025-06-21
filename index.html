@@ -23,7 +23,6 @@
       height: 100vh; /* Asegura que la altura sea de toda la pantalla */
       display: flex;
       flex-direction: column;
-      overflow: hidden;
     }
 
     /* Contenedor de la orden con el video de fondo */
@@ -47,9 +46,9 @@
       left: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover;  /* Asegura que el video cubra toda la pantalla */
-      opacity: 0.4;  /* Asegura que el video no opaque el contenido */
-      z-index: -1;
+      object-fit: cover;
+      opacity: 0.5;
+      z-index: -1; /* Asegura que el video esté detrás del contenido */
     }
 
     /* Estilos del título */
@@ -187,7 +186,7 @@
   <div class="order-summary-container">
     <!-- Video de fondo -->
     <video id="videoDisplay" muted loop autoplay>
-      <source src="https://raw.githubusercontent.com/jona30-web/Minimarket.app/1ccf8d541daa3acfb4dac1b5b2a46a99df54dc38/video4%20(1).mp4" type="video/mp4">
+      <source src="https://github.com/jona30-web/Minimarket.app/blob/e74d7331701c47b562cc0d444d636fca6592b675/lv_0_20250620222308.mp4?raw=true" type="video/mp4">
       Tu navegador no soporta el video.
     </video>
 
