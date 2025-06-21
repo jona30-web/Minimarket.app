@@ -20,7 +20,7 @@
       font-size: 16px;
       padding: 0;
       margin: 0;
-      height: 100vh; /* Asegura que la altura sea de toda la pantalla */
+      height: 100vh;
       display: flex;
       flex-direction: column;
     }
@@ -28,7 +28,7 @@
     /* Contenedor de la orden con el video de fondo */
     .order-summary-container {
       position: relative;
-      background: rgba(255, 255, 255, 0.8); /* Fondo blanco ligeramente transparente */
+      background: rgba(255, 255, 255, 0.8);
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -47,8 +47,8 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      opacity: 0.3; /* Hacemos el video más claro */
-      z-index: -1; /* Asegura que el video esté detrás del contenido */
+      opacity: 0.4;
+      z-index: -1;
       object-position: center;
     }
 
@@ -188,7 +188,7 @@
     <!-- Video de fondo -->
     <video id="videoDisplay" muted loop autoplay>
       <source src="https://raw.githubusercontent.com/jona30-web/Minimarket.app/1ccf8d541daa3acfb4dac1b5b2a46a99df54dc38/video4%20(1).mp4" type="video/mp4">
-      Tu navegador no soporta el formato de video.
+      Tu navegador no soporta el video.
     </video>
 
     <!-- Contenido del resumen de la orden -->
@@ -241,7 +241,6 @@
     <!-- Botones de acciones -->
     <button class="action-button" id="view-receipt">Vista previa recibo</button>
     <button class="action-button" id="finalize-sale">Finalizar venta</button>
-
   </div>
 
   <script>
