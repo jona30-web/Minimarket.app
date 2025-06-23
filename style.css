@@ -1,14 +1,14 @@
-/* Estilos generales */
+/* General Styles */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
     display: flex;
     min-height: 100vh;
     background-color: #f4f4f4;
+    transition: margin-left 0.3s ease-in-out;
 }
 
-/* Sidebar */
 #sidebar {
     background-color: #333;
     color: white;
@@ -17,10 +17,15 @@ body {
     display: flex;
     flex-direction: column;
     position: fixed;
-    height: 100%;
     top: 0;
     left: 0;
+    height: 100%;
+    transform: translateX(-250px);
     transition: transform 0.3s ease-in-out;
+}
+
+#sidebar.collapsed {
+    transform: translateX(0);
 }
 
 #sidebar ul {
@@ -42,6 +47,18 @@ body {
     background-color: #555;
 }
 
+#menu-toggle {
+    display: none;
+    font-size: 30px;
+    color: white;
+    background-color: #333;
+    border: none;
+    padding: 10px;
+    position: absolute;
+    top: 10px;
+    left: 20px;
+}
+
 #main-content {
     margin-left: 250px;
     padding: 20px;
@@ -49,28 +66,26 @@ body {
     transition: margin-left 0.3s ease-in-out;
 }
 
-/* Botón para abrir/cerrar el menú */
-#menu-toggle {
-    display: none;
-}
-
-/* Estilos cuando el menú está cerrado */
-#sidebar.collapsed {
-    transform: translateX(-250px);
-}
-
-#main-content.expanded {
-    margin-left: 0;
-}
-
-/* Header */
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-/* Resumen */
+#new-account-btn {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#new-account-btn:hover {
+    background-color: #45a049;
+}
+
+/* Summary cards */
 #summary {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -82,10 +97,11 @@ header {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
 
+/* Table */
 #accounts-table table {
     width: 100%;
     margin-top: 20px;
@@ -98,41 +114,17 @@ header {
     border-bottom: 1px solid #ddd;
 }
 
-/* Estilos para pantallas pequeñas */
 @media screen and (max-width: 768px) {
-    /* Ocultar el sidebar por defecto en pantallas pequeñas */
     #sidebar {
         width: 100%;
-        height: 100%;
-        position: fixed;
-        transform: translateX(-250px);
+        transform: translateX(-100%);
     }
 
-    /* Mostrar el botón para abrir el sidebar */
     #menu-toggle {
         display: block;
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        font-size: 30px;
-        cursor: pointer;
-        color: white;
-        background-color: #333;
-        border: none;
-        padding: 10px;
-        border-radius: 50%;
     }
 
-    /* Mostrar el contenido cuando el sidebar esté colapsado */
     #main-content {
-        margin-left: 0;
-    }
-
-    #sidebar.collapsed {
-        transform: translateX(0);
-    }
-
-    #main-content.expanded {
         margin-left: 0;
     }
 
