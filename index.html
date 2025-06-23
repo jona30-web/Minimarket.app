@@ -7,11 +7,14 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+    <!-- Botón para abrir el menú lateral -->
     <button id="menu-toggle" onclick="toggleSidebar()">☰</button>
 
-    <nav id="sidebar">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="collapsed">
         <ul>
-            <li><a href="#">Dashboard</a></li>
+            <li><a href="#" onclick="loadDashboard()">Dashboard</a></li>
             <li><a href="#">Suscripciones</a></li>
             <li><a href="#">Almacén</a></li>
             <li><a href="#">Empleados</a></li>
@@ -23,24 +26,25 @@
         </ul>
     </nav>
 
+    <!-- Main Content -->
     <div id="main-content">
         <header>
             <h1>Distribuidora Chacha</h1>
-            <div id="user-info">
-                <p>Admin</p>
-                <button id="new-account-btn">Nueva Cuenta</button>
-            </div>
+            <button id="new-account-btn" onclick="createAccount()">Nueva Cuenta</button>
         </header>
 
+        <!-- Dashboard -->
         <section id="dashboard">
             <h2>Dashboard</h2>
             <div id="summary">
+                <!-- Cards for metrics like Total Cobrado, etc. -->
                 <div class="summary-card">Total por Cobrar: <span>USD 0.00</span></div>
                 <div class="summary-card">Cuentas Vencidas: <span>USD 0.00</span></div>
                 <div class="summary-card">Pagos Recibidos: <span>USD 0.00</span></div>
                 <div class="summary-card">Clientes: <span>0</span></div>
             </div>
-            
+
+            <!-- Tabla dinámica de cuentas -->
             <div id="accounts-table">
                 <h3>Listado de Cuentas por Cobrar</h3>
                 <table>
@@ -54,13 +58,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>0001</td>
-                            <td>Juan Pérez</td>
-                            <td>USD 500.00</td>
-                            <td>USD 200.00</td>
-                            <td>12/07/2024</td>
-                        </tr>
+                        <!-- Dynamic content will be loaded here -->
                     </tbody>
                 </table>
             </div>
