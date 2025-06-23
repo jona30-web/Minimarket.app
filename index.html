@@ -1,367 +1,76 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Distribuidora Chacha - Resumen de Compra</title>
-  <style>
-    /* Estilos base */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-    }
-
-    body {
-      background-color: #f4f4f4;
-      color: #333;
-      line-height: 1.6;
-      font-size: 16px;
-      padding: 0;
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Contenedor de la orden con el video de fondo */
-    .order-summary-container {
-      position: relative;
-      background: rgba(255, 255, 255, 0.7); /* Fondo blanco ligeramente transparente */
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      margin: 20px;
-      z-index: 2;
-      min-height: 60vh;
-      display: flex;
-      flex-direction: column;
-      opacity: 0;
-      animation: fadeIn 1s forwards; /* Animación de aparición */
-    }
-
-    /* Animación de desvanecimiento */
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-
-    /* Video de fondo */
-    .order-summary-container video {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0.5;
-      z-index: -1; /* Asegura que el video esté detrás del contenido */
-      animation: fadeInVideo 3s ease-in-out infinite alternate; /* Efecto de pulsado */
-    }
-
-    /* Animación de pulsado para el video */
-    @keyframes fadeInVideo {
-      0% {
-        opacity: 0.5;
-      }
-      100% {
-        opacity: 0.7;
-      }
-    }
-
-    /* Estilos del título */
-    .order-summary-container h2 {
-      text-align: center;
-      color: #2196f3;
-      font-size: 2rem;
-      margin-bottom: 20px;
-      animation: slideUp 1s ease-out; /* Efecto de deslizamiento */
-    }
-
-    /* Animación de deslizamiento del título */
-    @keyframes slideUp {
-      from {
-        transform: translateY(20px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-
-    /* Lista de productos */
-    .product-list {
-      margin-bottom: 20px;
-      animation: fadeIn 1s ease-out; /* Animación de aparición de los productos */
-    }
-
-    .product-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #ccc;
-      padding: 10px 0;
-      transform: translateX(-50px);
-      animation: slideIn 0.6s ease forwards; /* Animación de entrada desde la izquierda */
-    }
-
-    /* Animación de deslizamiento para los productos */
-    @keyframes slideIn {
-      from {
-        transform: translateX(-50px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    .product-name {
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: #2196f3;
-    }
-
-    .product-price {
-      font-size: 1.1rem;
-      color: #4caf50;
-    }
-
-    .product-quantity {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .product-quantity button {
-      padding: 5px 10px;
-      font-size: 1.1rem;
-      background-color: #2196f3;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.3s ease;
-    }
-
-    .product-quantity button:hover {
-      background-color: #1976d2;
-      transform: scale(1.1); /* Efecto de aumento en tamaño */
-    }
-
-    .delete-btn {
-      color: red;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: color 0.3s ease;
-    }
-
-    .delete-btn:hover {
-      color: #d32f2f;
-    }
-
-    /* Cuadro de subtotal y total */
-    .total-container {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      border: 2px solid #2196f3;
-      padding: 20px;
-      border-radius: 10px;
-      background-color: #f1f8e9;
-      color: #2196f3;
-    }
-
-    .final-total {
-      margin-top: 20px;
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #2196f3;
-      text-align: center;
-    }
-
-    /* Estilos para botones */
-    .action-button {
-      background-color: #4caf50;
-      padding: 10px;
-      font-size: 1.2rem;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.3s ease;
-      width: 100%;
-    }
-
-    .action-button:hover {
-      background-color: #388e3c;
-      transform: scale(1.05); /* Efecto de aumento en tamaño */
-    }
-
-    /* Estilos para pantallas pequeñas */
-    @media (max-width: 768px) {
-      body {
-        padding: 10px;
-      }
-
-      .order-summary-container {
-        padding: 15px;
-      }
-
-      .total-container {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-      }
-
-      .total-container .subtotal,
-      .total-container .total {
-        margin-bottom: 10px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distribuidora Chacha</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Sidebar -->
+    <nav id="sidebar">
+        <ul>
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="#">Suscripciones</a></li>
+            <li><a href="#">Almacén</a></li>
+            <li><a href="#">Empleados</a></li>
+            <li><a href="#">Ventas</a></li>
+            <li><a href="#">Clientes</a></li>
+            <li><a href="#">Cuentas por Cobrar</a></li>
+            <li><a href="#">Reportes</a></li>
+            <li><a href="#">Configuración</a></li>
+        </ul>
+    </nav>
 
-  <!-- Contenedor de la orden con el video de fondo -->
-  <div class="order-summary-container">
-    <!-- Video de fondo -->
-    <video id="videoDisplay" muted loop autoplay>
-      <source src="https://github.com/jona30-web/Minimarket.app/blob/e74d7331701c47b562cc0d444d636fca6592b675/lv_0_20250620222308.mp4?raw=true" type="video/mp4">
-      Tu navegador no soporta el video.
-    </video>
+    <!-- Main Content -->
+    <div id="main-content">
+        <!-- Header -->
+        <header>
+            <h1>Distribuidora Chacha</h1>
+            <div id="user-info">
+                <p>Admin</p>
+                <button id="new-account-btn">Nueva Cuenta</button>
+            </div>
+        </header>
 
-    <!-- Contenido del resumen de la orden -->
-    <h2>Resumen de la Compra</h2>
-
-    <!-- Lista de productos disponibles -->
-    <div class="product-list">
-      <!-- Producto 1 -->
-      <div class="product-item">
-        <div class="product-name">Laptop HP EliteBook</div>
-        <div class="product-price">$1,299.99</div>
-        <div class="product-quantity">
-          <button>-</button>
-          <span id="quantity-laptop">1</span>
-          <button>+</button>
-        </div>
-        <span class="delete-btn">Eliminar</span>
-      </div>
-
-      <!-- Producto 2 -->
-      <div class="product-item">
-        <div class="product-name">Mouse Inalámbrico</div>
-        <div class="product-price">$99.99</div>
-        <div class="product-quantity">
-          <button>-</button>
-          <span id="quantity-mouse">1</span>
-          <button>+</button>
-        </div>
-        <span class="delete-btn">Eliminar</span>
-      </div>
+        <!-- Dashboard Content -->
+        <section id="dashboard">
+            <h2>Dashboard</h2>
+            <!-- Resumen -->
+            <div id="summary">
+                <div class="summary-card">Total por Cobrar: <span>USD 0.00</span></div>
+                <div class="summary-card">Cuentas Vencidas: <span>USD 0.00</span></div>
+                <div class="summary-card">Pagos Recibidos: <span>USD 0.00</span></div>
+                <div class="summary-card">Clientes: <span>0</span></div>
+            </div>
+            
+            <!-- Tablas -->
+            <div id="accounts-table">
+                <h3>Listado de Cuentas por Cobrar</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Factura</th>
+                            <th>Cliente</th>
+                            <th>Monto Original</th>
+                            <th>Saldo Pendiente</th>
+                            <th>Fecha Vencimiento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>0001</td>
+                            <td>Juan Pérez</td>
+                            <td>USD 500.00</td>
+                            <td>USD 200.00</td>
+                            <td>12/07/2024</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </div>
 
-    <!-- Cuadro de subtotal -->
-    <div class="total-container">
-      <div class="subtotal">Subtotal</div>
-      <div class="subtotal" id="subtotal">0.00</div>
-    </div>
-
-    <!-- Cuadro de total -->
-    <div class="total-container">
-      <div class="total">Total</div>
-      <div class="total" id="total">0.00</div>
-    </div>
-
-    <!-- Total final -->
-    <div class="final-total">
-      Total: <span id="final-total">0.00</span>
-    </div>
-
-    <!-- Botones de acciones -->
-    <button class="action-button" id="view-receipt">Vista previa recibo</button>
-    <button class="action-button" id="finalize-sale">Finalizar venta</button>
-  </div>
-
-  <script>
-    // Variables para el subtotal y el total
-    let subtotal = 0;
-    let total = 0;
-
-    // Precios de los productos
-    const productPrices = {
-      laptop: 1299.99,
-      mouse: 99.99
-    };
-
-    // Actualizar total al modificar cantidad de productos
-    function updateTotal() {
-      const laptopQuantity = parseInt(document.getElementById("quantity-laptop").textContent);
-      const mouseQuantity = parseInt(document.getElementById("quantity-mouse").textContent);
-
-      subtotal = (laptopQuantity * productPrices.laptop) + (mouseQuantity * productPrices.mouse);
-      total = subtotal; // Aquí se puede agregar impuestos si es necesario
-
-      // Actualizar en la interfaz
-      document.getElementById("subtotal").textContent = subtotal.toFixed(2);
-      document.getElementById("total").textContent = total.toFixed(2);
-      document.getElementById("final-total").textContent = total.toFixed(2);
-    }
-
-    // Función para aumentar o disminuir cantidad de productos
-    function updateQuantity(product, delta) {
-      const quantityElement = document.getElementById(`quantity-${product}`);
-      let quantity = parseInt(quantityElement.textContent);
-
-      if (quantity + delta >= 0) {
-        quantity += delta;
-        quantityElement.textContent = quantity;
-        updateTotal();
-      }
-    }
-
-    // Función para eliminar producto de la venta
-    function deleteProduct(product) {
-      const quantityElement = document.getElementById(`quantity-${product}`);
-      quantityElement.textContent = 0;
-      updateTotal();
-    }
-
-    // Asignar eventos a los botones
-    document.querySelectorAll('.product-quantity button').forEach(button => {
-      button.addEventListener('click', (e) => {
-        const product = e.target.closest('.product-item').querySelector('.product-name').textContent.toLowerCase().replace(' ', '-');
-        const action = e.target.textContent === '+' ? 1 : -1;
-        updateQuantity(product, action);
-      });
-    });
-
-    // Asignar evento de eliminación de producto
-    document.querySelectorAll('.delete-btn').forEach(button => {
-      button.addEventListener('click', (e) => {
-        const product = e.target.closest('.product-item').querySelector('.product-name').textContent.toLowerCase().replace(' ', '-');
-        deleteProduct(product);
-      });
-    });
-
-    // Acciones de botones
-    document.getElementById('view-receipt').addEventListener('click', () => {
-      alert("Vista previa recibo.");
-    });
-
-    document.getElementById('finalize-sale').addEventListener('click', () => {
-      alert("Venta finalizada.");
-    });
-  </script>
-
+    <script src="app.js"></script>
 </body>
 </html>
