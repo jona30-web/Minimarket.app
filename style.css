@@ -1,168 +1,95 @@
-/* Estilos base */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', sans-serif;
-}
-
+/* General Styles */
 body {
-  background-color: #f4f4f4;
-  color: #333;
-  line-height: 1.6;
-  font-size: 16px;
-  padding: 0;
-  margin: 0;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    min-height: 100vh;
+    background-color: #f4f4f4;
 }
 
-/* Contenedor de la orden con el video de fondo */
-.order-summary-container {
-  position: relative;
-  background: rgba(255, 255, 255, 0.7); /* Fondo semi-transparente */
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  margin: 20px;
-  z-index: 2;
-  min-height: 60vh;
-}
-
-/* Video de fondo */
-.order-summary-container video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.5;
-  z-index: -1; /* Asegura que el video esté detrás del contenido */
-}
-
-/* Estilos del título */
-.order-summary-container h2 {
-  text-align: center;
-  color: #2196f3;
-  font-size: 2rem;
-  margin-bottom: 20px;
-}
-
-/* Lista de productos */
-.product-list {
-  margin-bottom: 20px;
-}
-
-.product-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #ccc;
-  padding: 10px 0;
-}
-
-.product-item:last-child {
-  border-bottom: none;
-}
-
-.product-name {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #2196f3;
-}
-
-.product-price {
-  font-size: 1.1rem;
-  color: #4caf50;
-}
-
-.product-quantity {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.product-quantity button {
-  padding: 5px 10px;
-  font-size: 1.1rem;
-  background-color: #2196f3;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.product-quantity button:hover {
-  background-color: #1976d2;
-}
-
-.delete-btn {
-  color: red;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-/* Cuadro de subtotal y total */
-.total-container {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-  font-size: 1.2rem;
-  font-weight: bold;
-  border: 2px solid #2196f3;
-  padding: 20px;
-  border-radius: 10px;
-  background-color: #f1f8e9;
-  color: #2196f3;
-}
-
-.total-container .subtotal,
-.total-container .total {
-  font-weight: bold;
-}
-
-.final-total {
-  margin-top: 20px;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #2196f3;
-  text-align: center;
-}
-
-/* Estilos para botones */
-.action-button {
-  background-color: #4caf50;
-  padding: 10px;
-  font-size: 1.2rem;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  width: 100%;
-}
-
-.action-button:hover {
-  background-color: #388e3c;
-}
-
-/* Estilos para pantallas pequeñas */
-@media (max-width: 768px) {
-  body {
-    padding: 10px;
-  }
-
-  .order-summary-container {
-    padding: 15px;
-  }
-
-  .total-container {
+#sidebar {
+    background-color: #333;
+    color: white;
+    width: 250px;
+    padding: 20px;
+    display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
+    position: fixed;
+    height: 100%;
+}
 
-  .total-container .subtotal,
-  .total-container .total {
-    margin-bottom: 10px;
-  }
+#sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#sidebar ul li {
+    padding: 10px;
+}
+
+#sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+#sidebar ul li a:hover {
+    background-color: #555;
+}
+
+#main-content {
+    margin-left: 250px;
+    padding: 20px;
+    flex: 1;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.summary-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+#accounts-table table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+#accounts-table th, #accounts-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Mobile Responsiveness */
+@media screen and (max-width: 768px) {
+    #sidebar {
+        width: 200px;
+        font-size: 16px;
+    }
+    
+    #main-content {
+        margin-left: 0;
+        padding: 10px;
+    }
+
+    #summary {
+        grid-template-columns: 1fr 1fr;
+    }
 }
