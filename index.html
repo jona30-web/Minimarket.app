@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Sidebar -->
+    <button id="menu-toggle" onclick="toggleSidebar()">☰</button>
+
     <nav id="sidebar">
         <ul>
             <li><a href="#">Dashboard</a></li>
@@ -22,9 +23,7 @@
         </ul>
     </nav>
 
-    <!-- Main Content -->
     <div id="main-content">
-        <!-- Header -->
         <header>
             <h1>Distribuidora Chacha</h1>
             <div id="user-info">
@@ -33,10 +32,8 @@
             </div>
         </header>
 
-        <!-- Dashboard Content -->
         <section id="dashboard">
             <h2>Dashboard</h2>
-            <!-- Resumen -->
             <div id="summary">
                 <div class="summary-card">Total por Cobrar: <span>USD 0.00</span></div>
                 <div class="summary-card">Cuentas Vencidas: <span>USD 0.00</span></div>
@@ -44,7 +41,6 @@
                 <div class="summary-card">Clientes: <span>0</span></div>
             </div>
             
-            <!-- Tablas -->
             <div id="accounts-table">
                 <h3>Listado de Cuentas por Cobrar</h3>
                 <table>
