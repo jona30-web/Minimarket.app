@@ -1,70 +1,928 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Distribuidora Chacha</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Minimarket Chacha</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Custom scrollbar for better appearance (optional) */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Overlay for mobile sidebar */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40; /* Lower than sidebar, higher than content */
+            display: none; /* Hidden by default */
+        }
+        .overlay.active {
+            display: block; /* Shown when sidebar is active */
+        }
+    </style>
 </head>
-<body>
+<body class="bg-[#f7f9fc] text-gray-800 min-h-screen flex flex-col">
 
-    <!-- Botón para abrir el menú lateral -->
-    <button id="menu-toggle" onclick="toggleSidebar()">☰</button>
+    <div class="overlay lg:hidden"></div>
 
-    <!-- Sidebar -->
-    <nav id="sidebar" class="collapsed">
-        <ul>
-            <li><a href="#" onclick="loadDashboard()">Dashboard</a></li>
-            <li><a href="#">Suscripciones</a></li>
-            <li><a href="#">Almacén</a></li>
-            <li><a href="#">Empleados</a></li>
-            <li><a href="#">Ventas</a></li>
-            <li><a href="#">Clientes</a></li>
-            <li><a href="#">Cuentas por Cobrar</a></li>
-            <li><a href="#">Reportes</a></li>
-            <li><a href="#">Configuración</a></li>
-        </ul>
-    </nav>
+    <aside id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out lg:static lg:shadow-none lg:h-auto lg:flex-shrink-0">
+        <div class="p-4 border-b border-gray-200">
+            <h3 class="text-xl font-semibold text-gray-800">Distribuidora Chacha</h3>
+            <p class="text-sm text-gray-500">Sistema de Gestión</p>
+        </div>
+        <nav class="p-4">
+            <ul class="space-y-1">
+                <li>
+                    <a href="#dashboard-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium active-link" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt mr-3 text-lg"></i> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="#almacen-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium" data-section="almacen">
+                        <i class="fas fa-warehouse mr-3 text-lg"></i> Almacén
+                    </a>
+                </li>
+                <li>
+                    <a href="#empleados-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium" data-section="empleados">
+                        <i class="fas fa-users-cog mr-3 text-lg"></i> Empleados
+                    </a>
+                </li>
+                <li>
+                    <a href="#ventas-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium" data-section="ventas">
+                        <i class="fas fa-chart-line mr-3 text-lg"></i> Ventas
+                    </a>
+                </li>
+                <li>
+                    <a href="#clientes-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium" data-section="clientes">
+                        <i class="fas fa-user-friends mr-3 text-lg"></i> Clientes
+                    </a>
+                </li>
+                <li>
+                    <a href="#cuentas-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium" data-section="cuentas">
+                        <i class="fas fa-file-invoice-dollar mr-3 text-lg"></i> Cuentas por Cobrar
+                    </a>
+                </li>
+                <li>
+                    <a href="#reportes-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium" data-section="reportes">
+                        <i class="fas fa-chart-pie mr-3 text-lg"></i> Reportes
+                    </a>
+                </li>
+                <li>
+                    <a href="#configuracion-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium" data-section="configuracion">
+                        <i class="fas fa-cog mr-3 text-lg"></i> Configuración
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
 
-    <!-- Main Content -->
-    <div id="main-content">
-        <header>
-            <h1>Distribuidora Chacha</h1>
-            <button id="new-account-btn" onclick="createAccount()">Nueva Cuenta</button>
+    <div class="flex-1 flex flex-col lg:ml-64 transition-all duration-300 ease-in-out">
+        <header class="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white shadow-sm sticky top-0 z-30">
+            <div class="flex items-center space-x-3">
+                <button id="menu-toggle" aria-label="Menu" class="text-xl text-gray-600 lg:hidden">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="font-semibold text-xl text-gray-900">Dashboard</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative cursor-pointer">
+                    <i class="fas fa-bell text-gray-600 text-lg"></i>
+                    <span class="absolute -top-1 -right-2 bg-red-600 text-white text-xs font-semibold rounded-full w-5 h-5 flex items-center justify-center leading-none">3</span>
+                </div>
+                <div class="flex items-center space-x-2 cursor-pointer">
+                    <div class="bg-blue-600 rounded-full w-8 h-8 flex items-center justify-center text-white text-sm font-semibold">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span class="text-gray-900 font-medium text-sm">Admin</span>
+                </div>
+            </div>
         </header>
 
-        <!-- Dashboard -->
-        <section id="dashboard">
-            <h2>Dashboard</h2>
-            <div id="summary">
-                <!-- Cards for metrics like Total Cobrado, etc. -->
-                <div class="summary-card">Total por Cobrar: <span>USD 0.00</span></div>
-                <div class="summary-card">Cuentas Vencidas: <span>USD 0.00</span></div>
-                <div class="summary-card">Pagos Recibidos: <span>USD 0.00</span></div>
-                <div class="summary-card">Clientes: <span>0</span></div>
-            </div>
+        <main id="content-area" class="p-4 lg:p-6 flex-1 overflow-y-auto">
+            <section id="dashboard-section" class="active-section space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Ventas Hoy</p>
+                            <p class="font-semibold text-2xl text-gray-900">USD 0.00</p>
+                            <p class="text-xs text-green-600 font-semibold">+8.2% <span class="font-normal text-gray-500">vs ayer</span></p>
+                        </div>
+                        <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center text-green-600 text-2xl">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
 
-            <!-- Tabla dinámica de cuentas -->
-            <div id="accounts-table">
-                <h3>Listado de Cuentas por Cobrar</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Factura</th>
-                            <th>Cliente</th>
-                            <th>Monto Original</th>
-                            <th>Saldo Pendiente</th>
-                            <th>Fecha Vencimiento</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Dynamic content will be loaded here -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Productos</p>
+                            <p class="font-semibold text-2xl text-gray-900">3</p>
+                            <p class="text-xs text-red-600 font-semibold">1 agotándose</p>
+                        </div>
+                        <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 text-2xl">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Clientes</p>
+                            <p class="font-semibold text-2xl text-gray-900">3</p>
+                            <p class="text-xs text-green-600 font-semibold">1 VIP</p>
+                        </div>
+                        <div class="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center text-purple-600 text-2xl">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Empleados</p>
+                            <p class="font-semibold text-2xl text-gray-900">3</p>
+                            <p class="text-xs text-green-600 font-semibold">3 activos</p>
+                        </div>
+                        <div class="bg-orange-100 rounded-full w-12 h-12 flex items-center justify-center text-orange-600 text-2xl">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <h2 class="font-semibold text-lg text-gray-900 mb-4 border-b pb-3 border-gray-200">Acciones Rápidas</h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-y-6 text-center text-sm text-gray-700">
+                        <div class="flex flex-col items-center space-y-2 cursor-pointer hover:text-blue-600 transition-colors">
+                            <div class="bg-blue-100 rounded-full w-14 h-14 flex items-center justify-center text-blue-600 text-2xl">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
+                            <span class="font-medium">Nueva Venta</span>
+                        </div>
+                        <div class="flex flex-col items-center space-y-2 cursor-pointer hover:text-gray-900 transition-colors">
+                            <div class="bg-gray-100 rounded-full w-14 h-14 flex items-center justify-center text-gray-900 text-2xl">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <span class="font-medium">Agregar Producto</span>
+                        </div>
+                        <div class="flex flex-col items-center space-y-2 cursor-pointer hover:text-purple-600 transition-colors">
+                            <div class="bg-purple-100 rounded-full w-14 h-14 flex items-center justify-center text-purple-600 text-2xl">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <span class="font-medium">Nuevo Cliente</span>
+                        </div>
+                        <div class="flex flex-col items-center space-y-2 cursor-pointer hover:text-orange-600 transition-colors">
+                            <div class="bg-orange-100 rounded-full w-14 h-14 flex items-center justify-center text-orange-600 text-2xl">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <span class="font-medium">Generar Reporte</span>
+                        </div>
+                        <div class="flex flex-col items-center space-y-2 cursor-pointer hover:text-indigo-700 transition-colors">
+                            <div class="bg-indigo-100 rounded-full w-14 h-14 flex items-center justify-center text-indigo-700 text-2xl">
+                                <i class="fas fa-warehouse"></i>
+                            </div>
+                            <span class="font-medium">Gestionar Inventario</span>
+                        </div>
+                        <div class="flex flex-col items-center space-y-2 cursor-pointer hover:text-pink-600 transition-colors">
+                            <div class="bg-pink-100 rounded-full w-14 h-14 flex items-center justify-center text-pink-600 text-2xl">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <span class="font-medium">Horarios</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <h2 class="font-semibold text-lg text-gray-900 mb-2 border-b pb-3 border-gray-200">Ventas Recientes</h2>
+                    <p class="text-center text-gray-500 text-sm py-8">No hay ventas recientes</p>
+                </div>
+
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <h2 class="font-semibold text-lg text-gray-900 mb-2 border-b pb-3 border-gray-200">Productos con Stock Bajo</h2>
+                    <div class="bg-red-50 rounded-lg p-3 flex justify-between items-center mt-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="text-red-600 text-2xl">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900">Producto Estándar</p>
+                                <p class="text-xs text-gray-500">Código: PR002</p>
+                            </div>
+                        </div>
+                        <div class="text-right text-sm">
+                            <p class="text-red-600 font-semibold">8 unidades</p>
+                            <a href="#" class="text-blue-600 hover:underline">Reabastecer</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="almacen-section" class="hidden space-y-6">
+                <h2 class="font-semibold text-xl text-gray-900 mb-4">Gestión de Almacén</h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Total Productos</p>
+                            <p class="font-semibold text-2xl text-gray-900">3</p>
+                        </div>
+                        <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 text-2xl">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">En Stock</p>
+                            <p class="font-semibold text-2xl text-gray-900">3</p>
+                        </div>
+                        <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center text-green-600 text-2xl">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Stock Bajo</p>
+                            <p class="font-semibold text-2xl text-gray-900">1</p>
+                        </div>
+                        <div class="bg-orange-100 rounded-full w-12 h-12 flex items-center justify-center text-orange-600 text-2xl">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Sin Stock</p>
+                            <p class="font-semibold text-2xl text-gray-900">0</p>
+                        </div>
+                        <div class="bg-red-100 rounded-full w-12 h-12 flex items-center justify-center text-red-600 text-2xl">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-4 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <input type="text" placeholder="Buscar productos por nombre, código o categoría..." class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <div class="flex space-x-2 w-full sm:w-auto justify-end">
+                        <button class="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-md hover:bg-gray-200 transition-colors flex items-center">
+                            <i class="fas fa-qrcode mr-2"></i> Escanear QR
+                        </button>
+                        <button class="bg-blue-600 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center">
+                            <i class="fas fa-plus mr-2"></i> Nuevo Producto
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">PR001</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Producto Premium</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Premium</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">50</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">USD 25.99</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">En Stock</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            <button class="text-blue-600 hover:text-blue-900">Editar</button>
+                                            <button class="text-red-600 hover:text-red-900">Borrar</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">PR002</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Producto Estándar</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Estándar</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">8</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">Stock Bajo</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            <button class="text-blue-600 hover:text-blue-900">Editar</button>
+                                            <button class="text-red-600 hover:text-red-900">Borrar</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">PR003</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Producto Económico</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Económico</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">100</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">En Stock</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            <button class="text-blue-600 hover:text-blue-900">Editar</button>
+                                            <button class="text-red-600 hover:text-red-900">Borrar</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="cuentas-section" class="hidden space-y-6">
+                <h2 class="font-semibold text-xl text-gray-900 mb-4">Cuentas por Cobrar</h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Total por Cobrar</p>
+                            <p class="font-semibold text-2xl text-gray-900">USD 0.00</p>
+                            <p class="text-xs text-gray-500">Cuentas activas</p>
+                        </div>
+                        <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 text-2xl">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Cuentas Vencidas</p>
+                            <p class="font-semibold text-2xl text-gray-900">USD 0.00</p>
+                            <p class="text-xs text-red-600">Cuentas vencidas</p>
+                        </div>
+                        <div class="bg-red-100 rounded-full w-12 h-12 flex items-center justify-center text-red-600 text-2xl">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Pagos Recibidos</p>
+                            <p class="font-semibold text-2xl text-gray-900">USD 0.00</p>
+                            <p class="text-xs text-gray-500">Total de pagos</p>
+                        </div>
+                        <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center text-green-600 text-2xl">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center relative">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Clientes</p>
+                            <p class="font-semibold text-2xl text-gray-900">0</p>
+                            <p class="text-xs text-gray-500">Con cuentas pendientes</p>
+                        </div>
+                        <button class="absolute top-4 right-4 bg-blue-600 text-white text-xs px-3 py-1 rounded-md font-medium hover:bg-blue-700 transition-colors">Nueva Cuenta</button>
+                        <div class="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center text-purple-600 text-2xl">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b pb-3 border-gray-200 gap-y-2">
+                        <h3 class="font-semibold text-lg text-gray-900">Listado de Cuentas por Cobrar</h3>
+                        <div class="flex space-x-2">
+                            <button class="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-md hover:bg-gray-200 transition-colors flex items-center">
+                                <i class="fas fa-bell mr-2"></i> Recordatorios
+                            </button>
+                            <button class="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-md hover:bg-gray-200 transition-colors flex items-center">
+                                <i class="fas fa-file-export mr-2"></i> Exportar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Factura</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto Original</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Saldo Pendiente</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Vencimiento</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Días Vencido</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="8" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center italic">No hay cuentas por cobrar que coincidan con los filtros</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ventas-section" class="hidden space-y-6">
+                <h2 class="font-semibold text-xl text-gray-900 mb-4">Gestión de Ventas</h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Ventas del Mes</p>
+                            <p class="font-semibold text-2xl text-gray-900">USD 5,200.00</p>
+                        </div>
+                        <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center text-green-600 text-2xl">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Ventas Pendientes</p>
+                            <p class="font-semibold text-2xl text-gray-900">USD 150.00</p>
+                        </div>
+                        <div class="bg-yellow-100 rounded-full w-12 h-12 flex items-center justify-center text-yellow-600 text-2xl">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Promedio por Venta</p>
+                            <p class="font-semibold text-2xl text-gray-900">USD 25.50</p>
+                        </div>
+                        <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 text-2xl">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Total Clientes</p>
+                            <p class="font-semibold text-2xl text-gray-900">120</p>
+                        </div>
+                        <div class="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center text-purple-600 text-2xl">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b pb-3 border-gray-200 gap-y-2">
+                        <h3 class="font-semibold text-lg text-gray-900">Listado de Ventas</h3>
+                        <div class="flex space-x-2">
+                            <button class="bg-blue-600 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center">
+                                <i class="fas fa-plus mr-2"></i> Nueva Venta
+                            </button>
+                            <button class="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-md hover:bg-gray-200 transition-colors flex items-center">
+                                <i class="fas fa-filter mr-2"></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Venta</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">VTA001</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Juan Pérez</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">2024-06-25</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">USD 50.00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Completada</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            <button class="text-blue-600 hover:text-blue-900">Ver</button>
+                                            <button class="text-red-600 hover:text-red-900">Anular</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">VTA002</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">María López</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">2024-06-26</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">USD 75.50</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pendiente</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            <button class="text-blue-600 hover:text-blue-900">Ver</button>
+                                            <button class="text-red-600 hover:text-red-900">Anular</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="empleados-section" class="hidden space-y-6">
+                <h2 class="font-semibold text-xl text-gray-900 mb-4">Gestión de Empleados</h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Total Empleados</p>
+                            <p class="font-semibold text-2xl text-gray-900">15</p>
+                        </div>
+                        <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 text-2xl">
+                            <i class="fas fa-users-cog"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Activos</p>
+                            <p class="font-semibold text-2xl text-gray-900">12</p>
+                        </div>
+                        <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center text-green-600 text-2xl">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Ausentes Hoy</p>
+                            <p class="font-semibold text-2xl text-gray-900">1</p>
+                        </div>
+                        <div class="bg-orange-100 rounded-full w-12 h-12 flex items-center justify-center text-orange-600 text-2xl">
+                            <i class="fas fa-user-minus"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Nuevos este Mes</p>
+                            <p class="font-semibold text-2xl text-gray-900">2</p>
+                        </div>
+                        <div class="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center text-purple-600 text-2xl">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b pb-3 border-gray-200 gap-y-2">
+                        <h3 class="font-semibold text-lg text-gray-900">Lista de Empleados</h3>
+                        <button class="bg-blue-600 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center">
+                            <i class="fas fa-user-plus mr-2"></i> Nuevo Empleado
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cargo</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Ana García</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Cajera</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">555-1234</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            <button class="text-blue-600 hover:text-blue-900">Editar</button>
+                                            <button class="text-red-600 hover:text-red-900">Desactivar</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="clientes-section" class="hidden space-y-6">
+                <h2 class="font-semibold text-xl text-gray-900 mb-4">Gestión de Clientes</h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Total Clientes</p>
+                            <p class="font-semibold text-2xl text-gray-900">120</p>
+                        </div>
+                        <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 text-2xl">
+                            <i class="fas fa-user-friends"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Clientes VIP</p>
+                            <p class="font-semibold text-2xl text-gray-900">10</p>
+                        </div>
+                        <div class="bg-yellow-100 rounded-full w-12 h-12 flex items-center justify-center text-yellow-600 text-2xl">
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Nuevos Clientes (Mes)</p>
+                            <p class="font-semibold text-2xl text-gray-900">5</p>
+                        </div>
+                        <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center text-green-600 text-2xl">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Clientes con Crédito</p>
+                            <p class="font-semibold text-2xl text-gray-900">50</p>
+                        </div>
+                        <div class="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center text-purple-600 text-2xl">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b pb-3 border-gray-200 gap-y-2">
+                        <h3 class="font-semibold text-lg text-gray-900">Lista de Clientes</h3>
+                        <button class="bg-blue-600 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center">
+                            <i class="fas fa-user-plus mr-2"></i> Nuevo Cliente
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Última Compra</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Cliente A</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">VIP</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">cliente.a@email.com</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">2024-06-20</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            <button class="text-blue-600 hover:text-blue-900">Ver</button>
+                                            <button class="text-red-600 hover:text-red-900">Eliminar</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Cliente B</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Regular</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">cliente.b@email.com</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">2024-06-15</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            <button class="text-blue-600 hover:text-blue-900">Ver</button>
+                                            <button class="text-red-600 hover:text-red-900">Eliminar</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="reportes-section" class="hidden space-y-6">
+                <h2 class="font-semibold text-xl text-gray-900 mb-4">Generación de Reportes</h2>
+
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <h3 class="font-semibold text-lg text-gray-900 mb-4 border-b pb-3 border-gray-200">Tipos de Reportes</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer text-center">
+                            <i class="fas fa-chart-line text-blue-600 text-4xl mb-3"></i>
+                            <p class="font-medium text-gray-900">Reporte de Ventas</p>
+                            <p class="text-sm text-gray-500">Historial de ventas, top productos.</p>
+                            <button class="mt-3 bg-blue-500 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-600">Generar</button>
+                        </div>
+                        <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer text-center">
+                            <i class="fas fa-warehouse text-green-600 text-4xl mb-3"></i>
+                            <p class="font-medium text-gray-900">Reporte de Inventario</p>
+                            <p class="text-sm text-gray-500">Stock actual, productos bajo stock.</p>
+                            <button class="mt-3 bg-green-500 text-white text-sm px-4 py-2 rounded-md hover:bg-green-600">Generar</button>
+                        </div>
+                        <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer text-center">
+                            <i class="fas fa-users-cog text-purple-600 text-4xl mb-3"></i>
+                            <p class="font-medium text-gray-900">Reporte de Empleados</p>
+                            <p class="text-sm text-gray-500">Asistencia, rendimiento.</p>
+                            <button class="mt-3 bg-purple-500 text-white text-sm px-4 py-2 rounded-md hover:bg-purple-600">Generar</button>
+                        </div>
+                        <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer text-center">
+                            <i class="fas fa-file-invoice-dollar text-orange-600 text-4xl mb-3"></i>
+                            <p class="font-medium text-gray-900">Cuentas por Cobrar</p>
+                            <p class="text-sm text-gray-500">Detalle de facturas pendientes.</p>
+                            <button class="mt-3 bg-orange-500 text-white text-sm px-4 py-2 rounded-md hover:bg-orange-600">Generar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <h3 class="font-semibold text-lg text-gray-900 mb-4 border-b pb-3 border-gray-200">Reportes Generados Recientemente</h3>
+                    <p class="text-center text-gray-500 text-sm py-8">No hay reportes generados recientemente.</p>
+                </div>
+            </section>
+
+            <section id="configuracion-section" class="hidden space-y-6">
+                <h2 class="font-semibold text-xl text-gray-900 mb-4">Configuración del Sistema</h2>
+
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <h3 class="font-semibold text-lg text-gray-900 mb-4 border-b pb-3 border-gray-200">Configuración General</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="nombre-minimarket" class="block text-sm font-medium text-gray-700">Nombre del Minimarket:</label>
+                            <input type="text" id="nombre-minimarket" value="Minimarket Chacha" class="mt-1 block w-full sm:w-1/2 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm" />
+                        </div>
+                        <div>
+                            <label for="zona-horaria" class="block text-sm font-medium text-gray-700">Zona Horaria:</label>
+                            <select id="zona-horaria" class="mt-1 block w-full sm:w-1/2 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                <option>GMT-5 (Quito)</option>
+                                <option>GMT-6 (México)</option>
+                                <option>GMT-3 (Buenos Aires)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="moneda" class="block text-sm font-medium text-gray-700">Moneda por Defecto:</label>
+                            <select id="moneda" class="mt-1 block w-full sm:w-1/2 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                <option>USD - Dólar Estadounidense</option>
+                                <option>EUR - Euro</option>
+                                <option>PEN - Sol Peruano</option>
+                            </select>
+                        </div>
+                        <button class="bg-blue-600 text-white text-sm px-6 py-2 rounded-md hover:bg-blue-700 transition-colors">Guardar Cambios</button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <h3 class="font-semibold text-lg text-gray-900 mb-4 border-b pb-3 border-gray-200">Gestión de Usuarios y Roles</h3>
+                    <p class="text-sm text-gray-700 mb-4">Administra los usuarios que tienen acceso al sistema y sus permisos.</p>
+                    <button class="bg-green-600 text-white text-sm px-4 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center">
+                        <i class="fas fa-user-plus mr-2"></i> Crear Nuevo Usuario
+                    </button>
+                    <div class="mt-4 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Último Acceso</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">admin</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Administrador</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">2025-06-28</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-2">Editar</button>
+                                        <button class="text-red-600 hover:text-red-900">Eliminar</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.getElementById('menu-toggle');
+            const overlay = document.querySelector('.overlay');
+            const sidebarLinks = document.querySelectorAll('#sidebar nav ul li a');
+            const contentSections = document.querySelectorAll('#content-area section');
+            const mainHeaderTitle = document.querySelector('header h1');
+
+            // Función para cerrar la sidebar
+            const closeSidebar = () => {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.remove('active');
+            };
+
+            // Toggle de la sidebar en mobile
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('active');
+            });
+
+            // Cerrar sidebar al hacer clic en el overlay (solo en mobile)
+            overlay.addEventListener('click', () => {
+                closeSidebar();
+            });
+
+            // Cerrar sidebar si se hace click fuera de ella en mobile (adicional al overlay)
+            document.addEventListener('click', (event) => {
+                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickOnToggle = menuToggle.contains(event.target);
+                const isMobileView = window.innerWidth < 1024; // Tailwind's 'lg' breakpoint
+
+                if (isMobileView && !isClickInsideSidebar && !isClickOnToggle && !sidebar.classList.contains('-translate-x-full')) {
+                    closeSidebar();
+                }
+            });
+
+            // Función para mostrar la sección correcta y actualizar el título/enlace activo
+            const showSection = (sectionId) => {
+                contentSections.forEach(section => {
+                    section.classList.add('hidden');
+                    section.classList.remove('active-section');
+                });
+                document.getElementById(sectionId).classList.remove('hidden');
+                document.getElementById(sectionId).classList.add('active-section');
+
+                // Actualizar el título del header. Si el enlace tiene un data-section, lo usamos. Si no, usamos el texto del enlace.
+                const currentLink = document.querySelector(`#sidebar a[data-section="${sectionId.replace('-section', '')}"]`);
+                if (currentLink) {
+                     mainHeaderTitle.textContent = currentLink.textContent.trim();
+                } else {
+                     // Fallback por si acaso, aunque con data-section no debería ser necesario
+                     mainHeaderTitle.textContent = sectionId.replace('-section', '').charAt(0).toUpperCase() + sectionId.replace('-section', '').slice(1);
+                }
+
+
+                // Actualizar el enlace activo en la sidebar
+                sidebarLinks.forEach(link => {
+                    link.classList.remove('bg-blue-600', 'text-white');
+                    link.classList.add('text-gray-700', 'hover:bg-gray-100', 'hover:text-blue-600');
+                    if (link.dataset.section === sectionId.replace('-section', '')) {
+                        link.classList.add('bg-blue-600', 'text-white');
+                        link.classList.remove('text-gray-700', 'hover:bg-gray-100', 'hover:text-blue-600');
+                    }
+                });
+
+                // Si estamos en mobile, cerrar la sidebar después de seleccionar una opción
+                const isMobileView = window.innerWidth < 1024;
+                if (isMobileView) {
+                    closeSidebar();
+                }
+            };
+
+            // Añadir event listeners a los enlaces de la sidebar
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault(); // Previene el comportamiento por defecto del enlace
+                    const targetSectionId = link.getAttribute('href').substring(1); // Obtiene el ID de la sección sin el '#'
+                    showSection(targetSectionId);
+                });
+            });
+
+            // Mostrar la sección del dashboard por defecto al cargar
+            showSection('dashboard-section');
+
+            // Manejar redimensionamiento para ocultar la sidebar en escritorio si se encoge
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 1024) { // Si es desktop
+                    sidebar.classList.remove('-translate-x-full'); // Asegurarse de que esté visible
+                    overlay.classList.remove('active'); // Asegurarse de que el overlay esté oculto
+                } else { // Si es mobile/tablet
+                    // Mantener el estado de la sidebar (oculta o activa por el toggle)
+                }
+            });
+        });
+    </script>
 </body>
 </html>
