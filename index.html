@@ -174,9 +174,7 @@
                     <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Clientes</p>
-                            <p class="font-semibold text-2xl text-gray-900">3</p>
-                            <p class="text-xs text-green-600 font-semibold">1 VIP</p>
-                        </div>
+                            <p class="font-semibold text-2xl text-gray-900">0</p> <p class="text-xs text-green-600 font-semibold">0 VIP</p> </div>
                         <div class="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center text-purple-600 text-2xl">
                             <i class="fas fa-users"></i>
                         </div>
@@ -185,9 +183,7 @@
                     <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Empleados</p>
-                            <p class="font-semibold text-2xl text-gray-900">3</p>
-                            <p class="text-xs text-green-600 font-semibold">3 activos</p>
-                        </div>
+                            <p class="font-semibold text-2xl text-gray-900">0</p> <p class="text-xs text-green-600 font-semibold">0 activos</p> </div>
                         <div class="bg-orange-100 rounded-full w-12 h-12 flex items-center justify-center text-orange-600 text-2xl">
                             <i class="fas fa-user-tie"></i>
                         </div>
@@ -197,7 +193,7 @@
                 <div class="bg-white rounded-lg p-4 shadow-sm">
                     <h2 class="font-semibold text-lg text-gray-900 mb-4 border-b pb-3 border-gray-200">Acciones Rápidas</h2>
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-y-6 text-center text-sm text-gray-700">
-                        <div class="flex flex-col items-center space-y-2 cursor-pointer hover:text-blue-600 transition-colors">
+                        <div class="flex flex-col items-center space-y-2 cursor-pointer hover:text-blue-600 transition-colors" onclick="recordSale()">
                             <div class="bg-blue-100 rounded-full w-14 h-14 flex items-center justify-center text-blue-600 text-2xl">
                                 <i class="fas fa-plus-circle"></i>
                             </div>
@@ -209,7 +205,7 @@
                             </div>
                             <span class="font-medium">Agregar Producto</span>
                         </div>
-                        <div class="flex flex-col items-center space-y-2 cursor-pointer hover:text-purple-600 transition-colors">
+                        <div class="flex flex-col items-center space-y-2 cursor-pointer hover:text-purple-600 transition-colors" onclick="addClient()">
                             <div class="bg-purple-100 rounded-full w-14 h-14 flex items-center justify-center text-purple-600 text-2xl">
                                 <i class="fas fa-user-plus"></i>
                             </div>
@@ -425,7 +421,7 @@
                     <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Ventas del Mes</p>
-                            <p class="font-semibold text-2xl text-gray-900">USD 5,200.00</p>
+                            <p class="font-semibold text-2xl text-gray-900">USD 0.00</p>
                         </div>
                         <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center text-green-600 text-2xl">
                             <i class="fas fa-shopping-cart"></i>
@@ -434,7 +430,7 @@
                     <div class="bg-yellow-100 rounded-full w-12 h-12 flex items-center justify-center text-yellow-600 text-2xl">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Ventas Pendientes</p>
-                            <p class="font-semibold text-2xl text-gray-900">USD 150.00</p>
+                            <p class="font-semibold text-2xl text-gray-900">USD 0.00</p>
                         </div>
                         <div class="bg-yellow-100 rounded-full w-12 h-12 flex items-center justify-center text-yellow-600 text-2xl">
                             <i class="fas fa-hourglass-half"></i>
@@ -443,7 +439,7 @@
                     <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 text-2xl">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Promedio por Venta</p>
-                            <p class="font-semibold text-2xl text-gray-900">USD 25.50</p>
+                            <p class="font-semibold text-2xl text-gray-900">USD 0.00</p>
                         </div>
                         <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 text-2xl">
                             <i class="fas fa-chart-bar"></i>
@@ -452,7 +448,7 @@
                     <div class="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center text-purple-600 text-2xl">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Total Clientes</p>
-                            <p class="font-semibold text-2xl text-gray-900">120</p>
+                            <p class="font-semibold text-2xl text-gray-900">0</p>
                         </div>
                         <div class="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center text-purple-600 text-2xl">
                             <i class="fas fa-users"></i>
@@ -464,7 +460,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b pb-3 border-gray-200 gap-y-2">
                         <h3 class="font-semibold text-lg text-gray-900">Listado de Ventas</h3>
                         <div class="flex space-x-2">
-                            <button class="bg-blue-600 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center">
+                            <button class="bg-blue-600 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center" onclick="recordSale()">
                                 <i class="fas fa-plus mr-2"></i> Nueva Venta
                             </button>
                             <button class="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-md hover:bg-gray-200 transition-colors flex items-center">
@@ -526,8 +522,7 @@
                     <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Total Empleados</p>
-                            <p class="font-semibold text-2xl text-gray-900">15</p>
-                        </div>
+                            <p class="font-semibold text-2xl text-gray-900">0</p> </div>
                         <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 text-2xl">
                             <i class="fas fa-users-cog"></i>
                         </div>
@@ -535,8 +530,7 @@
                     <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Activos</p>
-                            <p class="font-semibold text-2xl text-gray-900">12</p>
-                        </div>
+                            <p class="font-semibold text-2xl text-gray-900">0</p> </div>
                         <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center text-green-600 text-2xl">
                             <i class="fas fa-check-circle"></i>
                         </div>
@@ -544,8 +538,7 @@
                     <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Ausentes Hoy</p>
-                            <p class="font-semibold text-2xl text-gray-900">1</p>
-                        </div>
+                            <p class="font-semibold text-2xl text-gray-900">0</p> </div>
                         <div class="bg-orange-100 rounded-full w-12 h-12 flex items-center justify-center text-orange-600 text-2xl">
                             <i class="fas fa-user-minus"></i>
                         </div>
@@ -553,8 +546,7 @@
                     <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Nuevos este Mes</p>
-                            <p class="font-semibold text-2xl text-gray-900">2</p>
-                        </div>
+                            <p class="font-semibold text-2xl text-gray-900">0</p> </div>
                         <div class="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center text-purple-600 text-2xl">
                             <i class="fas fa-user-plus"></i>
                         </div>
@@ -606,8 +598,7 @@
                     <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Total Clientes</p>
-                            <p class="font-semibold text-2xl text-gray-900">120</p>
-                        </div>
+                            <p class="font-semibold text-2xl text-gray-900">0</p> </div>
                         <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 text-2xl">
                             <i class="fas fa-user-friends"></i>
                         </div>
@@ -615,8 +606,7 @@
                     <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Clientes VIP</p>
-                            <p class="font-semibold text-2xl text-gray-900">10</p>
-                        </div>
+                            <p class="font-semibold text-2xl text-gray-900">0</p> </div>
                         <div class="bg-yellow-100 rounded-full w-12 h-12 flex items-center justify-center text-yellow-600 text-2xl">
                             <i class="fas fa-star"></i>
                         </div>
@@ -624,8 +614,7 @@
                     <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Nuevos Clientes (Mes)</p>
-                            <p class="font-semibold text-2xl text-gray-900">5</p>
-                        </div>
+                            <p class="font-semibold text-2xl text-gray-900">0</p> </div>
                         <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center text-green-600 text-2xl">
                             <i class="fas fa-user-plus"></i>
                         </div>
@@ -633,8 +622,7 @@
                     <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Clientes con Crédito</p>
-                            <p class="font-semibold text-2xl text-gray-900">50</p>
-                        </div>
+                            <p class="font-semibold text-2xl text-gray-900">0</p> </div>
                         <div class="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center text-purple-600 text-2xl">
                             <i class="fas fa-credit-card"></i>
                         </div>
@@ -644,7 +632,7 @@
                 <div class="bg-white rounded-lg p-4 shadow-sm">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b pb-3 border-gray-200 gap-y-2">
                         <h3 class="font-semibold text-lg text-gray-900">Lista de Clientes</h3>
-                        <button class="bg-blue-600 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center">
+                        <button class="bg-blue-600 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center" onclick="addClient()">
                             <i class="fas fa-user-plus mr-2"></i> Nuevo Cliente
                         </button>
                     </div>
@@ -1042,51 +1030,50 @@
              */
             async function fetchDashboardData() {
                 try {
-                    const response = await fetch(`${BASE_URL}/api/productos`);
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        throw new Error(`Error HTTP! Estado: ${response.status} - ${errorText}`);
+                    const productsResponse = await fetch(`${BASE_URL}/api/productos`);
+                    if (!productsResponse.ok) {
+                        const errorText = await productsResponse.text();
+                        throw new Error(`Error HTTP (Productos): ${productsResponse.status} - ${errorText}`);
                     }
-                    const result = await response.json();
+                    const productsResult = await productsResponse.json();
+                    const productos = productsResult.data || [];
 
-                    if (result.message === "success" && result.data) {
-                        const productos = result.data;
+                    dashboardTotalProductsElement.textContent = productos.length;
 
-                        dashboardTotalProductsElement.textContent = productos.length;
+                    const lowStockCount = productos.filter(p => p.stock > 0 && p.stock <= 10).length;
+                    dashboardLowStockTextElement.textContent = `${lowStockCount} agotándose`;
+                    dashboardLowStockTextElement.classList.remove('text-green-600', 'text-red-600');
 
-                        // Calcular productos con stock bajo (ejemplo: stock <= 10)
-                        const lowStockCount = productos.filter(p => p.stock > 0 && p.stock <= 10).length;
-                        dashboardLowStockTextElement.textContent = `${lowStockCount} agotándose`;
-                        dashboardLowStockTextElement.classList.remove('text-green-600', 'text-red-600'); // Limpiar clases previas
-
-                        if (lowStockCount > 0) {
-                            dashboardLowStockTextElement.classList.add('text-red-600');
-                            productsLowStockCard.style.display = 'block'; // Mostrar la tarjeta de stock bajo
-
-                            // Actualizar el primer item de la tarjeta de "Productos con Stock Bajo"
-                            // (Idealmente esto debería iterar sobre todos los productos con stock bajo,
-                            // pero para una tarjeta de ejemplo, tomamos el primero o un resumen)
-                            const firstLowStockProduct = products.filter(p => p.stock > 0 && p.stock <= 10)[0];
-                            if (firstLowStockProduct) {
-                                productsLowStockCard.querySelector('.text-sm.font-semibold.text-gray-900').textContent = firstLowStockProduct.nombre;
-                                productsLowStockCard.querySelector('.text-xs.text-gray-500').textContent = `Código: ${firstLowStockProduct.codigo}`;
-                                productsLowStockCard.querySelector('.text-red-600.font-semibold').textContent = `${firstLowStockProduct.stock} unidades`;
-                            }
-                        } else {
-                            dashboardLowStockTextElement.classList.add('text-green-600');
-                            productsLowStockCard.style.display = 'none'; // Ocultar si no hay productos con stock bajo
-                        }
-
-                    } else {
-                        console.error("Error al obtener productos del backend para Dashboard:", result.message);
-                        dashboardTotalProductsElement.textContent = 'N/A';
-                        dashboardLowStockTextElement.textContent = 'Error';
+                    if (lowStockCount > 0) {
                         dashboardLowStockTextElement.classList.add('text-red-600');
-                        productsLowStockCard.style.display = 'block'; // Mostrar la tarjeta para indicar error
-                        productsLowStockCard.querySelector('.text-sm.font-semibold.text-gray-900').textContent = 'Error de conexión';
-                        productsLowStockCard.querySelector('.text-xs.text-gray-500').textContent = 'No se pudo cargar el stock.';
-                        productsLowStockCard.querySelector('.text-red-600.font-semibold').textContent = '';
+                        productsLowStockCard.style.display = 'block';
+
+                        const firstLowStockProduct = productos.filter(p => p.stock > 0 && p.stock <= 10)[0];
+                        if (firstLowStockProduct) {
+                            productsLowStockCard.querySelector('.text-sm.font-semibold.text-gray-900').textContent = firstLowStockProduct.nombre;
+                            productsLowStockCard.querySelector('.text-xs.text-gray-500').textContent = `Código: ${firstLowStockProduct.codigo}`;
+                            productsLowStockCard.querySelector('.text-red-600.font-semibold').textContent = `${firstLowStockProduct.stock} unidades`;
+                        }
+                    } else {
+                        dashboardLowStockTextElement.classList.add('text-green-600');
+                        productsLowStockCard.style.display = 'none';
                     }
+
+                    // *** Datos para Clientes y Empleados - ¡Asume que tienes estas rutas! ***
+                    const clientsResponse = await fetch(`${BASE_URL}/api/clientes`);
+                    if (!clientsResponse.ok) throw new Error(`Error HTTP (Clientes): ${clientsResponse.status}`);
+                    const clientsResult = await clientsResponse.json();
+                    const clientes = clientsResult.data || [];
+                    document.getElementById('dashboard-total-clientes').textContent = clientes.length; // Asumiendo que existe este ID en tu HTML
+                    // Si tienes clientes VIP, necesitas lógica para contarlos aquí
+
+                    const employeesResponse = await fetch(`${BASE_URL}/api/empleados`);
+                    if (!employeesResponse.ok) throw new Error(`Error HTTP (Empleados): ${employeesResponse.status}`);
+                    const employeesResult = await employeesResponse.json();
+                    const empleados = employeesResult.data || [];
+                    document.getElementById('dashboard-total-empleados').textContent = empleados.length; // Asumiendo que existe este ID en tu HTML
+                    // Si tienes empleados activos, necesitas lógica para contarlos aquí
+
                 } catch (error) {
                     console.error("No se pudo conectar al backend (Dashboard):", error);
                     dashboardTotalProductsElement.textContent = 'N/A';
@@ -1096,9 +1083,13 @@
                     productsLowStockCard.querySelector('.text-sm.font-semibold.text-gray-900').textContent = 'Error de conexión';
                     productsLowStockCard.querySelector('.text-xs.text-gray-500').textContent = 'Asegúrate que el backend esté funcionando.';
                     productsLowStockCard.querySelector('.text-red-600.font-semibold').textContent = '';
-                    alert('Problema de conexión: No se pudo obtener la información del Dashboard. Asegúrate de que el servidor backend esté corriendo.');
+                    // También actualizar los contadores de clientes y empleados a "N/A" o "Error" si fallan.
+                    document.getElementById('dashboard-total-clientes').textContent = 'N/A';
+                    document.getElementById('dashboard-total-empleados').textContent = 'N/A';
+                    alert('Problema de conexión: No se pudo obtener la información del Dashboard. Asegúrate de que el servidor backend esté corriendo y sea accesible.');
                 }
             }
+
 
             /**
              * Carga y renderiza los datos de la tabla de productos en la sección de Almacén.
@@ -1357,7 +1348,123 @@
 
 
             // =======================================================
-            // 6. INICIALIZACIÓN
+            // 6. FUNCIONES CRUD PARA CLIENTES (NUEVAS)
+            // =======================================================
+
+            /**
+             * Función para agregar un nuevo Cliente
+             * (Utiliza prompts como los ejemplos anteriores, idealmente sería un modal)
+             */
+            window.addClient = async () => { // Hacer global para onclick en HTML
+                const nombre = prompt('Ingrese el NOMBRE del nuevo cliente:');
+                const email = prompt('Ingrese el EMAIL del cliente:');
+                const telefono = prompt('Ingrese el TELÉFONO del cliente (opcional):');
+
+                if (!nombre || !email) {
+                    alert('Nombre y Email del cliente son obligatorios.');
+                    return;
+                }
+
+                const nuevoCliente = {
+                    nombre: nombre.trim(),
+                    email: email.trim(),
+                    telefono: telefono ? telefono.trim() : ''
+                };
+
+                try {
+                    const response = await fetch(`${BASE_URL}/api/clientes`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(nuevoCliente)
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.error || `Error HTTP: ${response.status} - ${response.statusText}`);
+                    }
+
+                    alert(`Cliente "${result.data.nombre}" agregado exitosamente con ID: ${result.data.id}`);
+                    // Si tuvieras una tabla de clientes, la recargarías aquí:
+                    // fetchClientsData();
+                    fetchDashboardData(); // Actualizar el contador de clientes en el dashboard
+                } catch (error) {
+                    console.error('Error al agregar el cliente:', error);
+                    alert(`No se pudo agregar el cliente: ${error.message}`);
+                }
+            };
+
+            // =======================================================
+            // 7. FUNCIONES CRUD PARA VENTAS (NUEVAS)
+            // =======================================================
+
+            /**
+             * Función para registrar una nueva Venta
+             * (Utiliza prompts como los ejemplos anteriores, idealmente sería un modal complejo)
+             */
+            window.recordSale = async () => { // Hacer global para onclick en HTML
+                alert('Esta función de "Nueva Venta" es más compleja y requiere una interfaz de usuario dedicada para seleccionar productos y clientes. Para esta demostración, usaremos prompts simples.');
+
+                const clienteId = prompt('Ingrese el ID del cliente para la venta (ej. un ID de MongoDB como 60c72b2f9f1b2c001c8e4d3a):');
+                const productosVentaStr = prompt('Ingrese IDs de producto y cantidades separados por coma, y diferentes productos por punto y coma (ej. prod1ID,2;prod2ID,1):');
+
+                if (!clienteId || !productosVentaStr) {
+                    alert('ID de cliente y productos son obligatorios para la venta.');
+                    return;
+                }
+
+                const productosParaBackend = [];
+                productosVentaStr.split(';').forEach(item => {
+                    const parts = item.split(',');
+                    if (parts.length === 2) {
+                        productosParaBackend.push({
+                            productoId: parts[0].trim(), // Asegúrate que el nombre del campo coincida con tu backend
+                            cantidad: parseInt(parts[1].trim())
+                        });
+                    }
+                });
+
+                if (productosParaBackend.length === 0) {
+                    alert('Formato de productos incorrecto. Use: prodID,cantidad;prodID,cantidad');
+                    return;
+                }
+
+                const nuevaVenta = {
+                    clienteId: clienteId.trim(),
+                    productos: productosParaBackend
+                };
+
+                try {
+                    const response = await fetch(`${BASE_URL}/api/ventas`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(nuevaVenta)
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.error || `Error HTTP: ${response.status} - ${response.statusText}`);
+                    }
+
+                    alert(`Venta registrada exitosamente con ID: ${result.data.id}. Total: $${result.data.total.toFixed(2)}`);
+                    fetchDashboardData(); // Recargar el dashboard (si muestra ventas o stock bajo)
+                    fetchAlmacenData(); // Actualizar el stock de productos
+                    // Si tuvieras una tabla de ventas, la recargarías aquí:
+                    // fetchSalesData();
+                } catch (error) {
+                    console.error('Error al registrar la venta:', error);
+                    alert(`No se pudo registrar la venta: ${error.message}`);
+                }
+            };
+
+
+            // =======================================================
+            // 8. INICIALIZACIÓN
             // =======================================================
 
             // Mostrar la sección del dashboard por defecto al cargar la página.
