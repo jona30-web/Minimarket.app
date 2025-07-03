@@ -3,1880 +3,1309 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard - Minimarket Chacha</title>
+    <title>Dashboard - Distribuidora Chacha</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
-        /* Estilos generales del cuerpo */
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 40; display: none; }
+        .overlay.active { display: block; }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); z-index: 50; display: none; max-width: 90%; width: 500px; max-height: 90%; overflow-y: auto; }
+        .modal.active { display: block; }
+        .product-card { display: flex; flex-direction: column; justify-content: space-between; text-align: center; cursor: pointer; transition: all 0.2s; border: 1px solid #eee; }
+        .product-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
+        #sidebar nav a.active { background-color: #e0e7ff; color: #4f46e5; font-weight: 600; }
+        .max-h-96-overflow { max-height: 24rem; overflow-y: auto; }
+        .max-h-48-overflow { max-height: 12rem; overflow-y: auto; }
 
-        /* Custom scrollbar para una mejor apariencia (opcional) */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        /* Overlay para la sidebar móvil y los Modales */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 40; /* Más bajo que sidebar/modal, más alto que el contenido */
-            display: none; /* Oculto por defecto */
-        }
-        .overlay.active {
-            display: block; /* Visible cuando está activo */
-        }
-
-        /* Estilos de los Modales */
-        .modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        /* Estilos para los botones de Acciones Rápidas */
+        .quick-action-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 1rem; /* Aumenta el padding para hacerlos más grandes */
             background-color: white;
-            padding: 2rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            z-index: 50; /* Más alto que el overlay */
-            display: none; /* Oculto por defecto */
-            max-width: 90%;
-            width: 500px;
-            max-height: 90%;
-            overflow-y: auto;
-        }
-        .modal.active {
-            display: block; /* Visible cuando está activo */
-        }
-
-        /* Estilos específicos para la sección de ventas */
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 1rem;
-        }
-        .product-card {
-            background-color: white;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            text-align: center;
-            cursor: pointer;
+            border-radius: 0.75rem; /* Bordes más redondeados */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Sombra suave */
             transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 500;
+            color: #4b5563; /* Color de texto más oscuro */
         }
-        .product-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        .quick-action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
-        .product-card img {
-            max-height: 80px;
-            object-fit: contain;
-            margin: 0 auto 0.5rem;
+        .quick-action-button .icon-circle {
+            width: 56px; /* Tamaño del círculo de ícono */
+            height: 56px; /* Tamaño del círculo de ícono */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem; /* Espacio entre el círculo y el texto */
+            font-size: 1.75rem; /* Tamaño del ícono */
+            color: white;
         }
+        /* Colores de ejemplo para los círculos de íconos */
+        .icon-circle.blue { background-color: #3b82f6; } /* Nueva Venta */
+        .icon-circle.purple { background-color: #8b5cf6; } /* Agregar Producto */
+        .icon-circle.pink { background-color: #ec4899; } /* Nuevo Cliente */
+        .icon-circle.orange { background-color: #f97316; } /* Generar Reporte */
+        .icon-circle.indigo { background-color: #6366f1; } /* Gestionar Inventario */
+        .icon-circle.red { background-color: #ef4444; } /* Horarios (Placeholder) */
     </style>
 </head>
-<body class="bg-[#f7f9fc] text-gray-800 min-h-screen flex flex-col">
+<body class="bg-gray-100 text-gray-800 min-h-screen flex">
 
     <div id="overlay" class="overlay lg:hidden"></div>
 
-    <aside id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out lg:static lg:shadow-none lg:h-auto lg:flex-shrink-0">
-        <div class="p-4 border-b border-gray-200">
-            <h3 class="text-xl font-semibold text-gray-800">Distribuidora Chacha</h3>
+    <aside id="sidebar" class="w-64 h-full bg-white shadow-lg fixed top-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 transition-transform">
+        <div class="p-4 border-b">
+            <h3 class="text-xl font-semibold">Distribuidora Chacha</h3>
             <p class="text-sm text-gray-500">Sistema de Gestión</p>
         </div>
         <nav class="p-4">
             <ul class="space-y-1">
-                <li>
-                    <a href="#dashboard-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium" data-section="dashboard">
-                        <i class="fas fa-tachometer-alt mr-3 text-lg"></i> Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a href="#almacen-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium" data-section="almacen">
-                        <i class="fas fa-warehouse mr-3 text-lg"></i> Almacén
-                    </a>
-                </li>
-                <li>
-                    <a href="#nueva-venta-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium" data-section="nueva-venta">
-                        <i class="fas fa-cash-register mr-3 text-lg"></i> Nueva Venta
-                    </a>
-                </li>
-                <li>
-                    <a href="#empleados-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium" data-section="empleados">
-                        <i class="fas fa-users-cog mr-3 text-lg"></i> Empleados
-                    </a>
-                </li>
-                <li>
-                    <a href="#ventas-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium" data-section="ventas">
-                        <i class="fas fa-chart-line mr-3 text-lg"></i> Historial Ventas
-                    </a>
-                </li>
-                <li>
-                    <a href="#clientes-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium" data-section="clientes">
-                        <i class="fas fa-user-friends mr-3 text-lg"></i> Clientes
-                    </a>
-                </li>
-                <li>
-                    <a href="#cuentas-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium" data-section="cuentas">
-                        <i class="fas fa-file-invoice-dollar mr-3 text-lg"></i> Cuentas por Cobrar
-                    </a>
-                </li>
-                <li>
-                    <a href="#reportes-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium" data-section="reportes">
-                        <i class="fas fa-chart-pie mr-3 text-lg"></i> Reportes
-                    </a>
-                </li>
-                <li>
-                    <a href="#configuracion-section" class="flex items-center p-3 text-gray-700 rounded-lg hover:bg-gray-100 hover:text-blue-600 font-medium" data-section="configuracion">
-                        <i class="fas fa-cog mr-3 text-lg"></i> Configuración
-                    </a>
-                </li>
+                <li><a href="#dashboard-section" class="flex items-center p-3 rounded-lg font-medium" data-section="dashboard"><i class="fas fa-tachometer-alt w-6 mr-3"></i>Dashboard</a></li>
+                <li><a href="#nueva-venta-section" class="flex items-center p-3 rounded-lg font-medium" data-section="nueva-venta"><i class="fas fa-cash-register w-6 mr-3"></i>Nueva Venta</a></li>
+                <li><a href="#ventas-section" class="flex items-center p-3 rounded-lg font-medium" data-section="ventas"><i class="fas fa-chart-line w-6 mr-3"></i>Historial Ventas</a></li>
+                <li><a href="#cuentas-section" class="flex items-center p-3 rounded-lg font-medium" data-section="cuentas"><i class="fas fa-file-invoice-dollar w-6 mr-3"></i>Cuentas por Cobrar</a></li>
+                <li><a href="#almacen-section" class="flex items-center p-3 rounded-lg font-medium" data-section="almacen"><i class="fas fa-warehouse w-6 mr-3"></i>Almacén</a></li>
+                <li><a href="#clientes-section" class="flex items-center p-3 rounded-lg font-medium" data-section="clientes"><i class="fas fa-user-friends w-6 mr-3"></i>Clientes</a></li>
+                <li><a href="#empleados-section" class="flex items-center p-3 rounded-lg font-medium" data-section="empleados"><i class="fas fa-users-cog w-6 mr-3"></i>Empleados</a></li>
+                <li><a href="#reportes-section" class="flex items-center p-3 rounded-lg font-medium" data-section="reportes"><i class="fas fa-chart-pie w-6 mr-3"></i>Reportes</a></li>
             </ul>
         </nav>
     </aside>
 
-    <div class="flex-1 flex flex-col lg:ml-64 transition-all duration-300 ease-in-out">
-        <header class="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white shadow-sm sticky top-0 z-30">
-            <div class="flex items-center space-x-3">
-                <button id="menu-toggle" aria-label="Menu" class="text-xl text-gray-600 lg:hidden">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <h1 class="font-semibold text-xl text-gray-900">Dashboard</h1> </div>
-            <div class="flex items-center space-x-4">
-                <div class="relative cursor-pointer">
-                    <i class="fas fa-bell text-gray-600 text-lg"></i>
-                    <span class="absolute -top-1 -right-2 bg-red-600 text-white text-xs font-semibold rounded-full w-5 h-5 flex items-center justify-center leading-none">3</span>
-                </div>
-                <div class="flex items-center space-x-2 cursor-pointer">
-                    <div class="bg-blue-600 rounded-full w-8 h-8 flex items-center justify-center text-white text-sm font-semibold">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <span class="text-gray-900 font-medium text-sm">Admin</span>
-                </div>
-            </div>
+    <div class="flex-1 flex flex-col lg:ml-64">
+        <header class="flex items-center justify-between px-4 py-3 border-b bg-white shadow-sm sticky top-0 z-30">
+            <div class="flex items-center"><button id="menu-toggle" class="text-xl lg:hidden mr-3"><i class="fas fa-bars"></i></button><h1 id="main-header-title" class="font-semibold text-xl"></h1></div>
+            <div class="flex items-center space-x-2"><div class="bg-blue-600 rounded-full w-8 h-8 flex items-center justify-center text-white"><i class="fas fa-user"></i></div><span>Admin</span></div>
         </header>
 
         <main id="content-area" class="p-4 lg:p-6 flex-1 overflow-y-auto">
+            </main>
+    </div>
 
-            <section id="dashboard-section" class="active-section space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Ventas Hoy</p>
-                            <p class="font-semibold text-2xl text-gray-900">USD 0.00</p>
-                            <p class="text-xs text-green-600 font-semibold">+8.2% <span class="font-normal text-gray-500">vs ayer</span></p>
-                        </div>
-                        <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center text-green-600 text-2xl">
-                            <i class="fas fa-dollar-sign"></i>
-                        </div>
-                    </div>
+    <div id="modal-container"></div>
 
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Productos</p>
-                            <p class="font-semibold text-2xl text-gray-900" id="dashboard-total-productos">0</p>
-                            <p class="text-xs font-semibold" id="dashboard-low-stock-text">0 agotándose</p>
-                        </div>
-                        <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 text-2xl">
-                            <i class="fas fa-boxes"></i>
-                        </div>
-                    </div>
+<script type="module">
+    // --- FASE 1: CONEXIÓN A FIREBASE ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, addDoc, deleteDoc, updateDoc, setDoc, writeBatch, serverTimestamp, query, where, Timestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Clientes</p>
-                            <p class="font-semibold text-2xl text-gray-900">3</p>
-                            <p class="text-xs text-green-600 font-semibold">1 VIP</p>
-                        </div>
-                        <div class="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center text-purple-600 text-2xl">
-                            <i class="fas fa-users"></i>
-                        </div>
-                    </div>
+    // Tu configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDq6SsrhCeXDjKQ1SPEnVTTXvSY_RO5Zqc",
+      authDomain: "distribuidora-chacha.firebaseapp.com",
+      projectId: "distribuidora-chacha",
+      storageBucket: "distribuidora-chacha.appspot.com",
+      messagingSenderId: "852885176903",
+      appId: "1:852885176903:web:f2b3d048e832e90dece762"
+    };
 
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Empleados</p>
-                            <p class="font-semibold text-2xl text-gray-900">3</p>
-                            <p class="text-xs text-green-600 font-semibold">3 activos</p>
-                        </div>
-                        <div class="bg-orange-100 rounded-full w-12 h-12 flex items-center justify-center text-orange-600 text-2xl">
-                            <i class="fas fa-user-tie"></i>
-                        </div>
-                    </div>
+    // Inicializa Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // --- FASE 2: ESTADO GLOBAL Y DOM ---
+    const state = {
+        productos: [],
+        clientes: [],
+        empleados: [],
+        ventas: [],
+        cuentas_por_cobrar: [],
+        cart: [],
+        searchTerm: '' // Para la búsqueda de productos
+    };
+    const IVA_RATE = 0.15;
+    const DOMElements = {
+        sidebar: document.getElementById('sidebar'),
+        menuToggle: document.getElementById('menu-toggle'),
+        overlay: document.getElementById('overlay'),
+        mainHeaderTitle: document.getElementById('main-header-title'),
+        sidebarLinks: document.querySelectorAll('#sidebar nav a'),
+        contentArea: document.getElementById('content-area'),
+        modalContainer: document.getElementById('modal-container')
+    };
+
+    // --- FASE 3: LÓGICA DE UI Y NAVEGACIÓN ---
+    window.hideModal = () => {
+        const modal = DOMElements.modalContainer.querySelector('.modal');
+        if(modal) modal.classList.remove('active');
+        DOMElements.overlay.classList.remove('active');
+        setTimeout(() => { DOMElements.modalContainer.innerHTML = ''; }, 200);
+    };
+
+    window.showModal = (contentHtml) => {
+        // Asegúrate de que el overlay esté activo para que pueda cerrarse al hacer clic
+        DOMElements.modalContainer.innerHTML = `
+            <div class="modal active">
+                ${contentHtml}
+                <div class="mt-6 text-right">
+                    <button onclick="hideModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">Cerrar</button>
                 </div>
+            </div>
+        `;
+        DOMElements.overlay.classList.add('active');
+    };
 
-                <div class="bg-white rounded-lg p-4 shadow-sm">
-                    <h2 class="font-semibold text-lg text-gray-900 mb-4 border-b pb-3 border-gray-200">Acciones Rápidas</h2>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-y-6 text-center text-sm text-gray-700">
-                        <div class="flex flex-col items-center space-y-2 cursor-pointer hover:text-blue-600 transition-colors" onclick="showSection('nueva-venta-section')">
-                            <div class="bg-blue-100 rounded-full w-14 h-14 flex items-center justify-center text-blue-600 text-2xl">
-                                <i class="fas fa-plus-circle"></i>
-                            </div>
-                            <span class="font-medium">Nueva Venta</span>
-                        </div>
-                        <div class="flex flex-col items-center space-y-2 cursor-pointer hover:text-gray-900 transition-colors" onclick="showAddProductModal()">
-                            <div class="bg-gray-100 rounded-full w-14 h-14 flex items-center justify-center text-gray-900 text-2xl">
-                                <i class="fas fa-box"></i>
-                            </div>
-                            <span class="font-medium">Agregar Producto</span>
-                        </div>
-                        <div class="flex flex-col items-center space-y-2 cursor-pointer hover:text-purple-600 transition-colors" onclick="showAddClientModal()">
-                            <div class="bg-purple-100 rounded-full w-14 h-14 flex items-center justify-center text-purple-600 text-2xl">
-                                <i class="fas fa-user-plus"></i>
-                            </div>
-                            <span class="font-medium">Nuevo Cliente</span>
-                        </div>
-                        <div class="flex flex-col items-center space-y-2 cursor-pointer hover:text-orange-600 transition-colors">
-                            <div class="bg-orange-100 rounded-full w-14 h-14 flex items-center justify-center text-orange-600 text-2xl">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <span class="font-medium">Generar Reporte</span>
-                        </div>
-                        <div class="flex flex-col items-center space-y-2 cursor-pointer hover:text-indigo-700 transition-colors" onclick="showSection('almacen-section')">
-                            <div class="bg-indigo-100 rounded-full w-14 h-14 flex items-center justify-center text-indigo-700 text-2xl">
-                                <i class="fas fa-warehouse"></i>
-                            </div>
-                            <span class="font-medium">Gestionar Inventario</span>
-                        </div>
-                        <div class="flex flex-col items-center space-y-2 cursor-pointer hover:text-pink-600 transition-colors">
-                            <div class="bg-pink-100 rounded-full w-14 h-14 flex items-center justify-center text-pink-600 text-2xl">
-                                <i class="fas fa-calendar-alt"></i>
-                            </div>
-                            <span class="font-medium">Horarios</span>
-                        </div>
-                    </div>
-                </div>
+    window.showSection = async (sectionId) => {
+        const link = document.querySelector(`a[data-section="${sectionId.replace('-section', '')}"]`);
+        if (link) {
+            DOMElements.mainHeaderTitle.textContent = link.textContent.trim();
+            DOMElements.sidebarLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+        }
+        if (window.innerWidth < 1024) { DOMElements.sidebar.classList.add('-translate-x-full'); DOMElements.overlay.classList.remove('active'); }
 
-                <div class="bg-white rounded-lg p-4 shadow-sm">
-                    <h2 class="font-semibold text-lg text-gray-900 mb-2 border-b pb-3 border-gray-200">Ventas Recientes</h2>
-                    <p class="text-center text-gray-500 text-sm py-8">No hay ventas recientes</p>
-                </div>
+        // Mostrar un mensaje de carga mientras se obtienen los datos
+        DOMElements.contentArea.innerHTML = '<div class="text-center p-8"><i class="fas fa-spinner fa-spin text-4xl text-blue-500"></i><p class="mt-4 text-gray-600">Cargando...</p></div>';
 
-                <div class="bg-white rounded-lg p-4 shadow-sm" id="low-stock-products-card" style="display:none;">
-                    <h2 class="font-semibold text-lg text-gray-900 mb-2 border-b pb-3 border-gray-200">Productos con Stock Bajo</h2>
-                    <div class="bg-red-50 rounded-lg p-3 flex justify-between items-center mt-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="text-red-600 text-2xl">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900">Nombre del Producto</p>
-                                <p class="text-xs text-gray-500">Código: XXX</p>
-                            </div>
-                        </div>
-                        <div class="text-right text-sm">
-                            <p class="text-red-600 font-semibold">X unidades</p>
-                            <a href="#" class="text-blue-600 hover:underline" onclick="showSection('almacen-section');">Revisar</a>
-                        </div>
-                    </div>
-                </div>
-            </section>
+        // Recargar datos siempre que cambiamos de sección para tenerlos actualizados
+        await fetchData('productos');
+        await fetchData('clientes');
+        await fetchData('empleados');
+        await fetchData('ventas');
+        await fetchData('cuentas_por_cobrar');
 
-            <section id="almacen-section" class="hidden space-y-6">
-                <h2 class="font-semibold text-xl text-gray-900 mb-4">Gestión de Almacén</h2>
+        // Renderizar la sección específica
+        switch (sectionId) {
+            case 'dashboard-section':
+                renderDashboard();
+                break;
+            case 'nueva-venta-section':
+                renderNuevaVenta(); // Asegúrate de que esta función se llama
+                break;
+            case 'ventas-section':
+                renderVentas();
+                break;
+            case 'cuentas-section':
+                renderCuentasPorCobrar();
+                break;
+            case 'almacen-section':
+                renderAlmacen();
+                break;
+            case 'clientes-section':
+                renderClientes();
+                break;
+            case 'empleados-section':
+                renderEmpleados();
+                break;
+            case 'reportes-section':
+                renderReportes();
+                break;
+            // Manejo de acciones rápidas que no corresponden a una sección directamente
+            case 'add-product':
+                showProductForm();
+                break;
+            case 'add-customer':
+                showCustomerForm();
+                break;
+            // Para "Horarios" no hay una sección directa, podrías añadir un modal simple o un alert
+            case 'horarios':
+                alert('La gestión de horarios no está implementada aún.');
+                renderDashboard(); // Vuelve al dashboard si no hay una sección para esto
+                break;
+            default:
+                DOMElements.contentArea.innerHTML = `<div class="text-center p-8"><h2 class="text-2xl font-bold text-gray-700 mb-4">Sección no encontrada</h2><p class="mt-2 text-gray-500">Por favor, selecciona una sección válida del menú.</p></div>`;
+        }
+    };
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Total Productos</p>
-                            <p class="font-semibold text-2xl text-gray-900" id="almacen-total-productos">0</p>
-                        </div>
-                        <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 text-2xl">
-                            <i class="fas fa-boxes"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">En Stock</p>
-                            <p class="font-semibold text-2xl text-gray-900" id="almacen-en-stock">0</p>
-                        </div>
-                        <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center text-green-600 text-2xl">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Stock Bajo</p>
-                            <p class="font-semibold text-2xl text-gray-900" id="almacen-stock-bajo">0</p>
-                        </div>
-                        <div class="bg-orange-100 rounded-full w-12 h-12 flex items-center justify-center text-orange-600 text-2xl">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Sin Stock</p>
-                            <p class="font-semibold text-2xl text-gray-900" id="almacen-sin-stock">0</p>
-                        </div>
-                        <div class="bg-red-100 rounded-full w-12 h-12 flex items-center justify-center text-red-600 text-2xl">
-                            <i class="fas fa-times-circle"></i>
-                        </div>
-                    </div>
-                </div>
+    const fetchData = async (collectionName) => {
+        try {
+            const q = query(collection(db, collectionName));
+            const querySnapshot = await getDocs(q);
+            state[collectionName] = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            console.log(`Datos de ${collectionName} cargados:`, state[collectionName]);
+        } catch (error) {
+            console.error(`Error al leer ${collectionName} desde Firebase:`, error);
+            state[collectionName] = [];
+        }
+    };
 
-                <div class="bg-white rounded-lg p-4 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <input type="text" id="product-search-input" placeholder="Buscar productos por nombre, código o categoría..." class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    <div class="flex space-x-2 w-full sm:w-auto justify-end">
-                        <button class="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-md hover:bg-gray-200 transition-colors flex items-center">
-                            <i class="fas fa-qrcode mr-2"></i> Escanear QR
-                        </button>
-                        <button class="bg-blue-600 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center" onclick="showAddProductModal()">
-                            <i class="fas fa-plus mr-2"></i> Nuevo Producto
-                        </button>
-                    </div>
-                </div>
+    // --- FASE 4: FUNCIONES DE RENDERIZADO ---
 
-                <div class="bg-white rounded-lg p-4 shadow-sm">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200" id="almacen-table-body">
-                                <tr><td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center italic">Cargando productos...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
+    function renderDashboard() {
+        const totalProducts = state.productos.length;
+        const totalSales = state.ventas.length;
+        const totalRevenue = state.ventas.reduce((sum, venta) => sum + (venta.total || 0), 0).toFixed(2);
+        const pendingAccounts = state.cuentas_por_cobrar.filter(c => c.estado === 'Pendiente').length;
+        const topProducts = [...state.productos].sort((a, b) => b.stock - a.stock).slice(0, 5);
+        const recentSales = [...state.ventas].sort((a, b) => (b.fecha?.toDate() || 0) - (a.fecha?.toDate() || 0)).slice(0, 5);
 
-            <section id="nueva-venta-section" class="hidden space-y-6">
-                <h2 class="font-semibold text-xl text-gray-900 mb-4">Nueva Venta</h2>
+        let topProductsHtml = topProducts.length > 0 ? topProducts.map(p => `
+            <li class="flex justify-between items-center py-2 border-b last:border-b-0">
+                <span>${p.name}</span>
+                <span class="bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-sm">${p.stock} unidades</span>
+            </li>
+        `).join('') : '<p class="text-gray-500 text-sm">No hay productos para mostrar.</p>';
 
-                <div class="lg:flex lg:space-x-6">
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex-1 mb-6 lg:mb-0">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b pb-3 border-gray-200 gap-y-2">
-                            <h3 class="font-semibold text-lg text-gray-900">Productos Disponibles</h3>
-                            <div class="flex space-x-2 w-full sm:w-auto">
-                                <input type="text" id="sale-product-search-input" placeholder="Buscar producto..." class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                                <button class="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-md hover:bg-gray-200 transition-colors flex items-center">
-                                    <i class="fas fa-barcode mr-2"></i> Escanear
-                                </button>
-                            </div>
-                        </div>
-                        <div id="products-for-sale-grid" class="products-grid max-h-96 overflow-y-auto">
-                            <p class="text-center text-gray-500 col-span-full py-8">Cargando productos...</p>
-                        </div>
-                    </div>
+        let recentSalesHtml = recentSales.length > 0 ? recentSales.map(s => `
+            <li class="flex justify-between items-center py-2 border-b last:border-b-0">
+                <span>Venta a ${s.clienteNombre || 'Cliente General'}</span>
+                <span class="font-semibold text-blue-600">$${s.total ? s.total.toFixed(2) : '0.00'}</span>
+            </li>
+        `).join('') : '<p class="text-gray-500 text-sm">No hay ventas recientes.</p>';
 
-                    <div class="bg-white rounded-lg p-4 shadow-sm lg:w-96 lg:flex-shrink-0">
-                        <h3 class="font-semibold text-lg text-gray-900 mb-4 border-b pb-3 border-gray-200">Carrito de Compras</h3>
 
-                        <div id="cart-items" class="max-h-72 overflow-y-auto mb-4 space-y-3">
-                            <p class="text-center text-gray-500 text-sm italic">El carrito está vacío.</p>
-                        </div>
+        DOMElements.contentArea.innerHTML = `
+            <h2 class="text-2xl font-bold mb-6">Dashboard General</h2>
 
-                        <div class="border-t border-gray-200 pt-4 space-y-2">
-                            <div class="flex justify-between text-base font-medium text-gray-700">
-                                <span>Subtotal:</span>
-                                <span id="cart-subtotal">USD 0.00</span>
-                            </div>
-                            <div class="flex justify-between text-base font-medium text-gray-700">
-                                <span>IVA (12%):</span>
-                                <span id="cart-tax">USD 0.00</span>
-                            </div>
-                            <div class="flex justify-between text-xl font-bold text-gray-900">
-                                <span>Total:</span>
-                                <span id="cart-total">USD 0.00</span>
-                            </div>
-                        </div>
-
-                        <div class="mt-6 space-y-3">
-                            <button class="w-full bg-green-600 text-white font-semibold py-3 rounded-md hover:bg-green-700 transition-colors text-lg" onclick="processSale()">
-                                Procesar Venta
-                            </button>
-                            <button class="w-full bg-red-100 text-red-600 font-semibold py-2 rounded-md hover:bg-red-200 transition-colors" onclick="clearCart()">
-                                Vaciar Carrito
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="cuentas-section" class="hidden space-y-6">
-                <h2 class="font-semibold text-xl text-gray-900 mb-4">Cuentas por Cobrar</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Total por Cobrar</p>
-                            <p class="font-semibold text-2xl text-gray-900">USD 0.00</p>
-                            <p class="text-xs text-gray-500">Cuentas activas</p>
-                        </div>
-                        <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 text-2xl">
-                            <i class="fas fa-money-bill-wave"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Cuentas Vencidas</p>
-                            <p class="font-semibold text-2xl text-gray-900">USD 0.00</p>
-                            <p class="text-xs text-red-600">Cuentas vencidas</p>
-                        </div>
-                        <div class="bg-red-100 rounded-full w-12 h-12 flex items-center justify-center text-red-600 text-2xl">
-                            <i class="fas fa-exclamation-circle"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Pagos Recibidos</p>
-                            <p class="font-semibold text-2xl text-gray-900">USD 0.00</p>
-                            <p class="text-xs text-gray-500">Total de pagos</p>
-                        </div>
-                        <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center text-green-600 text-2xl">
-                            <i class="fas fa-receipt"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center relative">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Clientes</p>
-                            <p class="font-semibold text-2xl text-gray-900">0</p>
-                            <p class="text-xs text-gray-500">Con cuentas pendientes</p>
-                        </div>
-                        <button class="absolute top-4 right-4 bg-blue-600 text-white text-xs px-3 py-1 rounded-md font-medium hover:bg-blue-700 transition-colors">Nueva Cuenta</button>
-                        <div class="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center text-purple-600 text-2xl">
-                            <i class="fas fa-users"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg p-4 shadow-sm">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b pb-3 border-gray-200 gap-y-2">
-                        <h3 class="font-semibold text-lg text-gray-900">Listado de Cuentas por Cobrar</h3>
-                        <div class="flex space-x-2">
-                            <button class="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-md hover:bg-gray-200 transition-colors flex items-center">
-                                <i class="fas fa-bell mr-2"></i> Recordatorios
-                            </button>
-                            <button class="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-md hover:bg-gray-200 transition-colors flex items-center">
-                                <i class="fas fa-file-export mr-2"></i> Exportar
-                            </button>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Factura</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto Original</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Saldo Pendiente</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Vencimiento</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Días Vencido</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <tr>
-                                    <td colspan="8" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center italic">No hay cuentas por cobrar que coincidan con los filtros</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section id="ventas-section" class="hidden space-y-6">
-                <h2 class="font-semibold text-xl text-gray-900 mb-4">Historial de Ventas</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Ventas del Mes</p>
-                            <p class="font-semibold text-2xl text-gray-900">USD 5,200.00</p>
-                        </div>
-                        <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center text-green-600 text-2xl">
-                            <i class="fas fa-shopping-cart"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Ventas Pendientes</p>
-                            <p class="font-semibold text-2xl text-gray-900">USD 150.00</p>
-                        </div>
-                        <div class="bg-yellow-100 rounded-full w-12 h-12 flex items-center justify-center text-yellow-600 text-2xl">
-                            <i class="fas fa-hourglass-half"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Promedio por Venta</p>
-                            <p class="font-semibold text-2xl text-gray-900">USD 25.50</p>
-                        </div>
-                        <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 text-2xl">
-                            <i class="fas fa-chart-bar"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Total Clientes</p>
-                            <p class="font-semibold text-2xl text-gray-900">120</p>
-                        </div>
-                        <div class="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center text-purple-600 text-2xl">
-                            <i class="fas fa-users"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg p-4 shadow-sm">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b pb-3 border-gray-200 gap-y-2">
-                        <h3 class="font-semibold text-lg text-gray-900">Listado de Ventas</h3>
-                        <div class="flex space-x-2">
-                            <button class="bg-blue-600 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center" onclick="showSection('nueva-venta-section')">
-                                <i class="fas fa-plus mr-2"></i> Nueva Venta
-                            </button>
-                            <button class="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-md hover:bg-gray-200 transition-colors flex items-center">
-                                <i class="fas fa-filter mr-2"></i> Filtrar
-                            </button>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Venta</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">VTA001</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Juan Pérez</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">2024-06-25</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">USD 50.00</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Completada</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2">
-                                            <button class="text-blue-600 hover:text-blue-900">Ver</button>
-                                            <button class="text-red-600 hover:text-red-900">Anular</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">VTA002</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">María López</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">2024-06-26</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pendiente</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2">
-                                            <button class="text-blue-600 hover:text-blue-900">Ver</button>
-                                            <button class="text-red-600 hover:text-red-900">Anular</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section id="empleados-section" class="hidden space-y-6">
-                <h2 class="font-semibold text-xl text-gray-900 mb-4">Gestión de Empleados</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Total Empleados</p>
-                            <p class="font-semibold text-2xl text-gray-900">15</p>
-                        </div>
-                        <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 text-2xl">
-                            <i class="fas fa-users-cog"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Activos</p>
-                            <p class="font-semibold text-2xl text-gray-900">12</p>
-                        </div>
-                        <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center text-green-600 text-2xl">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Ausentes Hoy</p>
-                            <p class="font-semibold text-2xl text-gray-900">1</p>
-                        </div>
-                        <div class="bg-orange-100 rounded-full w-12 h-12 flex items-center justify-center text-orange-600 text-2xl">
-                            <i class="fas fa-user-minus"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Nuevos este Mes</p>
-                            <p class="font-semibold text-2xl text-gray-900">2</p>
-                        </div>
-                        <div class="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center text-purple-600 text-2xl">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg p-4 shadow-sm">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b pb-3 border-gray-200 gap-y-2">
-                        <h3 class="font-semibold text-lg text-gray-900">Lista de Empleados</h3>
-                        <button class="bg-blue-600 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center">
-                            <i class="fas fa-user-plus mr-2"></i> Nuevo Empleado
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cargo</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Ana García</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Cajera</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">555-1234</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2">
-                                            <button class="text-blue-600 hover:text-blue-900">Editar</button>
-                                            <button class="text-red-600 hover:text-red-900">Desactivar</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section id="clientes-section" class="hidden space-y-6">
-                <h2 class="font-semibold text-xl text-gray-900 mb-4">Gestión de Clientes</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Total Clientes</p>
-                            <p class="font-semibold text-2xl text-gray-900">120</p>
-                        </div>
-                        <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center text-blue-600 text-2xl">
-                            <i class="fas fa-user-friends"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Clientes VIP</p>
-                            <p class="font-semibold text-2xl text-gray-900">10</p>
-                        </div>
-                        <div class="bg-yellow-100 rounded-full w-12 h-12 flex items-center justify-center text-yellow-600 text-2xl">
-                            <i class="fas fa-star"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Nuevos Clientes (Mes)</p>
-                            <p class="font-semibold text-2xl text-gray-900">5</p>
-                        </div>
-                        <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center text-green-600 text-2xl">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Clientes con Crédito</p>
-                            <p class="font-semibold text-2xl text-gray-900">50</p>
-                        </div>
-                        <div class="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center text-purple-600 text-2xl">
-                            <i class="fas fa-credit-card"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg p-4 shadow-sm">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b pb-3 border-gray-200 gap-y-2">
-                        <h3 class="font-semibold text-lg text-gray-900">Lista de Clientes</h3>
-                        <button class="bg-blue-600 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center" onclick="showAddClientModal()">
-                            <i class="fas fa-user-plus mr-2"></i> Nuevo Cliente
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Última Compra</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Cliente A</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">VIP</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">cliente.a@email.com</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">2024-06-20</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2">
-                                            <button class="text-blue-600 hover:text-blue-900">Ver</button>
-                                            <button class="text-red-600 hover:text-red-900">Eliminar</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Cliente B</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Regular</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">cliente.b@email.com</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">2024-06-15</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2">
-                                            <button class="text-blue-600 hover:text-blue-900">Ver</button>
-                                            <button class="text-red-600 hover:text-red-900">Eliminar</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section id="reportes-section" class="hidden space-y-6">
-                <h2 class="font-semibold text-xl text-gray-900 mb-4">Generación de Reportes</h2>
-                <div class="bg-white rounded-lg p-4 shadow-sm">
-                    <h3 class="font-semibold text-lg text-gray-900 mb-4 border-b pb-3 border-gray-200">Tipos de Reportes</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer text-center">
-                            <i class="fas fa-chart-line text-blue-600 text-4xl mb-3"></i>
-                            <p class="font-medium text-gray-900">Reporte de Ventas</p>
-                            <p class="text-sm text-gray-500">Historial de ventas, top productos.</p>
-                            <button class="mt-3 bg-blue-500 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-600">Generar</button>
-                        </div>
-                        <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer text-center">
-                            <i class="fas fa-warehouse text-green-600 text-4xl mb-3"></i>
-                            <p class="font-medium text-gray-900">Reporte de Inventario</p>
-                            <p class="text-sm text-gray-500">Stock actual, productos bajo stock.</p>
-                            <button class="mt-3 bg-green-500 text-white text-sm px-4 py-2 rounded-md hover:bg-green-600">Generar</button>
-                        </div>
-                        <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer text-center">
-                            <i class="fas fa-users-cog text-purple-600 text-4xl mb-3"></i>
-                            <p class="font-medium text-gray-900">Reporte de Empleados</p>
-                            <p class="text-sm text-gray-500">Asistencia, rendimiento.</p>
-                            <button class="mt-3 bg-purple-500 text-white text-sm px-4 py-2 rounded-md hover:bg-purple-600">Generar</button>
-                        </div>
-                        <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer text-center">
-                            <i class="fas fa-file-invoice-dollar text-orange-600 text-4xl mb-3"></i>
-                            <p class="font-medium text-gray-900">Cuentas por Cobrar</p>
-                            <p class="text-sm text-gray-500">Detalle de facturas pendientes.</p>
-                            <button class="mt-3 bg-orange-500 text-white text-sm px-4 py-2 rounded-md hover:bg-orange-600">Generar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg p-4 shadow-sm">
-                    <h3 class="font-semibold text-lg text-gray-900 mb-4 border-b pb-3 border-gray-200">Reportes Generados Recientemente</h3>
-                    <p class="text-center text-gray-500 text-sm py-8">No hay reportes generados recientemente.</p>
-                </div>
-            </section>
-
-            <section id="configuracion-section" class="hidden space-y-6">
-                <h2 class="font-semibold text-xl text-gray-900 mb-4">Configuración del Sistema</h2>
-                <div class="bg-white rounded-lg p-4 shadow-sm">
-                    <h3 class="font-semibold text-lg text-gray-900 mb-4 border-b pb-3 border-gray-200">Configuración General</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="nombre-minimarket" class="block text-sm font-medium text-gray-700">Nombre del Minimarket:</label>
-                            <input type="text" id="nombre-minimarket" value="Minimarket Chacha" class="mt-1 block w-full sm:w-1/2 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm" />
-                        </div>
-                        <div>
-                            <label for="zona-horaria" class="block text-sm font-medium text-gray-700">Zona Horaria:</label>
-                            <select id="zona-horaria" class="mt-1 block w-full sm:w-1/2 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
-                                <option>GMT-5 (Quito)</option>
-                                <option>GMT-6 (México)</option>
-                                <option>GMT-3 (Buenos Aires)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="moneda" class="block text-sm font-medium text-gray-700">Moneda por Defecto:</label>
-                            <select id="moneda" class="mt-1 block w-full sm:w-1/2 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
-                                <option>USD - Dólar Estadounidense</option>
-                                <option>EUR - Euro</option>
-                                <option>PEN - Sol Peruano</option>
-                            </select>
-                        </div>
-                        <button class="bg-blue-600 text-white text-sm px-6 py-2 rounded-md hover:bg-blue-700 transition-colors">Guardar Cambios</button>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg p-4 shadow-sm">
-                    <h3 class="font-semibold text-lg text-gray-900 mb-4 border-b pb-3 border-gray-200">Dispositivos y Conectividad</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <p class="block text-sm font-medium text-gray-700 mb-2">Impresora Térmica Bluetooth:</p>
-                            <p class="text-sm text-gray-500 mb-2">Conecta tu impresora térmica para imprimir recibos de venta.</p>
-                            <button id="connect-printer-btn" class="bg-indigo-600 text-white text-sm px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors flex items-center">
-                                <i class="fas fa-print mr-2"></i> Conectar Impresora
-                            </button>
-                            <p id="printer-status" class="text-xs text-gray-600 mt-2">Estado: Desconectada</p>
-                        </div>
-                        <div>
-                            <p class="block text-sm font-medium text-gray-700 mb-2">Lector de Códigos de Barras Bluetooth:</p>
-                            <p class="text-sm text-gray-500 mb-2">Conecta tu lector de códigos de barras para agilizar el registro de productos en ventas.</p>
-                            <button id="connect-scanner-btn" class="bg-indigo-600 text-white text-sm px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors flex items-center">
-                                <i class="fas fa-barcode mr-2"></i> Conectar Lector
-                            </button>
-                            <p id="scanner-status" class="text-xs text-gray-600 mt-2">Estado: Desconectado</p>
-                        </div>
-                        <p class="text-sm text-red-600 mt-4">**Nota:** La conectividad Bluetooth directa en navegadores es experimental y puede no ser compatible con todos los dispositivos o navegadores (requiere HTTPS y Chrome/Edge). Para una funcionalidad completa, se recomienda una aplicación nativa.</p>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg p-4 shadow-sm">
-                    <h3 class="font-semibold text-lg text-gray-900 mb-4 border-b pb-3 border-gray-200">Gestión de Usuarios y Roles</h3>
-                    <p class="text-sm text-gray-700 mb-4">Administra los usuarios que tienen acceso al sistema y sus permisos.</p>
-                    <button class="bg-green-600 text-white text-sm px-4 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center">
-                        <i class="fas fa-user-plus mr-2"></i> Crear Nuevo Usuario
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h3 class="text-xl font-semibold border-b pb-3 mb-5">Acciones Rápidas</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
+                    <button class="quick-action-button" onclick="showSection('nueva-venta-section')">
+                        <div class="icon-circle blue"><i class="fas fa-plus"></i></div>
+                        Nueva Venta
                     </button>
-                    <div class="mt-4 overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Último Acceso</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">admin</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Administrador</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">2025-06-28</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <button class="text-blue-600 hover:text-blue-900 mr-2">Editar</button>
-                                        <button class="text-red-600 hover:text-red-900">Eliminar</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <button class="quick-action-button" onclick="showSection('add-product')">
+                        <div class="icon-circle purple"><i class="fas fa-box"></i></div>
+                        Agregar Producto
+                    </button>
+                    <button class="quick-action-button" onclick="showSection('add-customer')">
+                        <div class="icon-circle pink"><i class="fas fa-user-plus"></i></div>
+                        Nuevo Cliente
+                    </button>
+                    <button class="quick-action-button" onclick="showSection('reportes-section')">
+                        <div class="icon-circle orange"><i class="fas fa-chart-pie"></i></div>
+                        Generar Reporte
+                    </button>
+                    <button class="quick-action-button" onclick="showSection('almacen-section')">
+                        <div class="icon-circle indigo"><i class="fas fa-warehouse"></i></div>
+                        Gestionar Inventario
+                    </button>
+                    <button class="quick-action-button" onclick="showSection('horarios')">
+                        <div class="icon-circle red"><i class="fas fa-calendar-alt"></i></div>
+                        Horarios
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500">Productos Registrados</p>
+                        <h3 class="text-3xl font-bold text-blue-600">${totalProducts}</h3>
+                    </div>
+                    <i class="fas fa-box text-blue-400 text-4xl"></i>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500">Total de Ventas</p>
+                        <h3 class="text-3xl font-bold text-green-600">${totalSales}</h3>
+                    </div>
+                    <i class="fas fa-shopping-cart text-green-400 text-4xl"></i>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500">Ingresos Totales</p>
+                        <h3 class="text-3xl font-bold text-purple-600">$${totalRevenue}</h3>
+                    </div>
+                    <i class="fas fa-dollar-sign text-purple-400 text-4xl"></i>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500">Cuentas Pendientes</p>
+                        <h3 class="text-3xl font-bold text-red-600">${pendingAccounts}</h3>
+                    </div>
+                    <i class="fas fa-exclamation-triangle text-red-400 text-4xl"></i>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4">Productos con más Stock</h3>
+                    <ul>${topProductsHtml}</ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4">Ventas Recientes</h3>
+                    <ul>${recentSalesHtml}</ul>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderNuevaVenta() {
+        const { subtotal, iva, total } = calculateCartTotals();
+        // Filtra los productos por el término de búsqueda actual
+        const filteredProducts = state.productos.filter(p =>
+            p.name.toLowerCase().includes(state.searchTerm) ||
+            p.barcode.toLowerCase().includes(state.searchTerm)
+        );
+
+        let productsGridHtml = filteredProducts.length > 0 ? filteredProducts.map(p => `
+            <div class="bg-white p-4 rounded-lg shadow-sm product-card" onclick="addToCart('${p.id}')">
+                <img src="https://via.placeholder.com/80" alt="${p.name}" class="mx-auto mb-2 rounded">
+                <h4 class="font-medium text-sm truncate">${p.name}</h4>
+                <p class="text-gray-600 text-xs">Stock: ${p.stock}</p>
+                <p class="text-blue-600 font-bold mt-1">$${p.price.toFixed(2)}</p>
+            </div>
+        `).join('') : '<p class="text-center text-gray-500 col-span-full">No hay productos disponibles o que coincidan con la búsqueda.</p>';
+
+        let cartItemsHtml = state.cart.length > 0 ? state.cart.map(item => `
+            <div class="flex items-center justify-between p-3 border-b last:border-b-0">
+                <div class="flex-1">
+                    <p class="font-medium">${item.name}</p>
+                    <p class="text-sm text-gray-600">$${item.price.toFixed(2)} c/u</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="updateCartQuantity('${item.id}', -1)" class="bg-red-200 text-red-700 w-7 h-7 rounded-full text-sm flex items-center justify-center">-</button>
+                    <span class="font-semibold">${item.cantidad}</span>
+                    <button onclick="updateCartQuantity('${item.id}', 1)" class="bg-green-200 text-green-700 w-7 h-7 rounded-full text-sm flex items-center justify-center">+</button>
+                    <button onclick="removeFromCart('${item.id}')" class="ml-2 text-gray-500 hover:text-red-600"><i class="fas fa-trash-alt"></i></button>
+                </div>
+            </div>
+        `).join('') : '<p class="text-center text-gray-500">El carrito está vacío.</p>';
+
+        const customerOptions = state.clientes.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+
+        DOMElements.contentArea.innerHTML = `
+            <h2 class="text-2xl font-bold mb-6">Nueva Venta</h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4">Seleccionar Productos</h3>
+                    <div class="mb-4">
+                        <input type="text" id="product-search" placeholder="Buscar producto por nombre o código..." class="w-full p-2 border border-gray-300 rounded-md shadow-sm" value="${state.searchTerm}" oninput="updateSearchTerm(this.value)">
+                    </div>
+                    <div id="products-grid" class="products-grid max-h-96-overflow">
+                        ${productsGridHtml}
                     </div>
                 </div>
-            </section>
-        </main>
-    </div>
 
-    <div id="addProductModal" class="modal">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Agregar Nuevo Producto</h3>
-        <form id="addProductForm" class="space-y-4">
-            <div>
-                <label for="add-codigo" class="block text-sm font-medium text-gray-700">Código</label>
-                <input type="text" id="add-codigo" name="codigo" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div>
-                <label for="add-nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
-                <input type="text" id="add-nombre" name="nombre" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div>
-                <label for="add-categoria" class="block text-sm font-medium text-gray-700">Categoría</label>
-                <input type="text" id="add-categoria" name="categoria" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div>
-                <label for="add-stock" class="block text-sm font-medium text-gray-700">Stock</label>
-                <input type="number" id="add-stock" name="stock" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div>
-                <label for="add-precio" class="block text-sm font-medium text-gray-700">Precio (USD)</label>
-                <input type="number" step="0.01" id="add-precio" name="precio" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div class="flex justify-end space-x-3 mt-6">
-                <button type="button" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400" onclick="hideModal(addProductModal)">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Guardar Producto</button>
-            </div>
-        </form>
-    </div>
-
-    <div id="editProductModal" class="modal">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Editar Producto</h3>
-        <form id="editProductForm" class="space-y-4">
-            <input type="hidden" id="edit-id" name="id"> <div>
-                <label for="edit-codigo" class="block text-sm font-medium text-gray-700">Código</label>
-                <input type="text" id="edit-codigo" name="codigo" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed" readonly>
-            </div>
-            <div>
-                <label for="edit-nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
-                <input type="text" id="edit-nombre" name="nombre" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div>
-                <label for="edit-categoria" class="block text-sm font-medium text-gray-700">Categoría</label>
-                <input type="text" id="edit-categoria" name="categoria" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div>
-                <label for="edit-stock" class="block text-sm font-medium text-gray-700">Stock</label>
-                <input type="number" id="edit-stock" name="stock" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div>
-                <label for="edit-precio" class="block text-sm font-medium text-gray-700">Precio (USD)</label>
-                <input type="number" step="0.01" id="edit-precio" name="precio" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div class="flex justify-end space-x-3 mt-6">
-                <button type="button" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400" onclick="hideModal(editProductModal)">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Guardar Cambios</button>
-            </div>
-        </form>
-    </div>
-
-    <div id="addClientModal" class="modal">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Agregar Nuevo Cliente</h3>
-        <form id="addClientForm" class="space-y-4">
-            <div>
-                <label for="client-nombre" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
-                <input type="text" id="client-nombre" name="nombre" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div>
-                <label for="client-email" class="block text-sm font-medium text-gray-700">Email (Opcional)</label>
-                <input type="email" id="client-email" name="email" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div>
-                <label for="client-telefono" class="block text-sm font-medium text-gray-700">Teléfono (Opcional)</label>
-                <input type="tel" id="client-telefono" name="telefono" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div class="flex justify-end space-x-3 mt-6">
-                <button type="button" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400" onclick="hideModal(addClientModal)">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Guardar Cliente</button>
-            </div>
-        </form>
-    </div>
-
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // =======================================================
-            // 1. CONFIGURACIÓN Y ELEMENTOS DEL DOM
-            // =======================================================
-
-            // URL base de tu backend en Render. ¡ES CRÍTICO QUE SEA ESTA!
-            const BASE_URL = 'https://minimarket-chacha-backend.onrender.com'; // ¡ACTUALIZADO AQUÍ!
-
-            // Elementos del Sidebar y Layout
-            const sidebar = document.getElementById('sidebar');
-            const menuToggle = document.getElementById('menu-toggle');
-            const overlay = document.getElementById('overlay');
-            const sidebarLinks = document.querySelectorAll('#sidebar nav ul li a');
-            const contentSections = document.querySelectorAll('#content-area section');
-            const mainHeaderTitle = document.querySelector('header h1');
-
-            // Elementos del Dashboard
-            const dashboardTotalProductsElement = document.getElementById('dashboard-total-productos');
-            const dashboardLowStockTextElement = document.getElementById('dashboard-low-stock-text');
-            const productsLowStockCard = document.getElementById('low-stock-products-card');
-
-            // Elementos de la sección Almacén
-            const totalProductosAlmacenElement = document.getElementById('almacen-total-productos');
-            const enStockAlmacenElement = document.getElementById('almacen-en-stock');
-            const stockBajoAlmacenElement = document.getElementById('almacen-stock-bajo');
-            const sinStockAlmacenElement = document.getElementById('almacen-sin-stock');
-            const almacenTableBody = document.getElementById('almacen-table-body');
-            const productSearchInput = document.getElementById('product-search-input');
-
-            // Elementos de los Modales y Formularios (Productos)
-            const addProductModal = document.getElementById('addProductModal');
-            const addProductForm = document.getElementById('addProductForm');
-            const editProductModal = document.getElementById('editProductModal');
-            const editProductForm = document.getElementById('editProductForm');
-
-            // Elementos de los Modales y Formularios (Clientes)
-            const addClientModal = document.getElementById('addClientModal');
-            const addClientForm = document.getElementById('addClientForm');
-
-            // Elementos de la sección Nueva Venta (POS)
-            const productsForSaleGrid = document.getElementById('products-for-sale-grid');
-            const saleProductSearchInput = document.getElementById('sale-product-search-input');
-            const cartItemsContainer = document.getElementById('cart-items');
-            const cartSubtotalElement = document.getElementById('cart-subtotal');
-            const cartTaxElement = document.getElementById('cart-tax');
-            const cartTotalElement = document.getElementById('cart-total');
-
-            // Elementos de Conectividad Bluetooth (Configuración)
-            const connectPrinterBtn = document.getElementById('connect-printer-btn');
-            const printerStatusText = document.getElementById('printer-status');
-            const connectScannerBtn = document.getElementById('connect-scanner-btn');
-            const scannerStatusText = document.getElementById('scanner-status');
-
-
-            // Variables globales para almacenar datos y estado
-            let allProductsData = []; // Todos los productos cargados del backend
-            let productsForSaleData = []; // Productos para la sección de ventas (filtrados, etc.)
-            let cart = []; // Array para almacenar los productos en el carrito
-
-
-            // =======================================================
-            // 2. FUNCIONES DE UI GENERALES
-            // =======================================================
-
-            /**
-             * Muestra un modal y activa el overlay.
-             * @param {HTMLElement} modalElement El elemento DOM del modal a mostrar.
-             */
-            const showModal = (modalElement) => {
-                modalElement.classList.add('active');
-                overlay.classList.add('active');
-            };
-
-            /**
-             * Oculta un modal y desactiva el overlay si no hay otros modales o la sidebar activa.
-             * @param {HTMLElement} modalElement El elemento DOM del modal a ocultar.
-             */
-            const hideModal = (modalElement) => {
-                modalElement.classList.remove('active');
-                // Solo desactiva el overlay si no hay ningún otro modal activo Y la sidebar está cerrada
-                if (!document.querySelector('.modal.active') && sidebar.classList.contains('-translate-x-full')) {
-                    overlay.classList.remove('active');
-                }
-            };
-
-            /**
-             * Cierra la sidebar móvil y ajusta el overlay.
-             */
-            const closeSidebar = () => {
-                sidebar.classList.add('-translate-x-full');
-                // Solo desactiva el overlay si no hay ningún modal abierto
-                if (!document.querySelector('.modal.active')) {
-                    overlay.classList.remove('active');
-                }
-            };
-
-            /**
-             * Cierra todos los modales abiertos y la sidebar móvil.
-             * Se usa para el evento de clic en el overlay.
-             */
-            const hideAllOpenUIElements = () => {
-                document.querySelectorAll('.modal.active').forEach(modal => {
-                    modal.classList.remove('active');
-                });
-                closeSidebar(); // Esto ya maneja el overlay si no hay modales activos
-            };
-
-            /**
-             * Muestra la sección de contenido especificada y actualiza la navegación.
-             * @param {string} sectionId El ID de la sección a mostrar (ej: 'almacen-section').
-             */
-            const showSection = (sectionId) => {
-                // Ocultar todas las secciones
-                contentSections.forEach(section => {
-                    section.classList.add('hidden');
-                    section.classList.remove('active-section');
-                });
-
-                // Mostrar la sección deseada
-                document.getElementById(sectionId).classList.remove('hidden');
-                document.getElementById(sectionId).classList.add('active-section');
-
-                // Actualizar el título del encabezado principal
-                const currentLink = document.querySelector(`#sidebar a[data-section="${sectionId.replace('-section', '')}"]`);
-                if (currentLink) {
-                    mainHeaderTitle.textContent = currentLink.textContent.trim();
-                } else {
-                    // Fallback si no se encuentra el data-section, capitalizar el ID
-                    mainHeaderTitle.textContent = sectionId.replace('-section', '').split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                }
-
-                // Actualizar el estilo del enlace activo en la sidebar
-                sidebarLinks.forEach(link => {
-                    link.classList.remove('bg-blue-600', 'text-white');
-                    link.classList.add('text-gray-700', 'hover:bg-gray-100', 'hover:text-blue-600');
-                    if (link.dataset.section === sectionId.replace('-section', '')) {
-                        link.classList.add('bg-blue-600', 'text-white');
-                        link.classList.remove('text-gray-700', 'hover:bg-gray-100', 'hover:text-blue-600');
-                    }
-                });
-
-                // Cerrar la sidebar en vistas móviles después de seleccionar una sección
-                const isMobileView = window.innerWidth < 1024;
-                if (isMobileView) {
-                    closeSidebar();
-                }
-
-                // Cargar datos específicos para la sección activa
-                if (sectionId === 'dashboard-section') {
-                    fetchDashboardData();
-                } else if (sectionId === 'almacen-section') {
-                    fetchAlmacenData();
-                } else if (sectionId === 'nueva-venta-section') {
-                    fetchProductsForSale(); // Cargar productos para la venta
-                }
-            };
-
-
-            // =======================================================
-            // 3. MANEJO DE EVENTOS DE UI
-            // =======================================================
-
-            // Toggle de la sidebar en mobile
-            menuToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('-translate-x-full');
-                overlay.classList.toggle('active');
-                // Asegurar que el overlay esté activo si la sidebar se abre
-                if (!sidebar.classList.contains('-translate-x-full')) {
-                     overlay.classList.add('active');
-                } else {
-                     // Si la sidebar se cierra, y no hay modales activos, el overlay se desactiva.
-                     if (!document.querySelector('.modal.active')) {
-                        overlay.classList.remove('active');
-                    }
-                }
-            });
-
-            // Cerrar sidebar o modales al hacer clic en el overlay
-            overlay.addEventListener('click', () => {
-                hideAllOpenUIElements();
-            });
-
-            // Añadir event listeners a los enlaces de la sidebar para cambiar de sección
-            sidebarLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const targetSectionId = link.getAttribute('href').substring(1); // Eliminar '#'
-                    showSection(targetSectionId);
-                });
-            });
-
-            // Manejar redimensionamiento de ventana para la sidebar en desktop
-            window.addEventListener('resize', () => {
-                if (window.innerWidth >= 1024) {
-                    sidebar.classList.remove('-translate-x-full');
-                    overlay.classList.remove('active'); // Ocultar overlay en desktop si no hay modales
-                }
-            });
-
-
-            // =======================================================
-            // 4. FUNCIONES DE INTERACCIÓN CON EL BACKEND (API)
-            // =======================================================
-
-            /**
-             * Carga y actualiza los datos de resumen en la sección del Dashboard.
-             */
-            async function fetchDashboardData() {
-                try {
-                    const response = await fetch(`${BASE_URL}/api/productos`);
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        throw new Error(`Error HTTP! Estado: ${response.status} - ${errorText}`);
-                    }
-                    const result = await response.json();
-
-                    if (result.message === "success" && result.data) {
-                        const productos = result.data;
-
-                        dashboardTotalProductsElement.textContent = productos.length;
-
-                        // Calcular productos con stock bajo (ejemplo: stock <= 10)
-                        const lowStockCount = productos.filter(p => p.stock > 0 && p.stock <= 10).length;
-                        dashboardLowStockTextElement.textContent = `${lowStockCount} agotándose`;
-                        dashboardLowStockTextElement.classList.remove('text-green-600', 'text-red-600'); // Limpiar clases previas
-
-                        if (lowStockCount > 0) {
-                            dashboardLowStockTextElement.classList.add('text-red-600');
-                            productsLowStockCard.style.display = 'block'; // Mostrar la tarjeta de stock bajo
-
-                            // Actualizar el primer item de la tarjeta de "Productos con Stock Bajo"
-                            const firstLowStockProduct = productos.filter(p => p.stock > 0 && p.stock <= 10)[0];
-                            if (firstLowStockProduct) {
-                                productsLowStockCard.querySelector('.text-sm.font-semibold.text-gray-900').textContent = firstLowStockProduct.nombre;
-                                productsLowStockCard.querySelector('.text-xs.text-gray-500').textContent = `Código: ${firstLowStockProduct.codigo}`;
-                                productsLowStockCard.querySelector('.text-red-600.font-semibold').textContent = `${firstLowStockProduct.stock} unidades`;
-                            }
-                        } else {
-                            dashboardLowStockTextElement.classList.add('text-green-600');
-                            productsLowStockCard.style.display = 'none'; // Ocultar si no hay productos con stock bajo
-                        }
-
-                    } else {
-                        console.error("Error al obtener productos del backend para Dashboard:", result.message);
-                        dashboardTotalProductsElement.textContent = 'N/A';
-                        dashboardLowStockTextElement.textContent = 'Error';
-                        dashboardLowStockTextElement.classList.add('text-red-600');
-                        productsLowStockCard.style.display = 'block'; // Mostrar la tarjeta para indicar error
-                        productsLowStockCard.querySelector('.text-sm.font-semibold.text-gray-900').textContent = 'Error de conexión';
-                        productsLowStockCard.querySelector('.text-xs.text-gray-500').textContent = 'No se pudo cargar el stock.';
-                        productsLowStockCard.querySelector('.text-red-600.font-semibold').textContent = '';
-                    }
-                } catch (error) {
-                    console.error("No se pudo conectar al backend (Dashboard):", error);
-                    dashboardTotalProductsElement.textContent = 'N/A';
-                    dashboardLowStockTextElement.textContent = 'Error';
-                    dashboardLowStockTextElement.classList.add('text-red-600');
-                    productsLowStockCard.style.display = 'block';
-                    productsLowStockCard.querySelector('.text-sm.font-semibold.text-gray-900').textContent = 'Error de conexión';
-                    productsLowStockCard.querySelector('.text-xs.text-gray-500').textContent = 'Asegúrate que el backend esté funcionando.';
-                    productsLowStockCard.querySelector('.text-red-600.font-semibold').textContent = '';
-                    alert('Problema de conexión: No se pudo obtener la información del Dashboard. Asegúrate de que el servidor backend esté corriendo.');
-                }
-            }
-
-            /**
-             * Carga y renderiza los datos de la tabla de productos en la sección de Almacén.
-             */
-            async function fetchAlmacenData() {
-                almacenTableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center italic">Cargando productos...</td></tr>';
-
-                try {
-                    const response = await fetch(`${BASE_URL}/api/productos`);
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        throw new Error(`Error HTTP! Estado: ${response.status} - ${errorText}`);
-                    }
-                    const result = await response.json();
-
-                    if (result.message === "success" && result.data) {
-                        allProductsData = result.data; // Almacenar todos los productos
-                        renderAlmacenTable(allProductsData); // Renderizar inicialmente con todos
-
-                        // Actualizar estadísticas de Almacén
-                        totalProductosAlmacenElement.textContent = allProductsData.length;
-                        enStockAlmacenElement.textContent = allProductsData.filter(p => p.stock > 0).length;
-                        stockBajoAlmacenElement.textContent = allProductsData.filter(p => p.stock > 0 && p.stock <= 10).length;
-                        sinStockAlmacenElement.textContent = allProductsData.filter(p => p.stock === 0).length;
-
-                    } else {
-                        console.error("Error al obtener productos del backend para Almacén:", result.message);
-                        almacenTableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center italic">Error al cargar productos desde el servidor.</td></tr>';
-                    }
-                } catch (error) {
-                    console.error("No se pudo conectar al backend (Almacén):", error);
-                    almacenTableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center italic">No se pudo conectar al servidor backend. Asegúrate de que esté funcionando.</td></tr>';
-                    alert('Problema de conexión: No se pudo obtener la información del Almacén. Asegúrate de que el servidor backend esté corriendo.');
-                }
-            }
-
-            /**
-             * Renderiza las filas de la tabla de productos en la sección Almacén.
-             * @param {Array<Object>} productsToRender Array de objetos de producto a mostrar.
-             */
-            function renderAlmacenTable(productsToRender) {
-                almacenTableBody.innerHTML = ''; // Limpiar tabla antes de renderizar
-
-                if (productsToRender.length === 0) {
-                    almacenTableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center italic">No hay productos para mostrar.</td></tr>';
-                    return;
-                }
-
-                productsToRender.forEach(producto => {
-                    const row = document.createElement('tr');
-                    let statusClass, statusText;
-                    if (producto.stock === 0) {
-                        statusClass = 'bg-red-100 text-red-800';
-                        statusText = 'Sin Stock';
-                    } else if (producto.stock > 0 && producto.stock <= 10) { // Consideramos stock bajo si está entre 1 y 10
-                        statusClass = 'bg-orange-100 text-orange-800';
-                        statusText = 'Stock Bajo';
-                    } else {
-                        statusClass = 'bg-green-100 text-green-800';
-                        statusText = 'En Stock';
-                    }
-
-                    row.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${producto.codigo}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${producto.nombre}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${producto.categoria || 'N/A'}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm ${producto.stock <= 10 ? 'text-red-600 font-semibold' : 'text-gray-700'}">${producto.stock}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">USD ${producto.precio.toFixed(2)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">${statusText}</span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex space-x-2">
-                                <button class="text-blue-600 hover:text-blue-900" onclick="showEditProductModal('${producto.id}', '${producto.codigo}', '${producto.nombre}', '${producto.categoria}', ${producto.stock}, ${producto.precio})">Editar</button>
-                                <button class="text-red-600 hover:text-red-900" onclick="deleteProduct('${producto.id}', '${producto.nombre}')">Borrar</button>
-                            </div>
-                        </td>
-                    `;
-                    almacenTableBody.appendChild(row);
-                });
-            }
-
-            // =======================================================
-            // 5. FUNCIONALIDAD CRUD DE PRODUCTOS (MODALES Y FORMULARIOS)
-            // =======================================================
-
-            // --- A. AGREGAR PRODUCTO ---
-
-            /**
-             * Muestra el modal para agregar un nuevo producto.
-             */
-            window.showAddProductModal = () => { // Hacer global para onclick en HTML
-                addProductForm.reset(); // Limpiar el formulario para un nuevo producto
-                showModal(addProductModal);
-            };
-
-            // Maneja el envío del formulario para agregar producto
-            addProductForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
-
-                const newProduct = {
-                    codigo: document.getElementById('add-codigo').value.trim(),
-                    nombre: document.getElementById('add-nombre').value.trim(),
-                    categoria: document.getElementById('add-categoria').value.trim() || 'General', // Default si no se ingresa
-                    stock: parseInt(document.getElementById('add-stock').value, 10),
-                    precio: parseFloat(document.getElementById('add-precio').value),
-                };
-
-                // Validaciones básicas
-                if (!newProduct.codigo || !newProduct.nombre || isNaN(newProduct.stock) || isNaN(newProduct.precio) || newProduct.stock < 0 || newProduct.precio < 0) {
-                    alert('Por favor, completa todos los campos obligatorios (Código, Nombre, Stock, Precio) y asegúrate de que Stock y Precio sean números válidos y no negativos.');
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`${BASE_URL}/api/productos`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(newProduct),
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || `Error desconocido al agregar producto. Código: ${response.status}`);
-                    }
-
-                    const result = await response.json();
-                    alert('Producto agregado exitosamente: ' + result.message);
-                    hideModal(addProductModal); // Ocultar el modal
-                    fetchAlmacenData();      // Recargar la tabla de productos
-                    fetchDashboardData();  // Actualizar los datos del dashboard
-                    fetchProductsForSale(); // También actualizar productos para la venta
-
-                } catch (error) {
-                    console.error('Error al agregar producto:', error);
-                    alert('Error al agregar producto: ' + error.message);
-                }
-            });
-
-            // --- B. BORRAR PRODUCTO ---
-
-            /**
-             * Elimina un producto por su ID.
-             * @param {string} productId El ID del producto a eliminar.
-             * @param {string} productName El nombre del producto para la confirmación.
-             */
-            window.deleteProduct = async (productId, productName) => { // Hacer global para onclick en HTML
-                if (!confirm(`¿Estás seguro de que quieres eliminar el producto "${productName}"? Esta acción es irreversible.`)) {
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`${BASE_URL}/api/productos/${productId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || `Error desconocido al eliminar producto. Código: ${response.status}`);
-                    }
-
-                    const result = await response.json();
-                    alert('Producto eliminado exitosamente: ' + result.message);
-                    fetchAlmacenData();     // Recargar la tabla
-                    fetchDashboardData();   // Actualizar dashboard
-                    fetchProductsForSale(); // También actualizar productos para la venta
-
-                } catch (error) {
-                    console.error('Error al eliminar producto:', error);
-                    alert('Error al eliminar producto: ' + error.message);
-                }
-            };
-
-            // --- C. EDITAR PRODUCTO ---
-
-            /**
-             * Muestra el modal para editar un producto y precarga sus datos.
-             * @param {string} id ID del producto.
-             * @param {string} codigo Código del producto.
-             * @param {string} nombre Nombre del producto.
-             * @param {string} categoria Categoría del producto.
-             * @param {number} stock Stock del producto.
-             * @param {number} precio Precio del producto.
-             */
-            window.showEditProductModal = (id, codigo, nombre, categoria, stock, precio) => { // Hacer global para onclick en HTML
-                document.getElementById('edit-id').value = id;
-                document.getElementById('edit-codigo').value = codigo;
-                document.getElementById('edit-nombre').value = nombre;
-                document.getElementById('edit-categoria').value = categoria;
-                document.getElementById('edit-stock').value = stock;
-                document.getElementById('edit-precio').value = precio;
-                showModal(editProductModal);
-            };
-
-            // Maneja el envío del formulario para editar producto
-            editProductForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
-
-                const productId = document.getElementById('edit-id').value;
-                const updatedProduct = {
-                    nombre: document.getElementById('edit-nombre').value.trim(),
-                    categoria: document.getElementById('edit-categoria').value.trim() || 'General',
-                    stock: parseInt(document.getElementById('edit-stock').value, 10),
-                    precio: parseFloat(document.getElementById('edit-precio').value),
-                    // El código no se envía en el PUT porque ya está en la URL (id)
-                };
-
-                // Validaciones básicas
-                if (!updatedProduct.nombre || isNaN(updatedProduct.stock) || isNaN(updatedProduct.precio) || updatedProduct.stock < 0 || updatedProduct.precio < 0) {
-                    alert('Por favor, completa todos los campos obligatorios y asegúrate de que Stock y Precio sean números válidos y no negativos.');
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`${BASE_URL}/api/productos/${productId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(updatedProduct),
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || `Error desconocido al actualizar producto. Código: ${response.status}`);
-                    }
-
-                    const result = await response.json();
-                    alert('Producto actualizado exitosamente: ' + result.message);
-                    hideModal(editProductModal); // Ocultar el modal
-                    fetchAlmacenData();      // Recargar la tabla
-                    fetchDashboardData();  // Actualizar dashboard
-                    fetchProductsForSale(); // También actualizar productos para la venta
-
-                } catch (error) {
-                    console.error('Error al actualizar producto:', error);
-                    alert('Error al actualizar producto: ' + error.message);
-                }
-            });
-
-
-            // --- D. BÚSQUEDA DE PRODUCTOS (EN ALMACÉN) ---
-
-            productSearchInput.addEventListener('input', (event) => {
-                const searchTerm = event.target.value.toLowerCase().trim();
-                // Filtrar los productos existentes en 'allProductsData' (cargados previamente)
-                const filteredProducts = allProductsData.filter(p =>
-                    p.nombre.toLowerCase().includes(searchTerm) ||
-                    p.codigo.toLowerCase().includes(searchTerm) ||
-                    (p.categoria && p.categoria.toLowerCase().includes(searchTerm))
-                );
-                renderAlmacenTable(filteredProducts); // Re-renderizar la tabla con los productos filtrados
-            });
-
-
-            // =======================================================
-            // 6. FUNCIONALIDAD DE CLIENTES (MODALES Y FORMULARIOS)
-            // =======================================================
-
-            /**
-             * Muestra el modal para agregar un nuevo cliente.
-             */
-            window.showAddClientModal = () => {
-                addClientForm.reset();
-                showModal(addClientModal);
-            };
-
-            // Maneja el envío del formulario para agregar cliente
-            addClientForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
-
-                const newClient = {
-                    nombre: document.getElementById('client-nombre').value.trim(),
-                    email: document.getElementById('client-email').value.trim() || null,
-                    telefono: document.getElementById('client-telefono').value.trim() || null
-                };
-
-                if (!newClient.nombre) {
-                    alert('Por favor, ingresa el nombre del cliente.');
-                    return;
-                }
-
-                alert('Cliente simulado agregado: ' + newClient.nombre);
-                hideModal(addClientModal);
-                // Aquí iría la llamada al backend para agregar un cliente real.
-                // try {
-                //     const response = await fetch(`${BASE_URL}/api/clientes`, {
-                //         method: 'POST',
-                //         headers: { 'Content-Type': 'application/json' },
-                //         body: JSON.stringify(newClient),
-                //     });
-                //     if (!response.ok) throw new Error('Error al agregar cliente');
-                //     const result = await response.json();
-                //     alert('Cliente agregado: ' + result.message);
-                //     hideModal(addClientModal);
-                //     // Actualizar lista de clientes si existe
-                // } catch (error) {
-                //     console.error('Error al agregar cliente:', error);
-                //     alert('Error al agregar cliente: ' + error.message);
-                // }
-            });
-
-
-            // =======================================================
-            // 7. FUNCIONALIDAD DEL PUNTO DE VENTA (NUEVA VENTA)
-            // =======================================================
-
-            const IVA_RATE = 0.12; // 12% de IVA
-
-            /**
-             * Carga y muestra los productos disponibles para la venta.
-             */
-            async function fetchProductsForSale() {
-                productsForSaleGrid.innerHTML = '<p class="text-center text-gray-500 col-span-full py-8">Cargando productos...</p>';
-                try {
-                    const response = await fetch(`${BASE_URL}/api/productos`);
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        throw new Error(`Error HTTP! Estado: ${response.status} - ${errorText}`);
-                    }
-                    const result = await response.json();
-
-                    if (result.message === "success" && result.data) {
-                        productsForSaleData = result.data.filter(p => p.stock > 0); // Solo productos con stock
-                        renderProductsForSale(productsForSaleData);
-                    } else {
-                        productsForSaleGrid.innerHTML = '<p class="text-center text-red-500 col-span-full py-8">Error al cargar productos para la venta.</p>';
-                    }
-                } catch (error) {
-                    console.error("Error al cargar productos para venta:", error);
-                    productsForSaleGrid.innerHTML = '<p class="text-center text-red-500 col-span-full py-8">No se pudo conectar al backend para cargar productos de venta.</p>';
-                }
-            }
-
-            /**
-             * Renderiza las tarjetas de productos disponibles para la venta.
-             * @param {Array<Object>} products Array de objetos de producto.
-             */
-            function renderProductsForSale(products) {
-                productsForSaleGrid.innerHTML = '';
-                if (products.length === 0) {
-                    productsForSaleGrid.innerHTML = '<p class="text-center text-gray-500 col-span-full py-8">No hay productos disponibles para la venta.</p>';
-                    return;
-                }
-
-                products.forEach(product => {
-                    const productCard = document.createElement('div');
-                    productCard.className = 'product-card flex flex-col items-center justify-between'; // Added flex-col & justify-between
-                    productCard.innerHTML = `
-                        <img src="https://via.placeholder.com/80x80?text=${product.nombre.charAt(0)}" alt="${product.nombre}" class="mb-2">
-                        <p class="font-medium text-gray-800 text-sm">${product.nombre}</p>
-                        <p class="text-gray-500 text-xs">${product.categoria || 'General'}</p>
-                        <p class="font-bold text-gray-900 mt-1">USD ${product.precio.toFixed(2)}</p>
-                        <p class="text-xs text-gray-600">Stock: ${product.stock}</p>
-                    `;
-                    productCard.onclick = () => addProductToCart(product);
-                    productsForSaleGrid.appendChild(productCard);
-                });
-            }
-
-            /**
-             * Añade un producto al carrito o incrementa su cantidad.
-             * @param {Object} product El objeto del producto a añadir.
-             */
-            function addProductToCart(product) {
-                const existingItemIndex = cart.findIndex(item => item.id === product.id);
-
-                if (existingItemIndex > -1) {
-                    // Si el producto ya está en el carrito, incrementa la cantidad
-                    if (cart[existingItemIndex].quantity < product.stock) {
-                        cart[existingItemIndex].quantity++;
-                    } else {
-                        alert(`No hay suficiente stock para ${product.nombre}. Stock disponible: ${product.stock}`);
-                        return;
-                    }
-                } else {
-                    // Si el producto no está en el carrito, agrégalo con cantidad 1
-                    if (product.stock > 0) {
-                        cart.push({ ...product, quantity: 1 });
-                    } else {
-                        alert(`El producto ${product.nombre} no tiene stock disponible.`);
-                        return;
-                    }
-                }
-                renderCart();
-            }
-
-            /**
-             * Elimina un producto del carrito o disminuye su cantidad.
-             * @param {string} productId El ID del producto a modificar.
-             * @param {boolean} decrement Si es true, disminuye la cantidad; si es false, elimina el item.
-             */
-            window.removeFromCart = (productId, decrement = false) => {
-                const existingItemIndex = cart.findIndex(item => item.id === productId);
-
-                if (existingItemIndex > -1) {
-                    if (decrement) {
-                        cart[existingItemIndex].quantity--;
-                        if (cart[existingItemIndex].quantity <= 0) {
-                            cart.splice(existingItemIndex, 1); // Eliminar si la cantidad llega a 0
-                        }
-                    } else {
-                        cart.splice(existingItemIndex, 1); // Eliminar completamente el item
-                    }
-                }
-                renderCart();
-            };
-
-            /**
-             * Renderiza los ítems del carrito y actualiza los totales.
-             */
-            function renderCart() {
-                cartItemsContainer.innerHTML = ''; // Limpiar el contenedor del carrito
-
-                if (cart.length === 0) {
-                    cartItemsContainer.innerHTML = '<p class="text-center text-gray-500 text-sm italic">El carrito está vacío.</p>';
-                    updateCartTotals();
-                    return;
-                }
-
-                cart.forEach(item => {
-                    const cartItemDiv = document.createElement('div');
-                    cartItemDiv.className = 'flex items-center justify-between bg-gray-50 p-2 rounded-md';
-                    cartItemDiv.innerHTML = `
-                        <div class="flex-1">
-                            <p class="font-medium text-gray-900">${item.nombre}</p>
-                            <p class="text-xs text-gray-600">USD ${item.precio.toFixed(2)} x ${item.quantity}</p>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4">Detalle de la Venta</h3>
+                    <div class="mb-4">
+                        <label for="selected-customer" class="block text-sm font-medium text-gray-700 mb-1">Cliente:</label>
+                        <select id="selected-customer" class="w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                            <option value="general">Cliente General</option>
+                            ${customerOptions}
+                        </select>
+                    </div>
+
+                    <div id="cart-items" class="border rounded-md max-h-48-overflow mb-4">
+                        ${cartItemsHtml}
+                    </div>
+
+                    <div class="border-t pt-4 mt-4 space-y-2">
+                        <div class="flex justify-between text-lg">
+                            <span>Subtotal:</span>
+                            <span id="cart-subtotal">$${subtotal.toFixed(2)}</span>
                         </div>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="removeFromCart('${item.id}', true)" class="text-gray-500 hover:text-gray-700 p-1">
-                                <i class="fas fa-minus-circle"></i>
-                            </button>
-                            <span class="font-bold text-gray-800">${item.quantity}</span>
-                            <button onclick="addProductToCart({id: '${item.id}', nombre: '${item.nombre}', precio: ${item.precio}, stock: ${productsForSaleData.find(p => p.id === item.id).stock}})" class="text-blue-600 hover:text-blue-800 p-1">
-                                <i class="fas fa-plus-circle"></i>
-                            </button>
-                            <button onclick="removeFromCart('${item.id}')" class="text-red-600 hover:text-red-800 p-1 ml-2">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                        <div class="flex justify-between text-lg">
+                            <span>IVA (15%):</span>
+                            <span id="cart-iva">$${iva.toFixed(2)}</span>
                         </div>
-                    `;
-                    cartItemsContainer.appendChild(cartItemDiv);
-                });
-                updateCartTotals();
+                        <div class="flex justify-between text-2xl font-bold text-blue-600">
+                            <span>Total:</span>
+                            <span id="cart-total">$${total.toFixed(2)}</span>
+                        </div>
+                    </div>
+
+                    <button onclick="processSaleWrapper()" class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg">
+                        <i class="fas fa-check-circle mr-2"></i> Procesar Venta
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Función para actualizar el término de búsqueda y re-renderizar la sección de venta
+    window.updateSearchTerm = (value) => {
+        state.searchTerm = value.toLowerCase();
+        renderNuevaVenta(); // Re-renderiza la sección completa para aplicar el filtro
+    };
+
+
+    function renderVentas() {
+        const salesHtml = state.ventas.length > 0 ? state.ventas.map(sale => {
+            const saleDate = sale.fecha ? new Date(sale.fecha.toDate()).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
+            return `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${sale.id.substring(0, 8)}...</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${saleDate}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${sale.clienteNombre || 'Cliente General'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$${sale.total ? sale.total.toFixed(2) : '0.00'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${sale.estado === 'Completada' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                            ${sale.estado}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button onclick="viewSaleDetails('${sale.id}')" class="text-blue-600 hover:text-blue-900 mr-2"><i class="fas fa-eye"></i></button>
+                    </td>
+                </tr>
+            `;
+        }).join('') : `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No hay ventas registradas.</td></tr>`;
+
+        DOMElements.contentArea.innerHTML = `
+            <h2 class="text-2xl font-bold mb-6">Historial de Ventas</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Venta</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                            <th scope="col" class="relative px-6 py-3"><span class="sr-only">Acciones</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        ${salesHtml}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    function renderCuentasPorCobrar() {
+        const cuentasHtml = state.cuentas_por_cobrar.length > 0 ? state.cuentas_por_cobrar.map(cuenta => {
+            const cliente = state.clientes.find(c => c.id === cuenta.clienteId);
+            const clienteNombre = cliente ? cliente.nombre : 'Desconocido';
+            const fechaCreacion = cuenta.fechaCreacion ? new Date(cuenta.fechaCreacion.toDate()).toLocaleDateString('es-ES') : 'N/A';
+            const fechaVencimiento = cuenta.fechaVencimiento ? new Date(cuenta.fechaVencimiento.toDate()).toLocaleDateString('es-ES') : 'N/A';
+            let statusClass = '';
+            if (cuenta.estado === 'Pagada') {
+                statusClass = 'bg-green-100 text-green-800';
+            } else if (cuenta.estado === 'Vencida') {
+                statusClass = 'bg-red-100 text-red-800';
+            } else {
+                statusClass = 'bg-yellow-100 text-yellow-800';
             }
 
-            /**
-             * Calcula y actualiza el subtotal, IVA y total del carrito.
-             */
-            function updateCartTotals() {
-                let subtotal = 0;
-                cart.forEach(item => {
-                    subtotal += item.price * item.quantity;
-                });
+            return `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${cuenta.id.substring(0, 8)}...</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${clienteNombre}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$${cuenta.monto ? cuenta.monto.toFixed(2) : '0.00'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${cuenta.concepto}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${fechaVencimiento}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                            ${cuenta.estado}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button onclick="showCuentaPorCobrarForm(${JSON.stringify(cuenta).replace(/'/g, "\\'")})" class="text-indigo-600 hover:text-indigo-900 mr-2"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteCuentaPorCobrar('${cuenta.id}')" class="text-red-600 hover:text-red-900"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                </tr>
+            `;
+        }).join('') : `<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No hay cuentas por cobrar registradas.</td></tr>`;
 
-                const tax = subtotal * IVA_RATE;
-                const total = subtotal + tax;
+        DOMElements.contentArea.innerHTML = `
+            <h2 class="text-2xl font-bold mb-6">Cuentas por Cobrar</h2>
+            <div class="flex justify-end mb-4">
+                <button onclick="showCuentaPorCobrarForm()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                    <i class="fas fa-plus mr-2"></i> Añadir Cuenta por Cobrar
+                </button>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Cuenta</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Concepto</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vencimiento</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                            <th scope="col" class="relative px-6 py-3"><span class="sr-only">Acciones</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        ${cuentasHtml}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
 
-                cartSubtotalElement.textContent = `USD ${subtotal.toFixed(2)}`;
-                cartTaxElement.textContent = `USD ${tax.toFixed(2)}`;
-                cartTotalElement.textContent = `USD ${total.toFixed(2)}`;
+    function renderAlmacen() {
+        const productsHtml = state.productos.length > 0 ? state.productos.map(product => `
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${product.name}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${product.barcode}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${product.category}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$${product.price ? product.price.toFixed(2) : '0.00'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${product.stock > 10 ? 'bg-green-100 text-green-800' : product.stock > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
+                        ${product.stock}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button onclick="showProductForm(${JSON.stringify(product).replace(/'/g, "\\'")})" class="text-indigo-600 hover:text-indigo-900 mr-2"><i class="fas fa-edit"></i></button>
+                    <button onclick="deleteProduct('${product.id}')" class="text-red-600 hover:text-red-900"><i class="fas fa-trash-alt"></i></button>
+                </td>
+            </tr>
+        `).join('') : `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No hay productos registrados.</td></tr>`;
+
+        DOMElements.contentArea.innerHTML = `
+            <h2 class="text-2xl font-bold mb-6">Gestión de Almacén</h2>
+            <div class="flex justify-end mb-4">
+                <button onclick="showProductForm()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                    <i class="fas fa-plus mr-2"></i> Añadir Producto
+                </button>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código de Barras</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                            <th scope="col" class="relative px-6 py-3"><span class="sr-only">Acciones</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        ${productsHtml}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    function renderClientes() {
+        const customersHtml = state.clientes.length > 0 ? state.clientes.map(customer => `
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${customer.nombre}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${customer.email || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${customer.telefono || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$${customer.totalCompras ? customer.totalCompras.toFixed(2) : '0.00'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button onclick="showCustomerForm(${JSON.stringify(customer).replace(/'/g, "\\'")})" class="text-indigo-600 hover:text-indigo-900 mr-2"><i class="fas fa-edit"></i></button>
+                    <button onclick="deleteCustomer('${customer.id}')" class="text-red-600 hover:text-red-900"><i class="fas fa-trash-alt"></i></button>
+                </td>
+            </tr>
+        `).join('') : `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No hay clientes registrados.</td></tr>`;
+
+        DOMElements.contentArea.innerHTML = `
+            <h2 class="text-2xl font-bold mb-6">Gestión de Clientes</h2>
+            <div class="flex justify-end mb-4">
+                <button onclick="showCustomerForm()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                    <i class="fas fa-plus mr-2"></i> Añadir Cliente
+                </button>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Compras</th>
+                            <th scope="col" class="relative px-6 py-3"><span class="sr-only">Acciones</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        ${customersHtml}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    function renderEmpleados() {
+        const employeesHtml = state.empleados.length > 0 ? state.empleados.map(employee => `
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${employee.nombre}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${employee.cargo || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${employee.telefono || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button onclick="showEmployeeForm(${JSON.stringify(employee).replace(/'/g, "\\'")})" class="text-indigo-600 hover:text-indigo-900 mr-2"><i class="fas fa-edit"></i></button>
+                    <button onclick="deleteEmployee('${employee.id}')" class="text-red-600 hover:text-red-900"><i class="fas fa-trash-alt"></i></button>
+                </td>
+            </tr>
+        `).join('') : `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">No hay empleados registrados.</td></tr>`;
+
+        DOMElements.contentArea.innerHTML = `
+            <h2 class="text-2xl font-bold mb-6">Gestión de Empleados</h2>
+            <div class="flex justify-end mb-4">
+                <button onclick="showEmployeeForm()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                    <i class="fas fa-plus mr-2"></i> Añadir Empleado
+                </button>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cargo</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
+                            <th scope="col" class="relative px-6 py-3"><span class="sr-only">Acciones</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        ${employeesHtml}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    function renderReportes() {
+        const totalSales = state.ventas.length;
+        const totalRevenue = state.ventas.reduce((sum, venta) => sum + (venta.total || 0), 0).toFixed(2);
+        const productsLowStock = state.productos.filter(p => p.stock <= 5 && p.stock > 0).length;
+        const productsOutOfStock = state.productos.filter(p => p.stock === 0).length;
+        const salesByMonth = {};
+        state.ventas.forEach(sale => {
+            if (sale.fecha) {
+                const date = new Date(sale.fecha.toDate());
+                const monthYear = `${date.toLocaleString('es-ES', { month: 'long' })} ${date.getFullYear()}`;
+                salesByMonth[monthYear] = (salesByMonth[monthYear] || 0) + (sale.total || 0);
             }
-
-            /**
-             * Vacía el carrito de compras.
-             */
-            window.clearCart = () => {
-                if (confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
-                    cart = [];
-                    renderCart();
-                }
-            };
-
-            /**
-             * Simula el proceso de venta.
-             * En un entorno real, esto enviaría los datos de la venta al backend,
-             * actualizaría el stock, y generaría un recibo.
-             */
-            window.processSale = async () => {
-                if (cart.length === 0) {
-                    alert('El carrito está vacío. Agrega productos para procesar la venta.');
-                    return;
-                }
-
-                if (!confirm(`¿Confirmar venta por USD ${cartTotalElement.textContent.replace('USD ', '')}?`)) {
-                    return;
-                }
-
-                alert('Simulando procesamiento de venta...');
-                console.log('Venta a procesar:', cart);
-
-                // Aquí iría la lógica para enviar la venta al backend,
-                // actualizar el stock de cada producto, etc.
-                // Ejemplo:
-                // try {
-                //     const saleData = {
-                //         items: cart.map(item => ({
-                //             productId: item.id,
-                //             quantity: item.quantity,
-                //             priceAtSale: item.price
-                //         })),
-                //         total: parseFloat(cartTotalElement.textContent.replace('USD ', ''))
-                //         // otros campos como clienteId, metodoPago, etc.
-                //     };
-                //     const response = await fetch(`${BASE_URL}/api/ventas`, {
-                //         method: 'POST',
-                //         headers: { 'Content-Type': 'application/json' },
-                //         body: JSON.stringify(saleData)
-                //     });
-                //     if (!response.ok) throw new Error('Error al registrar la venta');
-                //     const result = await response.json();
-                //     alert('Venta registrada exitosamente. ID de Venta: ' + result.saleId);
-                //     cart = []; // Vaciar carrito
-                //     renderCart(); // Renderizar carrito vacío
-                //     fetchDashboardData(); // Actualizar dashboard
-                //     fetchAlmacenData(); // Actualizar stock en Almacén
-                //     fetchProductsForSale(); // Actualizar productos disponibles para la venta
-                // } catch (error) {
-                //     console.error('Error al procesar venta:', error);
-                //     alert('Error al procesar venta: ' + error.message);
-                // }
-
-                alert('¡Venta simulada exitosa! El carrito se ha vaciado.');
-                cart = []; // Vaciar el carrito
-                renderCart(); // Actualizar la interfaz del carrito
-                fetchDashboardData(); // Refrescar los datos del dashboard (ej. ventas hoy)
-                fetchAlmacenData(); // Refrescar el stock en Almacén
-                fetchProductsForSale(); // Refrescar los productos disponibles para la venta (por si cambió el stock)
-            };
-
-            // Manejo de búsqueda en la sección de ventas
-            saleProductSearchInput.addEventListener('input', (event) => {
-                const searchTerm = event.target.value.toLowerCase().trim();
-                const filteredProducts = productsForSaleData.filter(p =>
-                    p.nombre.toLowerCase().includes(searchTerm) ||
-                    p.codigo.toLowerCase().includes(searchTerm) ||
-                    (p.categoria && p.categoria.toLowerCase().includes(searchTerm))
-                );
-                renderProductsForSale(filteredProducts);
-            });
-
-
-            // =======================================================
-            // 8. FUNCIONALIDAD DE CONECTIVIDAD (BLUETOOTH PLACEHOLDER)
-            // =======================================================
-
-            // La Web Bluetooth API requiere HTTPS y es compatible principalmente con Chrome/Edge.
-            // Esta es una implementación simplificada y de ejemplo.
-            // Para una impresora térmica o un escáner de códigos de barras común,
-            // que a menudo usan Bluetooth clásico (SPP), esta API no es directamente compatible.
-            // Necesitarías soluciones más complejas o aplicaciones nativas.
-
-            let printerDevice = null;
-            let scannerDevice = null;
-
-            connectPrinterBtn.addEventListener('click', async () => {
-                if (!navigator.bluetooth) {
-                    alert('Tu navegador no soporta la Web Bluetooth API o no está en HTTPS. Prueba con Chrome en HTTPS.');
-                    return;
-                }
-
-                printerStatusText.textContent = 'Estado: Buscando impresora...';
-                try {
-                    // Filtrar por servicios conocidos o por nombre si sabes el nombre exacto de tu impresora.
-                    // Esto es muy genérico y DEBES ajustar los filtros para tu dispositivo específico.
-                    printerDevice = await navigator.bluetooth.requestDevice({
-                        filters: [{ services: ['000018f0-0000-1000-8000-00805f9b34fb'] }], // Ejemplo de un servicio genérico para dispositivos IoT
-                        // O por nombre si lo conoces:
-                        // filters: [{ namePrefix: 'Printer' }],
-                        optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb'] // Debes incluir todos los servicios con los que interactuarás
-                    });
-                    printerStatusText.textContent = `Estado: Conectado a "${printerDevice.name}"`;
-                    alert(`Impresora conectada: ${printerDevice.name}`);
-                    // Aquí podrías intentar conectar a un GATT server y acceder a características
-                    // para enviar comandos de impresión, lo cual es muy específico de cada impresora.
-                    // console.log(printerDevice);
-                    // const server = await printerDevice.gatt.connect();
-                    // const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb'); // Reemplazar con el UUID de servicio de tu impresora
-                    // const characteristic = await service.getCharacteristic('UUID_DE_LA_CARACTERISTICA_DE_ESCRITURA'); // Reemplazar con el UUID de la característica de escritura
-                    // await characteristic.writeValue(new TextEncoder().encode("Hola desde la web!"));
-                } catch (error) {
-                    printerStatusText.textContent = 'Estado: Falló la conexión';
-                    console.error('Error al conectar impresora Bluetooth:', error);
-                    alert('Error al conectar la impresora: ' + error);
-                }
-            });
-
-            connectScannerBtn.addEventListener('click', async () => {
-                if (!navigator.bluetooth) {
-                    alert('Tu navegador no soporta la Web Bluetooth API o no está en HTTPS. Prueba con Chrome en HTTPS.');
-                    return;
-                }
-
-                scannerStatusText.textContent = 'Estado: Buscando lector...';
-                try {
-                    // Filtrar por servicios conocidos o por nombre si sabes el nombre exacto de tu lector.
-                    // Los lectores de códigos de barras a menudo se presentan como teclados HID.
-                    scannerDevice = await navigator.bluetooth.requestDevice({
-                        filters: [{ services: ['00001812-0000-1000-8000-00805f9b34fb'] }], // UUID para HID Service
-                        // O por nombre:
-                        // filters: [{ namePrefix: 'Scanner' }],
-                        optionalServices: ['00001812-0000-1000-8000-00805f9b34fb']
-                    });
-                    scannerStatusText.textContent = `Estado: Conectado a "${scannerDevice.name}"`;
-                    alert(`Lector conectado: ${scannerDevice.name}`);
-                    // Para un lector HID, podrías escuchar las notificaciones de su característica de input.
-                    // Esto es complejo y varía por dispositivo.
-                } catch (error) {
-                    scannerStatusText.textContent = 'Estado: Falló la conexión';
-                    console.error('Error al conectar lector Bluetooth:', error);
-                    alert('Error al conectar el lector: ' + error);
-                }
-            });
-
-
-            // =======================================================
-            // 9. INICIALIZACIÓN
-            // =======================================================
-
-            // Mostrar la sección del dashboard por defecto al cargar la página.
-            // Esto también activa la carga inicial de datos del dashboard.
-            showSection('dashboard-section');
         });
-    </script>
+
+        let salesByMonthHtml = Object.entries(salesByMonth).map(([month, total]) => `
+            <li class="flex justify-between py-2 border-b last:border-b-0">
+                <span>${month}</span>
+                <span class="font-semibold text-blue-600">$${total.toFixed(2)}</span>
+            </li>
+        `).join('');
+        if (Object.keys(salesByMonth).length === 0) {
+            salesByMonthHtml = '<p class="text-gray-500 text-sm">No hay datos de ventas por mes.</p>';
+        }
+
+
+        DOMElements.contentArea.innerHTML = `
+            <h2 class="text-2xl font-bold mb-6">Reportes y Estadísticas</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500">Total Ventas (Cantidad)</p>
+                        <h3 class="text-3xl font-bold text-blue-600">${totalSales}</h3>
+                    </div>
+                    <i class="fas fa-receipt text-blue-400 text-4xl"></i>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500">Total Ingresos</p>
+                        <h3 class="text-3xl font-bold text-green-600">$${totalRevenue}</h3>
+                    </div>
+                    <i class="fas fa-money-bill-wave text-green-400 text-4xl"></i>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500">Productos con poco Stock (&lt;=5)</p>
+                        <h3 class="text-3xl font-bold text-yellow-600">${productsLowStock}</h3>
+                    </div>
+                    <i class="fas fa-exclamation-circle text-yellow-400 text-4xl"></i>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500">Productos sin Stock (0)</p>
+                        <h3 class="text-3xl font-bold text-red-600">${productsOutOfStock}</h3>
+                    </div>
+                    <i class="fas fa-times-circle text-red-400 text-4xl"></i>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4">Ingresos por Mes</h3>
+                    <ul>${salesByMonthHtml}</ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-center text-gray-500">
+                    <p>Espacio para futuros gráficos de reportes.</p>
+                </div>
+            </div>
+        `;
+    }
+
+    // --- FASE 5: TODAS LAS DEMÁS FUNCIONES (CRUD, Lógica de Venta, etc.) ---
+
+    // Funciones para Almacén (Productos)
+    window.addProduct = async (productData) => {
+        try {
+            await addDoc(collection(db, "productos"), productData);
+            await fetchData('productos');
+            alert('Producto añadido exitosamente!');
+            renderAlmacen();
+        } catch (e) {
+            console.error("Error añadiendo producto: ", e);
+            alert('Error añadiendo producto.');
+        }
+    }
+
+    window.updateProduct = async (id, productData) => {
+        try {
+            const productRef = doc(db, "productos", id);
+            await updateDoc(productRef, productData);
+            await fetchData('productos');
+            alert('Producto actualizado exitosamente!');
+            renderAlmacen();
+        } catch (e) {
+            console.error("Error actualizando producto: ", e);
+            alert('Error actualizando producto.');
+        }
+    }
+
+    window.deleteProduct = async (id) => {
+        if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) return;
+        try {
+            await deleteDoc(doc(db, "productos", id));
+            await fetchData('productos');
+            alert('Producto eliminado exitosamente!');
+            renderAlmacen();
+        } catch (e) {
+            console.error("Error eliminando producto: ", e);
+            alert('Error eliminando producto.');
+        }
+    }
+
+    window.showProductForm = (product = null) => {
+        const isEditing = product !== null;
+        const title = isEditing ? 'Editar Producto' : 'Nuevo Producto';
+        const submitText = isEditing ? 'Actualizar' : 'Guardar';
+
+        const formHtml = `
+            <h3 class="text-xl font-semibold mb-4">${title}</h3>
+            <form id="product-form" class="space-y-4">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
+                    <input type="text" id="name" name="name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${product ? product.name : ''}" required>
+                </div>
+                <div>
+                    <label for="barcode" class="block text-sm font-medium text-gray-700">Código de Barras</label>
+                    <input type="text" id="barcode" name="barcode" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${product ? product.barcode : ''}" required>
+                </div>
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700">Categoría</label>
+                    <input type="text" id="category" name="category" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${product ? product.category : ''}" required>
+                </div>
+                <div>
+                    <label for="price" class="block text-sm font-medium text-gray-700">Precio</label>
+                    <input type="number" id="price" name="price" step="0.01" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${product ? product.price : ''}" required>
+                </div>
+                <div>
+                    <label for="stock" class="block text-sm font-medium text-gray-700">Stock</label>
+                    <input type="number" id="stock" name="stock" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${product ? product.stock : ''}" required>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="hideModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">${submitText}</button>
+                </div>
+            </form>
+        `;
+        window.showModal(formHtml);
+
+        document.getElementById('product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                name: formData.get('name'),
+                barcode: formData.get('barcode'),
+                category: formData.get('category'),
+                price: parseFloat(formData.get('price')),
+                stock: parseInt(formData.get('stock')),
+            };
+            if (isEditing) {
+                await window.updateProduct(product.id, data);
+            } else {
+                await window.addProduct(data);
+            }
+            window.hideModal();
+            // Después de añadir/actualizar, regresa al almacén si no estabas ya ahí.
+            window.showSection('almacen-section');
+        });
+    }
+
+    // Funciones para Clientes
+    window.addCustomer = async (customerData) => {
+        try {
+            await addDoc(collection(db, "clientes"), {...customerData, totalCompras: 0});
+            await fetchData('clientes');
+            alert('Cliente añadido exitosamente!');
+            renderClientes();
+        } catch (e) {
+            console.error("Error añadiendo cliente: ", e);
+            alert('Error añadiendo cliente.');
+        }
+    }
+
+    window.updateCustomer = async (id, customerData) => {
+        try {
+            const customerRef = doc(db, "clientes", id);
+            await updateDoc(customerRef, customerData);
+            await fetchData('clientes');
+            alert('Cliente actualizado exitosamente!');
+            renderClientes();
+        } catch (e) {
+            console.error("Error actualizando cliente: ", e);
+            alert('Error actualizando cliente.');
+        }
+    }
+
+    window.deleteCustomer = async (id) => {
+        if (!confirm('¿Estás seguro de que quieres eliminar este cliente?')) return;
+        try {
+            await deleteDoc(doc(db, "clientes", id));
+            await fetchData('clientes');
+            alert('Cliente eliminado exitosamente!');
+            renderClientes();
+        } catch (e) {
+            console.error("Error eliminando cliente: ", e);
+            alert('Error eliminando cliente.');
+        }
+    }
+
+    window.showCustomerForm = (customer = null) => {
+        const isEditing = customer !== null;
+        const title = isEditing ? 'Editar Cliente' : 'Nuevo Cliente';
+        const submitText = isEditing ? 'Actualizar' : 'Guardar';
+
+        const formHtml = `
+            <h3 class="text-xl font-semibold mb-4">${title}</h3>
+            <form id="customer-form" class="space-y-4">
+                <div>
+                    <label for="nombreCliente" class="block text-sm font-medium text-gray-700">Nombre</label>
+                    <input type="text" id="nombreCliente" name="nombre" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${customer ? customer.nombre : ''}" required>
+                </div>
+                <div>
+                    <label for="emailCliente" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="emailCliente" name="email" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${customer ? customer.email : ''}">
+                </div>
+                <div>
+                    <label for="telefonoCliente" class="block text-sm font-medium text-gray-700">Teléfono</label>
+                    <input type="text" id="telefonoCliente" name="telefono" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${customer ? customer.telefono : ''}">
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="hideModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">${submitText}</button>
+                </div>
+            </form>
+        `;
+        window.showModal(formHtml);
+
+        document.getElementById('customer-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                nombre: formData.get('nombre'),
+                email: formData.get('email'),
+                telefono: formData.get('telefono'),
+            };
+            if (isEditing) {
+                await window.updateCustomer(customer.id, data);
+            } else {
+                await window.addCustomer(data);
+            }
+            window.hideModal();
+            // Después de añadir/actualizar, regresa a la sección de clientes si no estabas ya ahí.
+            window.showSection('clientes-section');
+        });
+    }
+
+    // Funciones para Empleados
+    window.addEmployee = async (employeeData) => {
+        try {
+            await addDoc(collection(db, "empleados"), employeeData);
+            await fetchData('empleados');
+            alert('Empleado añadido exitosamente!');
+            renderEmpleados();
+        } catch (e) {
+            console.error("Error añadiendo empleado: ", e);
+            alert('Error añadiendo empleado.');
+        }
+    }
+
+    window.updateEmployee = async (id, employeeData) => {
+        try {
+            const employeeRef = doc(db, "empleados", id);
+            await updateDoc(employeeRef, employeeData);
+            await fetchData('empleados');
+            alert('Empleado actualizado exitosamente!');
+            renderEmpleados();
+        } catch (e) {
+            console.error("Error actualizando empleado: ", e);
+            alert('Error actualizando empleado.');
+        }
+    }
+
+    window.deleteEmployee = async (id) => {
+        if (!confirm('¿Estás seguro de que quieres eliminar este empleado?')) return;
+        try {
+            await deleteDoc(doc(db, "empleados", id));
+            await fetchData('empleados');
+            alert('Empleado eliminado exitosamente!');
+            renderEmpleados();
+        } catch (e) {
+            console.error("Error eliminando empleado: ", e);
+            alert('Error eliminando empleado.');
+        }
+    }
+
+    window.showEmployeeForm = (employee = null) => {
+        const isEditing = employee !== null;
+        const title = isEditing ? 'Editar Empleado' : 'Nuevo Empleado';
+        const submitText = isEditing ? 'Actualizar' : 'Guardar';
+
+        const formHtml = `
+            <h3 class="text-xl font-semibold mb-4">${title}</h3>
+            <form id="employee-form" class="space-y-4">
+                <div>
+                    <label for="nombreEmpleado" class="block text-sm font-medium text-gray-700">Nombre</label>
+                    <input type="text" id="nombreEmpleado" name="nombre" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${employee ? employee.nombre : ''}" required>
+                </div>
+                <div>
+                    <label for="cargoEmpleado" class="block text-sm font-medium text-gray-700">Cargo</label>
+                    <input type="text" id="cargoEmpleado" name="cargo" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${employee ? employee.cargo : ''}">
+                </div>
+                <div>
+                    <label for="telefonoEmpleado" class="block text-sm font-medium text-gray-700">Teléfono</label>
+                    <input type="text" id="telefonoEmpleado" name="telefono" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${employee ? employee.telefono : ''}">
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="hideModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">${submitText}</button>
+                </div>
+            </form>
+        `;
+        window.showModal(formHtml);
+
+        document.getElementById('employee-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                nombre: formData.get('nombre'),
+                cargo: formData.get('cargo'),
+                telefono: formData.get('telefono'),
+            };
+            if (isEditing) {
+                await window.updateEmployee(employee.id, data);
+            } else {
+                await window.addEmployee(data);
+            }
+            window.hideModal();
+        });
+    }
+
+    // Funciones para Nueva Venta
+    window.addToCart = (productId) => {
+        const product = state.productos.find(p => p.id === productId);
+        if (!product) {
+            console.error("Producto no encontrado:", productId);
+            return;
+        }
+
+        const existingItemIndex = state.cart.findIndex(item => item.id === productId);
+
+        if (existingItemIndex > -1) {
+            const newCart = [...state.cart];
+            if (newCart[existingItemIndex].cantidad < product.stock) {
+                newCart[existingItemIndex].cantidad += 1;
+            } else {
+                alert('No hay suficiente stock para este producto.');
+            }
+            state.cart = newCart;
+        } else {
+            if (product.stock > 0) {
+                state.cart = [...state.cart, { ...product, cantidad: 1 }];
+            } else {
+                alert('Este producto no tiene stock disponible.');
+            }
+        }
+        renderNuevaVenta(); // Re-renderiza la sección para actualizar el carrito y productos
+    };
+
+    window.updateCartQuantity = (productId, change) => {
+        const product = state.productos.find(p => p.id === productId);
+        if (!product) return;
+
+        const newCart = state.cart.map(item => {
+            if (item.id === productId) {
+                const newQuantity = item.cantidad + change;
+                if (newQuantity <= 0) return null; // Elimina el item si la cantidad es 0 o menos
+                if (newQuantity > product.stock) {
+                    alert('No hay suficiente stock.');
+                    return item;
+                }
+                return { ...item, cantidad: newQuantity };
+            }
+            return item;
+        }).filter(item => item !== null); // Filtra los items que son null (eliminados)
+
+        state.cart = newCart;
+        renderNuevaVenta(); // Re-renderiza la sección para actualizar el carrito
+    };
+
+    window.removeFromCart = (productId) => {
+        state.cart = state.cart.filter(item => item.id !== productId);
+        renderNuevaVenta(); // Re-renderiza la sección para actualizar el carrito
+    };
+
+    function calculateCartTotals() {
+        const subtotal = state.cart.reduce((sum, item) => sum + (item.price * item.cantidad), 0);
+        const iva = subtotal * IVA_RATE;
+        const total = subtotal + iva;
+        return { subtotal, iva, total };
+    }
+
+    window.processSaleWrapper = async () => {
+        const selectedCustomerElement = document.getElementById('selected-customer');
+        const clienteId = selectedCustomerElement ? selectedCustomerElement.value : 'general';
+        const metodoPago = 'efectivo'; // Podrías añadir un selector de método de pago en el futuro
+        await processSale(clienteId, metodoPago);
+    };
+
+    window.processSale = async (clienteId, metodoPago) => {
+        if (state.cart.length === 0) {
+            alert('El carrito está vacío. Agrega productos para procesar la venta.');
+            return;
+        }
+
+        const cliente = state.clientes.find(c => c.id === clienteId);
+        const clienteNombre = cliente ? cliente.nombre : 'Cliente General';
+        const { subtotal, iva, total } = calculateCartTotals();
+
+        const saleData = {
+            fecha: serverTimestamp(),
+            clienteId: clienteId === 'general' ? null : clienteId,
+            clienteNombre: clienteId === 'general' ? 'Cliente General' : clienteNombre,
+            items: state.cart.map(item => ({
+                productoId: item.id,
+                nombre: item.name,
+                cantidad: item.cantidad,
+                precioUnitario: item.price
+            })),
+            subtotal: subtotal,
+            iva: iva,
+            total: total,
+            metodoPago: metodoPago,
+            estado: 'Completada'
+        };
+
+        try {
+            const batch = writeBatch(db);
+
+            const newSaleRef = doc(collection(db, "ventas"));
+            batch.set(newSaleRef, saleData);
+
+            for (const item of state.cart) {
+                const productRef = doc(db, "productos", item.id);
+                const currentProduct = state.productos.find(p => p.id === item.id);
+                if (currentProduct) {
+                    const updatedStock = currentProduct.stock - item.cantidad;
+                    batch.update(productRef, { stock: updatedStock });
+                }
+            }
+
+            if (clienteId !== 'general') {
+                const customerRef = doc(db, "clientes", clienteId);
+                const currentCustomer = state.clientes.find(c => c.id === clienteId);
+                const newTotalCompras = (currentCustomer?.totalCompras || 0) + total;
+                batch.update(customerRef, { totalCompras: newTotalCompras });
+            }
+
+            await batch.commit();
+            alert('¡Venta procesada y stock actualizado exitosamente!');
+            state.cart = []; // Vacía el carrito después de la venta
+            state.searchTerm = ''; // Limpia el término de búsqueda
+            await fetchData('productos'); // Actualiza el stock
+            await fetchData('ventas'); // Agrega la nueva venta
+            await fetchData('clientes'); // Actualiza el total de compras del cliente
+            renderNuevaVenta(); // Re-renderiza la sección de Nueva Venta después de la compra
+            renderDashboard(); // Actualiza el dashboard también
+            renderVentas(); // Actualiza el historial de ventas
+        } catch (e) {
+            console.error("Error al procesar la venta: ", e);
+            alert('Hubo un error al procesar la venta.');
+        }
+    };
+
+    window.viewSaleDetails = (saleId) => {
+        const sale = state.ventas.find(s => s.id === saleId);
+        if (!sale) {
+            alert('Detalles de venta no encontrados. Asegúrate de que los datos de ventas estén cargados.');
+            console.error('Venta no encontrada para ID:', saleId);
+            return;
+        }
+
+        const saleDate = sale.fecha ? new Date(sale.fecha.toDate()).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A';
+
+        let itemsHtml = sale.items.map(item => `
+            <div class="flex justify-between border-b pb-1 mb-1 text-sm">
+                <span>${item.cantidad} x ${item.nombre}</span>
+                <span>$${(item.cantidad * item.precioUnitario).toFixed(2)}</span>
+            </div>
+        `).join('');
+
+        const modalContent = `
+            <h3 class="text-xl font-semibold mb-4">Detalles de Venta #${sale.id.substring(0, 8)}...</h3>
+            <div class="space-y-2 text-gray-700">
+                <p><strong>Fecha:</strong> ${saleDate}</p>
+                <p><strong>Cliente:</strong> ${sale.clienteNombre || 'Cliente General'}</p>
+                <p><strong>Método de Pago:</strong> ${sale.metodoPago}</p>
+                <p><strong>Estado:</strong> <span class="bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs">${sale.estado}</span></p>
+                <div class="mt-4 pt-2 border-t">
+                    <h4 class="font-semibold text-lg mb-2">Productos:</h4>
+                    ${itemsHtml}
+                </div>
+                <div class="border-t pt-2 mt-4 space-y-1">
+                    <div class="flex justify-between text-md">
+                        <span>Subtotal:</span>
+                        <span>$${sale.subtotal ? sale.subtotal.toFixed(2) : '0.00'}</span>
+                    </div>
+                    <div class="flex justify-between text-md">
+                        <span>IVA:</span>
+                        <span>$${sale.iva ? sale.iva.toFixed(2) : '0.00'}</span>
+                    </div>
+                    <div class="flex justify-between text-xl font-bold text-blue-600">
+                        <span>Total:</span>
+                        <span>$${sale.total ? sale.total.toFixed(2) : '0.00'}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        window.showModal(modalContent);
+    };
+
+    // Funciones para Cuentas por Cobrar
+    window.addCuentaPorCobrar = async (cuentaData) => {
+        try {
+            await addDoc(collection(db, "cuentas_por_cobrar"), {...cuentaData, fechaCreacion: serverTimestamp(), estado: 'Pendiente'});
+            await fetchData('cuentas_por_cobrar');
+            alert('Cuenta por cobrar añadida exitosamente!');
+            renderCuentasPorCobrar();
+        } catch (e) {
+            console.error("Error añadiendo cuenta por cobrar: ", e);
+            alert('Error añadiendo cuenta por cobrar.');
+        }
+    }
+
+    window.updateCuentaPorCobrar = async (id, cuentaData) => {
+        try {
+            const cuentaRef = doc(db, "cuentas_por_cobrar", id);
+            await updateDoc(cuentaRef, cuentaData);
+            await fetchData('cuentas_por_cobrar');
+            alert('Cuenta por cobrar actualizada exitosamente!');
+            renderCuentasPorCobrar();
+        } catch (e) {
+            console.error("Error actualizando cuenta por cobrar: ", e);
+            alert('Error actualizando cuenta por cobrar.');
+        }
+    }
+
+    window.deleteCuentaPorCobrar = async (id) => {
+        if (!confirm('¿Estás seguro de que quieres eliminar esta cuenta por cobrar?')) return;
+        try {
+            await deleteDoc(doc(db, "cuentas_por_cobrar", id));
+            await fetchData('cuentas_por_cobrar');
+            alert('Cuenta por cobrar eliminada exitosamente!');
+            renderCuentasPorCobrar();
+        } catch (e) {
+            console.error("Error eliminando cuenta por cobrar: ", e);
+            alert('Error eliminando cuenta por cobrar.');
+        }
+    }
+
+    window.showCuentaPorCobrarForm = (cuenta = null) => {
+        const isEditing = cuenta !== null;
+        const title = isEditing ? 'Editar Cuenta por Cobrar' : 'Nueva Cuenta por Cobrar';
+        const submitText = isEditing ? 'Actualizar' : 'Guardar';
+        const fechaVencimiento = cuenta && cuenta.fechaVencimiento ? new Date(cuenta.fechaVencimiento.toDate()).toISOString().split('T')[0] : '';
+
+        const formHtml = `
+            <h3 class="text-xl font-semibold mb-4">${title}</h3>
+            <form id="cuenta-form" class="space-y-4">
+                <div>
+                    <label for="clienteId" class="block text-sm font-medium text-gray-700">Cliente</label>
+                    <select id="clienteId" name="clienteId" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
+                        <option value="">Seleccione un cliente</option>
+                        ${state.clientes.map(client => `
+                            <option value="${client.id}" ${cuenta && cuenta.clienteId === client.id ? 'selected' : ''}>${client.nombre}</option>
+                        `).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label for="monto" class="block text-sm font-medium text-gray-700">Monto</label>
+                    <input type="number" id="monto" name="monto" step="0.01" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${cuenta ? cuenta.monto : ''}" required>
+                </div>
+                <div>
+                    <label for="concepto" class="block text-sm font-medium text-gray-700">Concepto</label>
+                    <input type="text" id="concepto" name="concepto" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${cuenta ? cuenta.concepto : ''}" required>
+                </div>
+                <div>
+                    <label for="fechaVencimiento" class="block text-sm font-medium text-gray-700">Fecha de Vencimiento</label>
+                    <input type="date" id="fechaVencimiento" name="fechaVencimiento" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${fechaVencimiento}" required>
+                </div>
+                ${isEditing ? `
+                <div>
+                    <label for="estado" class="block text-sm font-medium text-gray-700">Estado</label>
+                    <select id="estado" name="estado" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
+                        <option value="Pendiente" ${cuenta.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                        <option value="Pagada" ${cuenta.estado === 'Pagada' ? 'selected' : ''}>Pagada</option>
+                        <option value="Vencida" ${cuenta.estado === 'Vencida' ? 'selected' : ''}>Vencida</option>
+                    </select>
+                </div>
+                ` : ''}
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="hideModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">${submitText}</button>
+                </div>
+            </form>
+        `;
+        window.showModal(formHtml);
+
+        document.getElementById('cuenta-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                clienteId: formData.get('clienteId'),
+                monto: parseFloat(formData.get('monto')),
+                concepto: formData.get('concepto'),
+                fechaVencimiento: Timestamp.fromDate(new Date(formData.get('fechaVencimiento'))),
+            };
+            if (isEditing) {
+                data.estado = formData.get('estado');
+                await window.updateCuentaPorCobrar(cuenta.id, data);
+            } else {
+                await window.addCuentaPorCobrar(data);
+            }
+            window.hideModal();
+        });
+    }
+
+    // --- FASE FINAL: INICIALIZACIÓN DE EVENTOS ---
+    document.addEventListener('DOMContentLoaded', async () => {
+        DOMElements.sidebarLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const sectionId = link.getAttribute('href').substring(1);
+                window.showSection(sectionId);
+            });
+        });
+        DOMElements.menuToggle.addEventListener('click', () => {
+            DOMElements.sidebar.classList.toggle('-translate-x-full');
+            DOMElements.overlay.classList.toggle('active');
+        });
+        DOMElements.overlay.addEventListener('click', () => {
+            DOMElements.sidebar.classList.add('-translate-x-full');
+            window.hideModal();
+        });
+
+        // Cargar datos iniciales y mostrar la sección de Dashboard al inicio
+        await fetchData('productos');
+        await fetchData('clientes');
+        await fetchData('empleados');
+        await fetchData('ventas');
+        await fetchData('cuentas_por_cobrar');
+        window.showSection('dashboard-section');
+    });
+</script>
+
 </body>
 </html>
