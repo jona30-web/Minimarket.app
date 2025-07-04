@@ -58,6 +58,37 @@
         .icon-circle.orange { background-color: #f97316; } /* Generar Reporte */
         .icon-circle.indigo { background-color: #6366f1; } /* Gestionar Inventario */
         .icon-circle.red { background-color: #ef4444; } /* Horarios (Placeholder) */
+
+        /* Estilos para el escáner de código de barras */
+        #barcode-scanner-container {
+            width: 100%;
+            height: 200px; /* Ajusta la altura según sea necesario */
+            background-color: #333;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        #barcode-scanner-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        #barcode-scanner-container .scan-region {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%; /* Ancho del área de escaneo */
+            height: 60%; /* Alto del área de escaneo */
+            border: 2px solid #4CAF50; /* Color del borde del área de escaneo */
+            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6); /* Oscurece el exterior */
+            pointer-events: none; /* Permite hacer clic a través del div */
+            z-index: 10;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 min-h-screen flex">
@@ -99,6 +130,10 @@
     // --- FASE 1: CONEXIÓN A FIREBASE ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
     import { getFirestore, collection, getDocs, doc, addDoc, deleteDoc, updateDoc, setDoc, writeBatch, serverTimestamp, query, where, Timestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+    // Importación de QuaggaJS para el escáner de código de barras
+    // QuaggaJS no es un módulo ES6, se carga globalmente o a través de un script tag separado.
+    // Para simplificar, asumiremos que QuaggaJS está disponible globalmente si se carga con un <script> antes de este.
+    // Si no, necesitaríamos un wrapper o import dinámico. Para esta demostración, no lo importamos directamente aquí.
 
     // Tu configuración de Firebase
     const firebaseConfig = {
@@ -122,9 +157,11 @@
         ventas: [],
         cuentas_por_cobrar: [],
         cart: [],
-        searchTerm: '' // Para la búsqueda de productos
+        searchTerm: '', // Para la búsqueda de productos
+        amountReceived: 0, // Nuevo estado para el monto recibido
+        isScannerActive: false // Estado para controlar el escáner
     };
-    const IVA_RATE = 0.15;
+    // const IVA_RATE = 0.15; // Eliminado o comentado, ya que no se usará el IVA
     const DOMElements = {
         sidebar: document.getElementById('sidebar'),
         menuToggle: document.getElementById('menu-toggle'),
@@ -140,6 +177,10 @@
         const modal = DOMElements.modalContainer.querySelector('.modal');
         if(modal) modal.classList.remove('active');
         DOMElements.overlay.classList.remove('active');
+        // Detener el escáner si está activo al cerrar el modal
+        if (state.isScannerActive) {
+            stopScanner();
+        }
         setTimeout(() => { DOMElements.modalContainer.innerHTML = ''; }, 200);
     };
 
@@ -164,6 +205,11 @@
             link.classList.add('active');
         }
         if (window.innerWidth < 1024) { DOMElements.sidebar.classList.add('-translate-x-full'); DOMElements.overlay.classList.remove('active'); }
+
+        // Detener el escáner si está activo al cambiar de sección
+        if (state.isScannerActive) {
+            stopScanner();
+        }
 
         // Mostrar un mensaje de carga mientras se obtienen los datos
         DOMElements.contentArea.innerHTML = '<div class="text-center p-8"><i class="fas fa-spinner fa-spin text-4xl text-blue-500"></i><p class="mt-4 text-gray-600">Cargando...</p></div>';
@@ -333,7 +379,8 @@
     }
 
     function renderNuevaVenta() {
-        const { subtotal, iva, total } = calculateCartTotals();
+        const { subtotal, total } = calculateCartTotals(); // Ya no calculamos IVA
+        const change = calculateChange(); // Calcula el cambio
         // Filtra los productos por el término de búsqueda actual
         const filteredProducts = state.productos.filter(p =>
             p.name.toLowerCase().includes(state.searchTerm) ||
@@ -372,8 +419,15 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
                     <h3 class="text-xl font-semibold mb-4">Seleccionar Productos</h3>
-                    <div class="mb-4">
-                        <input type="text" id="product-search" placeholder="Buscar producto por nombre o código..." class="w-full p-2 border border-gray-300 rounded-md shadow-sm" value="${state.searchTerm}" oninput="updateSearchTerm(this.value)">
+                    <div class="mb-4 flex items-center space-x-2">
+                        <input type="text" id="product-search" placeholder="Buscar producto por nombre o código..." class="flex-1 p-2 border border-gray-300 rounded-md shadow-sm" value="${state.searchTerm}" oninput="updateSearchTerm(this.value)">
+                        <button onclick="startScanner()" class="bg-green-500 hover:bg-green-600 text-white p-2 rounded-md shadow-sm">
+                            <i class="fas fa-barcode text-lg"></i>
+                        </button>
+                    </div>
+                    <div id="barcode-scanner-container" style="display: none;">
+                        <video id="barcode-scanner-video" style="width:100%; height:100%; object-fit: cover;"></video>
+                        <div class="scan-region"></div>
                     </div>
                     <div id="products-grid" class="products-grid max-h-96-overflow">
                         ${productsGridHtml}
@@ -399,15 +453,20 @@
                             <span>Subtotal:</span>
                             <span id="cart-subtotal">$${subtotal.toFixed(2)}</span>
                         </div>
-                        <div class="flex justify-between text-lg">
-                            <span>IVA (15%):</span>
-                            <span id="cart-iva">$${iva.toFixed(2)}</span>
-                        </div>
                         <div class="flex justify-between text-2xl font-bold text-blue-600">
                             <span>Total:</span>
                             <span id="cart-total">$${total.toFixed(2)}</span>
                         </div>
-                    </div>
+
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <label for="amount-received" class="block text-sm font-medium text-gray-700 mb-1">Monto Recibido:</label>
+                            <input type="number" id="amount-received" placeholder="Ingrese monto" class="w-full p-2 border border-gray-300 rounded-md shadow-sm text-lg font-bold" value="${state.amountReceived > 0 ? state.amountReceived : ''}" oninput="updateAmountReceived(this.value)" step="0.01">
+                        </div>
+                        <div class="flex justify-between text-xl font-bold text-green-600 mt-2">
+                            <span>Cambio:</span>
+                            <span id="cart-change">$${change.toFixed(2)}</span>
+                        </div>
+                        </div>
 
                     <button onclick="processSaleWrapper()" class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg">
                         <i class="fas fa-check-circle mr-2"></i> Procesar Venta
@@ -415,6 +474,11 @@
                 </div>
             </div>
         `;
+        // Asignar el valor de amountReceived al input después de que se renderiza el HTML
+        const amountReceivedInput = document.getElementById('amount-received');
+        if (amountReceivedInput) {
+            amountReceivedInput.value = state.amountReceived > 0 ? state.amountReceived : '';
+        }
     }
 
     // Función para actualizar el término de búsqueda y re-renderizar la sección de venta
@@ -422,6 +486,24 @@
         state.searchTerm = value.toLowerCase();
         renderNuevaVenta(); // Re-renderiza la sección completa para aplicar el filtro
     };
+
+    // Función para actualizar el monto recibido y recalcular el cambio
+    window.updateAmountReceived = (value) => {
+        state.amountReceived = parseFloat(value) || 0;
+        // Solo actualiza los campos de cambio sin re-renderizar toda la sección
+        // Esto es más eficiente que llamar a renderNuevaVenta()
+        const { total } = calculateCartTotals();
+        const change = calculateChange();
+        document.getElementById('cart-change').textContent = `$${change.toFixed(2)}`;
+        // Opcional: Si quieres que el total se actualice con IVA 0, puedes forzarlo aquí si se cambia manualmente
+        // document.getElementById('cart-total').textContent = `$${total.toFixed(2)}`;
+    };
+
+    // Nueva función para calcular el cambio
+    function calculateChange() {
+        const { total } = calculateCartTotals();
+        return Math.max(0, state.amountReceived - total); // El cambio no puede ser negativo
+    }
 
 
     function renderVentas() {
@@ -440,6 +522,7 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button onclick="viewSaleDetails('${sale.id}')" class="text-blue-600 hover:text-blue-900 mr-2"><i class="fas fa-eye"></i></button>
+                        <button onclick="deleteSale('${sale.id}')" class="text-red-600 hover:text-red-900"><i class="fas fa-trash-alt"></i></button>
                     </td>
                 </tr>
             `;
@@ -468,7 +551,20 @@
     }
 
     function renderCuentasPorCobrar() {
-        const cuentasHtml = state.cuentas_por_cobrar.length > 0 ? state.cuentas_por_cobrar.map(cuenta => {
+        // Mejoras: Filtro por estado, ordenar por fecha de vencimiento.
+        const filterState = document.getElementById('filter-cuenta-estado')?.value || 'Todos';
+        const sortedCuentas = [...state.cuentas_por_cobrar].sort((a, b) => {
+            const dateA = a.fechaVencimiento?.toDate() || new Date(0);
+            const dateB = b.fechaVencimiento?.toDate() || new Date(0);
+            return dateA - dateB;
+        });
+
+        const filteredCuentas = sortedCuentas.filter(cuenta => {
+            if (filterState === 'Todos') return true;
+            return cuenta.estado === filterState;
+        });
+
+        const cuentasHtml = filteredCuentas.length > 0 ? filteredCuentas.map(cuenta => {
             const cliente = state.clientes.find(c => c.id === cuenta.clienteId);
             const clienteNombre = cliente ? cliente.nombre : 'Desconocido';
             const fechaCreacion = cuenta.fechaCreacion ? new Date(cuenta.fechaCreacion.toDate()).toLocaleDateString('es-ES') : 'N/A';
@@ -496,6 +592,7 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button onclick="showCuentaPorCobrarForm(${JSON.stringify(cuenta).replace(/'/g, "\\'")})" class="text-indigo-600 hover:text-indigo-900 mr-2"><i class="fas fa-edit"></i></button>
+                        <button onclick="markCuentaAsPaid('${cuenta.id}')" class="text-green-600 hover:text-green-900 mr-2 ${cuenta.estado === 'Pagada' ? 'cursor-not-allowed opacity-50' : ''}" ${cuenta.estado === 'Pagada' ? 'disabled' : ''} title="Marcar como Pagada"><i class="fas fa-check-circle"></i></button>
                         <button onclick="deleteCuentaPorCobrar('${cuenta.id}')" class="text-red-600 hover:text-red-900"><i class="fas fa-trash-alt"></i></button>
                     </td>
                 </tr>
@@ -504,10 +601,19 @@
 
         DOMElements.contentArea.innerHTML = `
             <h2 class="text-2xl font-bold mb-6">Cuentas por Cobrar</h2>
-            <div class="flex justify-end mb-4">
+            <div class="flex justify-between items-center mb-4">
                 <button onclick="showCuentaPorCobrarForm()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
                     <i class="fas fa-plus mr-2"></i> Añadir Cuenta por Cobrar
                 </button>
+                <div class="flex items-center space-x-2">
+                    <label for="filter-cuenta-estado" class="text-sm font-medium text-gray-700">Filtrar por Estado:</label>
+                    <select id="filter-cuenta-estado" onchange="renderCuentasPorCobrar()" class="p-2 border border-gray-300 rounded-md shadow-sm">
+                        <option value="Todos" ${filterState === 'Todos' ? 'selected' : ''}>Todos</option>
+                        <option value="Pendiente" ${filterState === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                        <option value="Pagada" ${filterState === 'Pagada' ? 'selected' : ''}>Pagada</option>
+                        <option value="Vencida" ${filterState === 'Vencida' ? 'selected' : ''}>Vencida</option>
+                    </select>
+                </div>
             </div>
             <div class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -528,6 +634,8 @@
                 </table>
             </div>
         `;
+        // Para asegurar que el filtro se mantenga, establece el valor del select
+        document.getElementById('filter-cuenta-estado').value = filterState;
     }
 
     function renderAlmacen() {
@@ -1049,15 +1157,23 @@
 
     function calculateCartTotals() {
         const subtotal = state.cart.reduce((sum, item) => sum + (item.price * item.cantidad), 0);
-        const iva = subtotal * IVA_RATE;
-        const total = subtotal + iva;
-        return { subtotal, iva, total };
+        // const iva = subtotal * IVA_RATE; // Eliminado
+        // const total = subtotal + iva; // Modificado
+        const total = subtotal; // El total es igual al subtotal sin IVA
+        return { subtotal, total }; // Retorna solo subtotal y total
     }
 
     window.processSaleWrapper = async () => {
         const selectedCustomerElement = document.getElementById('selected-customer');
         const clienteId = selectedCustomerElement ? selectedCustomerElement.value : 'general';
         const metodoPago = 'efectivo'; // Podrías añadir un selector de método de pago en el futuro
+        
+        // Validar que se ha ingresado un monto recibido suficiente
+        const { total } = calculateCartTotals();
+        if (state.amountReceived < total) {
+            alert('El monto recibido es menor que el total de la venta. Por favor, ingrese un monto suficiente.');
+            return;
+        }
         await processSale(clienteId, metodoPago);
     };
 
@@ -1069,7 +1185,7 @@
 
         const cliente = state.clientes.find(c => c.id === clienteId);
         const clienteNombre = cliente ? cliente.nombre : 'Cliente General';
-        const { subtotal, iva, total } = calculateCartTotals();
+        const { subtotal, total } = calculateCartTotals(); // Recoge solo subtotal y total
 
         const saleData = {
             fecha: serverTimestamp(),
@@ -1082,10 +1198,12 @@
                 precioUnitario: item.price
             })),
             subtotal: subtotal,
-            iva: iva,
+            iva: 0, // IVA es 0 según la solicitud
             total: total,
             metodoPago: metodoPago,
-            estado: 'Completada'
+            estado: 'Completada',
+            montoRecibido: state.amountReceived, // Guarda el monto recibido
+            cambio: calculateChange() // Guarda el cambio
         };
 
         try {
@@ -1114,6 +1232,7 @@
             alert('¡Venta procesada y stock actualizado exitosamente!');
             state.cart = []; // Vacía el carrito después de la venta
             state.searchTerm = ''; // Limpia el término de búsqueda
+            state.amountReceived = 0; // Reinicia el monto recibido
             await fetchData('productos'); // Actualiza el stock
             await fetchData('ventas'); // Agrega la nueva venta
             await fetchData('clientes'); // Actualiza el total de compras del cliente
@@ -1159,18 +1278,42 @@
                         <span>Subtotal:</span>
                         <span>$${sale.subtotal ? sale.subtotal.toFixed(2) : '0.00'}</span>
                     </div>
-                    <div class="flex justify-between text-md">
-                        <span>IVA:</span>
-                        <span>$${sale.iva ? sale.iva.toFixed(2) : '0.00'}</span>
-                    </div>
                     <div class="flex justify-between text-xl font-bold text-blue-600">
                         <span>Total:</span>
                         <span>$${sale.total ? sale.total.toFixed(2) : '0.00'}</span>
                     </div>
+                    ${sale.montoRecibido !== undefined ? `
+                    <div class="flex justify-between text-md">
+                        <span>Monto Recibido:</span>
+                        <span>$${sale.montoRecibido.toFixed(2)}</span>
+                    </div>
+                    <div class="flex justify-between text-md font-bold text-green-600">
+                        <span>Cambio:</span>
+                        <span>$${sale.cambio.toFixed(2)}</span>
+                    </div>
+                    ` : ''}
                 </div>
             </div>
         `;
         window.showModal(modalContent);
+    };
+
+    // Nueva función para eliminar una venta
+    window.deleteSale = async (saleId) => {
+        if (!confirm('¿Estás seguro de que quieres eliminar esta venta? Esta acción no se puede deshacer y el stock de los productos no será restaurado automáticamente.')) {
+            return;
+        }
+
+        try {
+            // No se restaurará el stock de productos, solo se elimina el registro de venta.
+            await deleteDoc(doc(db, "ventas", saleId));
+            await fetchData('ventas'); // Volver a cargar las ventas
+            alert('Venta eliminada exitosamente.');
+            renderVentas(); // Re-renderizar la sección de ventas
+        } catch (error) {
+            console.error("Error eliminando la venta: ", error);
+            alert('Hubo un error al eliminar la venta.');
+        }
     };
 
     // Funciones para Cuentas por Cobrar
@@ -1211,6 +1354,21 @@
             alert('Error eliminando cuenta por cobrar.');
         }
     }
+
+    // Nueva función para marcar una cuenta por cobrar como pagada
+    window.markCuentaAsPaid = async (id) => {
+        if (!confirm('¿Estás seguro de que quieres marcar esta cuenta como "Pagada"?')) return;
+        try {
+            const cuentaRef = doc(db, "cuentas_por_cobrar", id);
+            await updateDoc(cuentaRef, { estado: 'Pagada' });
+            await fetchData('cuentas_por_cobrar');
+            alert('Cuenta por cobrar marcada como pagada exitosamente!');
+            renderCuentasPorCobrar();
+        } catch (e) {
+            console.error("Error al marcar cuenta como pagada: ", e);
+            alert('Error al marcar cuenta como pagada.');
+        }
+    };
 
     window.showCuentaPorCobrarForm = (cuenta = null) => {
         const isEditing = cuenta !== null;
@@ -1279,8 +1437,113 @@
         });
     }
 
+    // --- FUNCIONES DE ESCÁNER DE CÓDIGO DE BARRAS ---
+    let scannerQuagga = null;
+
+    window.startScanner = () => {
+        const scannerContainer = document.getElementById('barcode-scanner-container');
+        const videoElement = document.getElementById('barcode-scanner-video');
+        scannerContainer.style.display = 'block'; // Mostrar el contenedor del escáner
+        state.isScannerActive = true;
+
+        if (typeof Quagga === 'undefined') {
+            console.error('QuaggaJS no está cargado. Asegúrate de incluir el script Quagga.js.');
+            alert('Error: La funcionalidad de escáner no está disponible. Por favor, asegúrese de que QuaggaJS esté cargado.');
+            scannerContainer.style.display = 'none';
+            state.isScannerActive = false;
+            return;
+        }
+
+        Quagga.init({
+            inputStream : {
+                name : "Live",
+                type : "LiveStream",
+                target: videoElement,
+                constraints: {
+                    width: 640,
+                    height: 480,
+                    facingMode: "environment" // Usa la cámara trasera si está disponible
+                },
+            },
+            decoder : {
+                readers : ["ean_reader", "ean_8_reader", "code_39_reader", "code_39_vin_reader", "codabar_reader", "upc_reader", "upc_e_reader", "i2of5_reader"]
+            }
+        }, function(err) {
+            if (err) {
+                console.error(err);
+                alert('Error al iniciar el escáner: ' + err.message);
+                scannerContainer.style.display = 'none';
+                state.isScannerActive = false;
+                return;
+            }
+            console.log("Initialization finished. Ready to start");
+            Quagga.start();
+            scannerQuagga = Quagga; // Guardar la instancia para poder detenerla
+        });
+
+        Quagga.onDetected(function(result) {
+            const barcode = result.codeResult.code;
+            console.log("Código de barras detectado:", barcode);
+            
+            const product = state.productos.find(p => p.barcode === barcode);
+            if (product) {
+                addToCart(product.id);
+                // Detener el escáner automáticamente después de un escaneo exitoso
+                stopScanner();
+            } else {
+                alert('Producto con código de barras "' + barcode + '" no encontrado.');
+            }
+            // Puedes limpiar el campo de búsqueda o hacer algo más con el código
+            document.getElementById('product-search').value = barcode;
+        });
+
+        Quagga.onProcessed(function(result) {
+            var drawingCtx = Quagga.canvas.ctx.overlay,
+                drawingCanvas = Quagga.canvas.dom.overlay;
+
+            if (result) {
+                if (result.boxes) {
+                    drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.width), parseInt(drawingCanvas.height));
+                    result.boxes.filter(function (box) {
+                        return box !== result.box;
+                    }).forEach(function (box) {
+                        Quagga.ImageDebug.drawPath(box, {x: 0, y: 1}, drawingCtx, {color: "green", lineWidth: 2});
+                    });
+                }
+
+                if (result.box) {
+                    Quagga.ImageDebug.drawPath(result.box, {x: 0, y: 1}, drawingCtx, {color: "#00F", lineWidth: 2});
+                }
+
+                if (result.codeResult && result.codeResult.code) {
+                    Quagga.ImageDebug.drawPath(result.line, {x: 'x', y: 'y'}, drawingCtx, {color: "red", lineWidth: 3});
+                }
+            }
+        });
+    };
+
+    window.stopScanner = () => {
+        if (scannerQuagga) {
+            scannerQuagga.stop();
+            console.log("Scanner stopped.");
+            document.getElementById('barcode-scanner-container').style.display = 'none';
+            state.isScannerActive = false;
+            scannerQuagga = null; // Limpiar la referencia
+        }
+    };
+
     // --- FASE FINAL: INICIALIZACIÓN DE EVENTOS ---
     document.addEventListener('DOMContentLoaded', async () => {
+        // Cargar QuaggaJS dinámicamente si aún no está cargado
+        if (typeof Quagga === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/quagga@0.12.1/dist/quagga.min.js';
+            script.onload = () => {
+                console.log('QuaggaJS cargado dinámicamente.');
+            };
+            document.head.appendChild(script);
+        }
+
         DOMElements.sidebarLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
