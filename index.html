@@ -89,6 +89,50 @@
             pointer-events: none; /* Permite hacer clic a través del div */
             z-index: 10;
         }
+
+        /* Estilos para la impresión del recibo */
+        /* Oculta todo excepto el recibo cuando se imprime */
+        @media print {
+            body > *:not(#receipt-print-area) {
+                display: none !important;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                /* Puedes ajustar el ancho para impresoras térmicas (ej. 58mm ~ 2.28in, 80mm ~ 3.15in) */
+                width: 58mm; /* Ancho típico para recibos pequeños, ajusta según tu impresora */
+                font-family: 'monospace', 'Courier New', Courier, monospace; /* Fuente monoespaciada */
+                font-size: 9px; /* Tamaño de fuente pequeño para recibos */
+                color: black;
+            }
+            #receipt-print-area {
+                display: block !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none; /* Elimina sombras del modal */
+                padding: 0;
+                margin: 0;
+            }
+            /* Oculta el botón de cerrar y el botón de imprimir dentro del modal de impresión */
+            #receipt-print-area .no-print {
+                display: none !important;
+            }
+            /* Asegúrate de que los bordes y padding se manejen bien en la impresión */
+            #receipt-print-area .receipt-item {
+                border-bottom: 1px dashed #ccc;
+                padding: 2px 0;
+                margin-bottom: 2px;
+            }
+            #receipt-print-area .receipt-total {
+                border-top: 1px dashed #ccc;
+                padding-top: 4px;
+                margin-top: 4px;
+            }
+            h4, h5 { margin: 2px 0; padding: 0; }
+            p { margin: 1px 0; padding: 0; }
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 min-h-screen flex">
@@ -189,7 +233,7 @@
         DOMElements.modalContainer.innerHTML = `
             <div class="modal active">
                 ${contentHtml}
-                <div class="mt-6 text-right">
+                <div class="mt-6 text-right no-print">
                     <button onclick="hideModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">Cerrar</button>
                 </div>
             </div>
@@ -227,7 +271,10 @@
                 renderDashboard();
                 break;
             case 'nueva-venta-section':
-                renderNuevaVenta(); // Asegúrate de que esta función se llama
+                // Solo renderiza la estructura de Nueva Venta una vez
+                renderNuevaVentaStructure();
+                // Luego, renderiza los productos filtrados
+                renderFilteredProducts();
                 break;
             case 'ventas-section':
                 renderVentas();
@@ -378,39 +425,8 @@
         `;
     }
 
-    function renderNuevaVenta() {
-        const { subtotal, total } = calculateCartTotals(); // Ya no calculamos IVA
-        const change = calculateChange(); // Calcula el cambio
-        // Filtra los productos por el término de búsqueda actual
-        const filteredProducts = state.productos.filter(p =>
-            p.name.toLowerCase().includes(state.searchTerm) ||
-            p.barcode.toLowerCase().includes(state.searchTerm)
-        );
-
-        let productsGridHtml = filteredProducts.length > 0 ? filteredProducts.map(p => `
-            <div class="bg-white p-4 rounded-lg shadow-sm product-card" onclick="addToCart('${p.id}')">
-                <img src="https://via.placeholder.com/80" alt="${p.name}" class="mx-auto mb-2 rounded">
-                <h4 class="font-medium text-sm truncate">${p.name}</h4>
-                <p class="text-gray-600 text-xs">Stock: ${p.stock}</p>
-                <p class="text-blue-600 font-bold mt-1">$${p.price.toFixed(2)}</p>
-            </div>
-        `).join('') : '<p class="text-center text-gray-500 col-span-full">No hay productos disponibles o que coincidan con la búsqueda.</p>';
-
-        let cartItemsHtml = state.cart.length > 0 ? state.cart.map(item => `
-            <div class="flex items-center justify-between p-3 border-b last:border-b-0">
-                <div class="flex-1">
-                    <p class="font-medium">${item.name}</p>
-                    <p class="text-sm text-gray-600">$${item.price.toFixed(2)} c/u</p>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <button onclick="updateCartQuantity('${item.id}', -1)" class="bg-red-200 text-red-700 w-7 h-7 rounded-full text-sm flex items-center justify-center">-</button>
-                    <span class="font-semibold">${item.cantidad}</span>
-                    <button onclick="updateCartQuantity('${item.id}', 1)" class="bg-green-200 text-green-700 w-7 h-7 rounded-full text-sm flex items-center justify-center">+</button>
-                    <button onclick="removeFromCart('${item.id}')" class="ml-2 text-gray-500 hover:text-red-600"><i class="fas fa-trash-alt"></i></button>
-                </div>
-            </div>
-        `).join('') : '<p class="text-center text-gray-500">El carrito está vacío.</p>';
-
+    // --- NUEVA FUNCIÓN: Renderiza solo la ESTRUCTURA principal de Nueva Venta ---
+    function renderNuevaVentaStructure() {
         const customerOptions = state.clientes.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
 
         DOMElements.contentArea.innerHTML = `
@@ -430,8 +446,7 @@
                         <div class="scan-region"></div>
                     </div>
                     <div id="products-grid" class="products-grid max-h-96-overflow">
-                        ${productsGridHtml}
-                    </div>
+                        </div>
                 </div>
 
                 <div class="bg-white p-6 rounded-lg shadow-md">
@@ -445,17 +460,16 @@
                     </div>
 
                     <div id="cart-items" class="border rounded-md max-h-48-overflow mb-4">
-                        ${cartItemsHtml}
-                    </div>
+                        </div>
 
                     <div class="border-t pt-4 mt-4 space-y-2">
                         <div class="flex justify-between text-lg">
                             <span>Subtotal:</span>
-                            <span id="cart-subtotal">$${subtotal.toFixed(2)}</span>
+                            <span id="cart-subtotal">$0.00</span>
                         </div>
                         <div class="flex justify-between text-2xl font-bold text-blue-600">
                             <span>Total:</span>
-                            <span id="cart-total">$${total.toFixed(2)}</span>
+                            <span id="cart-total">$0.00</span>
                         </div>
 
                         <div class="mt-4 pt-4 border-t border-gray-200">
@@ -464,7 +478,7 @@
                         </div>
                         <div class="flex justify-between text-xl font-bold text-green-600 mt-2">
                             <span>Cambio:</span>
-                            <span id="cart-change">$${change.toFixed(2)}</span>
+                            <span id="cart-change">$0.00</span>
                         </div>
                         </div>
 
@@ -479,12 +493,76 @@
         if (amountReceivedInput) {
             amountReceivedInput.value = state.amountReceived > 0 ? state.amountReceived : '';
         }
+        // Llamar a la función que renderiza los productos y el carrito después de que la estructura esté en el DOM
+        renderFilteredProducts();
+        renderCartItems();
+        updateCartTotalsDisplay(); // Asegúrate de que los totales se muestren correctamente al cargar la estructura
     }
 
+    // --- NUEVA FUNCIÓN: Renderiza solo los productos filtrados ---
+    function renderFilteredProducts() {
+        const filteredProducts = state.productos.filter(p =>
+            p.name.toLowerCase().includes(state.searchTerm) ||
+            p.barcode.toLowerCase().includes(state.searchTerm)
+        );
+
+        const productsGridElement = document.getElementById('products-grid');
+        if (!productsGridElement) return; // Salir si el elemento no existe (no estamos en Nueva Venta)
+
+        productsGridElement.innerHTML = filteredProducts.length > 0 ? filteredProducts.map(p => `
+            <div class="bg-white p-4 rounded-lg shadow-sm product-card" onclick="addToCart('${p.id}')">
+                <img src="https://via.placeholder.com/80" alt="${p.name}" class="mx-auto mb-2 rounded">
+                <h4 class="font-medium text-sm truncate">${p.name}</h4>
+                <p class="text-gray-600 text-xs">Stock: ${p.stock}</p>
+                <p class="text-blue-600 font-bold mt-1">$${p.price.toFixed(2)}</p>
+            </div>
+        `).join('') : '<p class="text-center text-gray-500 col-span-full">No hay productos disponibles o que coincidan con la búsqueda.</p>';
+    }
+
+    // --- NUEVA FUNCIÓN: Renderiza solo los ítems del carrito ---
+    function renderCartItems() {
+        const cartItemsElement = document.getElementById('cart-items');
+        if (!cartItemsElement) return;
+
+        cartItemsElement.innerHTML = state.cart.length > 0 ? state.cart.map(item => `
+            <div class="flex items-center justify-between p-3 border-b last:border-b-0">
+                <div class="flex-1">
+                    <p class="font-medium">${item.name}</p>
+                    <p class="text-sm text-gray-600">$${item.price.toFixed(2)} c/u</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="updateCartQuantity('${item.id}', -1)" class="bg-red-200 text-red-700 w-7 h-7 rounded-full text-sm flex items-center justify-center">-</button>
+                    <span class="font-semibold">${item.cantidad}</span>
+                    <button onclick="updateCartQuantity('${item.id}', 1)" class="bg-green-200 text-green-700 w-7 h-7 rounded-full text-sm flex items-center justify-center">+</button>
+                    <button onclick="removeFromCart('${item.id}')" class="ml-2 text-gray-500 hover:text-red-600"><i class="fas fa-trash-alt"></i></button>
+                </div>
+            </div>
+        `).join('') : '<p class="text-center text-gray-500">El carrito está vacío.</p>';
+    }
+
+    // --- NUEVA FUNCIÓN: Actualiza solo los totales en la UI ---
+    function updateCartTotalsDisplay() {
+        const { subtotal, total } = calculateCartTotals();
+        const change = calculateChange();
+
+        const cartSubtotalElement = document.getElementById('cart-subtotal');
+        const cartTotalElement = document.getElementById('cart-total');
+        const cartChangeElement = document.getElementById('cart-change');
+
+        if (cartSubtotalElement) cartSubtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+        if (cartTotalElement) cartTotalElement.textContent = `$${total.toFixed(2)}`;
+        if (cartChangeElement) cartChangeElement.textContent = `$${change.toFixed(2)}`;
+    }
+
+    // --- FUNCIÓN ORIGINAL `renderNuevaVenta` AHORA ES `renderNuevaVentaStructure` ---
+    // Y las funciones `renderFilteredProducts`, `renderCartItems` y `updateCartTotalsDisplay`
+    // se encargan de las actualizaciones más granulares.
+
     // Función para actualizar el término de búsqueda y re-renderizar la sección de venta
+    // *** MODIFICADO PARA NO RE-RENDERIZAR TODO EL CONTAINER ***
     window.updateSearchTerm = (value) => {
         state.searchTerm = value.toLowerCase();
-        renderNuevaVenta(); // Re-renderiza la sección completa para aplicar el filtro
+        renderFilteredProducts(); // Solo actualiza la cuadrícula de productos
     };
 
     // Función para actualizar el monto recibido y recalcular el cambio
@@ -1126,7 +1204,8 @@
                 alert('Este producto no tiene stock disponible.');
             }
         }
-        renderNuevaVenta(); // Re-renderiza la sección para actualizar el carrito y productos
+        renderCartItems(); // Solo actualiza el carrito
+        updateCartTotalsDisplay(); // Actualiza los totales
     };
 
     window.updateCartQuantity = (productId, change) => {
@@ -1147,12 +1226,14 @@
         }).filter(item => item !== null); // Filtra los items que son null (eliminados)
 
         state.cart = newCart;
-        renderNuevaVenta(); // Re-renderiza la sección para actualizar el carrito
+        renderCartItems(); // Solo actualiza el carrito
+        updateCartTotalsDisplay(); // Actualiza los totales
     };
 
     window.removeFromCart = (productId) => {
         state.cart = state.cart.filter(item => item.id !== productId);
-        renderNuevaVenta(); // Re-renderiza la sección para actualizar el carrito
+        renderCartItems(); // Solo actualiza el carrito
+        updateCartTotalsDisplay(); // Actualiza los totales
     };
 
     function calculateCartTotals() {
@@ -1186,9 +1267,11 @@
         const cliente = state.clientes.find(c => c.id === clienteId);
         const clienteNombre = cliente ? cliente.nombre : 'Cliente General';
         const { subtotal, total } = calculateCartTotals(); // Recoge solo subtotal y total
+        const currentTimestamp = new Date(); // Usar una fecha actual para el recibo
 
         const saleData = {
-            fecha: serverTimestamp(),
+            fecha: serverTimestamp(), // Esto se guardará en Firestore
+            fechaLocal: currentTimestamp.toISOString(), // Guardar la fecha local para el recibo
             clienteId: clienteId === 'general' ? null : clienteId,
             clienteNombre: clienteId === 'general' ? 'Cliente General' : clienteNombre,
             items: state.cart.map(item => ({
@@ -1230,13 +1313,20 @@
 
             await batch.commit();
             alert('¡Venta procesada y stock actualizado exitosamente!');
+            
+            // Generar y mostrar el recibo
+            const receiptHtml = generateReceiptContent({...saleData, id: newSaleRef.id});
+            showReceiptModal(receiptHtml);
+
             state.cart = []; // Vacía el carrito después de la venta
             state.searchTerm = ''; // Limpia el término de búsqueda
             state.amountReceived = 0; // Reinicia el monto recibido
             await fetchData('productos'); // Actualiza el stock
             await fetchData('ventas'); // Agrega la nueva venta
             await fetchData('clientes'); // Actualiza el total de compras del cliente
-            renderNuevaVenta(); // Re-renderiza la sección de Nueva Venta después de la compra
+            
+            renderNuevaVentaStructure(); // Al procesar la venta, vuelve a renderizar la estructura y luego sus contenidos
+            document.getElementById('product-search').value = ''; // Y asegúrate de que el input de búsqueda no tenga el valor anterior
             renderDashboard(); // Actualiza el dashboard también
             renderVentas(); // Actualiza el historial de ventas
         } catch (e) {
@@ -1244,6 +1334,97 @@
             alert('Hubo un error al procesar la venta.');
         }
     };
+
+    // --- NUEVAS FUNCIONES PARA EL RECIBO ---
+
+    function generateReceiptContent(saleData) {
+        const empresaNombre = "Distribuidora Chacha";
+        const direccion = "Tu Dirección, Ciudad, País";
+        const telefono = "123-456-7890";
+        const ruc = "0000000000001"; // RUC o Identificación fiscal
+
+        const saleDateTime = saleData.fechaLocal ? new Date(saleData.fechaLocal).toLocaleString('es-ES', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : new Date().toLocaleString('es-ES');
+        const saleId = saleData.id ? saleData.id.substring(0, 12) : 'N/A'; // Usar los primeros 12 caracteres del ID para el recibo
+
+        let itemsHtml = saleData.items.map(item => `
+            <div class="flex justify-between receipt-item">
+                <span style="flex: 1; text-align: left;">${item.cantidad} x ${item.nombre}</span>
+                <span style="width: 50px; text-align: right;">$${item.precioUnitario.toFixed(2)}</span>
+                <span style="width: 60px; text-align: right; font-weight: bold;">$${(item.cantidad * item.precioUnitario).toFixed(2)}</span>
+            </div>
+        `).join('');
+
+        return `
+            <div id="receipt-print-area" class="text-xs p-4" style="max-width: 500px; margin: 0 auto; line-height: 1.2;">
+                <h4 class="text-center font-bold text-base mb-1">${empresaNombre}</h4>
+                <p class="text-center">${direccion}</p>
+                <p class="text-center">Tel: ${telefono}</p>
+                <p class="text-center">RUC: ${ruc}</p>
+                <p class="text-center mt-2 border-t border-b border-dashed py-1">--- RECIBO DE VENTA ---</p>
+                
+                <p class="mt-2"><strong>ID Venta:</strong> #${saleId}</p>
+                <p><strong>Fecha:</strong> ${saleDateTime}</p>
+                <p><strong>Cliente:</strong> ${saleData.clienteNombre}</p>
+                
+                <div class="mt-4 border-t border-dashed pt-2">
+                    <div class="flex justify-between font-bold">
+                        <span style="flex: 1; text-align: left;">Artículo</span>
+                        <span style="width: 50px; text-align: right;">P.U.</span>
+                        <span style="width: 60px; text-align: right;">Total</span>
+                    </div>
+                    ${itemsHtml}
+                </div>
+                
+                <div class="border-t border-dashed pt-2 mt-2 receipt-total">
+                    <div class="flex justify-between font-bold text-sm">
+                        <span>Subtotal:</span>
+                        <span>$${saleData.subtotal.toFixed(2)}</span>
+                    </div>
+                    <div class="flex justify-between font-bold text-sm">
+                        <span>IVA (0%):</span>
+                        <span>$0.00</span>
+                    </div>
+                    <div class="flex justify-between font-bold text-base mt-1">
+                        <span>TOTAL:</span>
+                        <span>$${saleData.total.toFixed(2)}</span>
+                    </div>
+                    <div class="flex justify-between text-sm mt-1">
+                        <span>Monto Recibido:</span>
+                        <span>$${saleData.montoRecibido.toFixed(2)}</span>
+                    </div>
+                    <div class="flex justify-between text-sm font-bold">
+                        <span>Cambio:</span>
+                        <span>$${saleData.cambio.toFixed(2)}</span>
+                    </div>
+                </div>
+                
+                <p class="text-center mt-4 pt-2 border-t border-dashed">¡Gracias por su compra!</p>
+                <p class="text-center text-xs">Visítanos de nuevo</p>
+            </div>
+        `;
+    }
+
+    function showReceiptModal(receiptHtml) {
+        const modalContent = `
+            <h3 class="text-xl font-semibold mb-4 no-print">Recibo de Venta Generado</h3>
+            <div class="receipt-preview-container border p-2 rounded max-h-96-overflow bg-gray-50">
+                ${receiptHtml}
+            </div>
+            <div class="mt-6 text-right no-print">
+                <button onclick="printReceipt()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg mr-2">
+                    <i class="fas fa-print mr-2"></i> Imprimir Recibo
+                </button>
+                <button onclick="hideModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">Cerrar</button>
+            </div>
+        `;
+        window.showModal(modalContent);
+    }
+
+    window.printReceipt = () => {
+        // Dispara la función de impresión del navegador
+        window.print();
+    };
+
 
     window.viewSaleDetails = (saleId) => {
         const sale = state.ventas.find(s => s.id === saleId);
@@ -1495,6 +1676,8 @@
             }
             // Puedes limpiar el campo de búsqueda o hacer algo más con el código
             document.getElementById('product-search').value = barcode;
+            // Asegúrate de que el input recupere el foco después de la detección
+            document.getElementById('product-search').focus();
         });
 
         Quagga.onProcessed(function(result) {
@@ -1529,6 +1712,8 @@
             document.getElementById('barcode-scanner-container').style.display = 'none';
             state.isScannerActive = false;
             scannerQuagga = null; // Limpiar la referencia
+            // Asegúrate de que el input recupere el foco al detener el escáner
+            document.getElementById('product-search').focus();
         }
     };
 
