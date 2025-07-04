@@ -154,6 +154,7 @@
                 <li><a href="#clientes-section" class="flex items-center p-3 rounded-lg font-medium" data-section="clientes"><i class="fas fa-user-friends w-6 mr-3"></i>Clientes</a></li>
                 <li><a href="#empleados-section" class="flex items-center p-3 rounded-lg font-medium" data-section="empleados"><i class="fas fa-users-cog w-6 mr-3"></i>Empleados</a></li>
                 <li><a href="#reportes-section" class="flex items-center p-3 rounded-lg font-medium" data-section="reportes"><i class="fas fa-chart-pie w-6 mr-3"></i>Reportes</a></li>
+                <li><a href="#configuracion-negocio-section" class="flex items-center p-3 rounded-lg font-medium" data-section="configuracion-negocio"><i class="fas fa-cog w-6 mr-3"></i>Configuración Negocio</a></li>
             </ul>
         </nav>
     </aside>
@@ -203,7 +204,14 @@
         cart: [],
         searchTerm: '', // Para la búsqueda de productos
         amountReceived: 0, // Nuevo estado para el monto recibido
-        isScannerActive: false // Estado para controlar el escáner
+        isScannerActive: false, // Estado para controlar el escáner
+        // NUEVA FUNCIONALIDAD: Estado para los datos del negocio
+        businessInfo: {
+            nombre: "Distribuidora Chacha",
+            direccion: "Tu Dirección, Ciudad, País",
+            telefono: "123-456-7890",
+            ruc: "0000000000001" // RUC o Identificación fiscal
+        }
     };
     // const IVA_RATE = 0.15; // Eliminado o comentado, ya que no se usará el IVA
     const DOMElements = {
@@ -264,6 +272,8 @@
         await fetchData('empleados');
         await fetchData('ventas');
         await fetchData('cuentas_por_cobrar');
+        // NUEVA FUNCIONALIDAD: Cargar información del negocio
+        await fetchBusinessInfo();
 
         // Renderizar la sección específica
         switch (sectionId) {
@@ -294,6 +304,10 @@
             case 'reportes-section':
                 renderReportes();
                 break;
+            // NUEVA FUNCIONALIDAD: Caso para la sección de configuración de negocio
+            case 'configuracion-negocio-section':
+                renderConfiguracionNegocio();
+                break;
             // Manejo de acciones rápidas que no corresponden a una sección directamente
             case 'add-product':
                 showProductForm();
@@ -320,6 +334,24 @@
         } catch (error) {
             console.error(`Error al leer ${collectionName} desde Firebase:`, error);
             state[collectionName] = [];
+        }
+    };
+
+    // NUEVA FUNCIONALIDAD: Cargar información del negocio
+    const fetchBusinessInfo = async () => {
+        try {
+            const docRef = doc(db, "configuracion", "negocio"); // Usaremos un documento fijo para la configuración del negocio
+            const docSnap = await getDocs(docRef);
+            if (docSnap.exists()) {
+                state.businessInfo = { ...docSnap.data() };
+                console.log("Información del negocio cargada:", state.businessInfo);
+            } else {
+                console.log("No se encontró información del negocio en Firebase. Usando valores por defecto.");
+                // Si no existe, podemos crearla o simplemente usar los valores por defecto del estado.
+                // Para el inicio, los valores por defecto son suficientes.
+            }
+        } catch (error) {
+            console.error("Error al cargar la información del negocio:", error);
         }
     };
 
@@ -427,7 +459,12 @@
 
     // --- NUEVA FUNCIÓN: Renderiza solo la ESTRUCTURA principal de Nueva Venta ---
     function renderNuevaVentaStructure() {
-        const customerOptions = state.clientes.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+        // Incluye una opción "Nuevo Cliente" en el select
+        const customerOptions = `
+            <option value="general">Cliente General</option>
+            <option value="new-customer">Nuevo Cliente (llenar datos)</option>
+            ${state.clientes.map(c => `<option value="${c.id}">${c.nombre} (C.I./RUC: ${c.cedula || 'N/A'})</option>`).join('')}
+        `;
 
         DOMElements.contentArea.innerHTML = `
             <h2 class="text-2xl font-bold mb-6">Nueva Venta</h2>
@@ -453,10 +490,29 @@
                     <h3 class="text-xl font-semibold mb-4">Detalle de la Venta</h3>
                     <div class="mb-4">
                         <label for="selected-customer" class="block text-sm font-medium text-gray-700 mb-1">Cliente:</label>
-                        <select id="selected-customer" class="w-full p-2 border border-gray-300 rounded-md shadow-sm">
-                            <option value="general">Cliente General</option>
+                        <select id="selected-customer" class="w-full p-2 border border-gray-300 rounded-md shadow-sm" onchange="toggleCustomerDetailsFields(this.value)">
                             ${customerOptions}
                         </select>
+                    </div>
+
+                    <div id="customer-details-fields" class="space-y-3 mb-4" style="display: none;">
+                        <h4 class="text-md font-semibold text-gray-800 border-b pb-2">Datos del Cliente</h4>
+                        <div>
+                            <label for="new-customer-cedula" class="block text-sm font-medium text-gray-700">Cédula/RUC:</label>
+                            <input type="text" id="new-customer-cedula" class="w-full p-2 border border-gray-300 rounded-md shadow-sm" placeholder="Cédula o RUC">
+                        </div>
+                        <div>
+                            <label for="new-customer-nombres" class="block text-sm font-medium text-gray-700">Nombres/Razón Social:</label>
+                            <input type="text" id="new-customer-nombres" class="w-full p-2 border border-gray-300 rounded-md shadow-sm" placeholder="Nombres o Razón Social">
+                        </div>
+                        <div>
+                            <label for="new-customer-telefono" class="block text-sm font-medium text-gray-700">Teléfono:</label>
+                            <input type="text" id="new-customer-telefono" class="w-full p-2 border border-gray-300 rounded-md shadow-sm" placeholder="Teléfono">
+                        </div>
+                        <div>
+                            <label for="new-customer-celular" class="block text-sm font-medium text-gray-700">Celular:</label>
+                            <input type="text" id="new-customer-celular" class="w-full p-2 border border-gray-300 rounded-md shadow-sm" placeholder="Celular (opcional)">
+                        </div>
                     </div>
 
                     <div id="cart-items" class="border rounded-md max-h-48-overflow mb-4">
@@ -497,7 +553,66 @@
         renderFilteredProducts();
         renderCartItems();
         updateCartTotalsDisplay(); // Asegúrate de que los totales se muestren correctamente al cargar la estructura
+
+        // NUEVA FUNCIONALIDAD: Restaurar el estado del selector de cliente y mostrar/ocultar campos si aplica
+        const selectedCustomerElement = document.getElementById('selected-customer');
+        if (selectedCustomerElement) {
+            // Verifica si el cliente "general" o un cliente existente estaba seleccionado
+            const currentCustomerId = state.currentSaleCustomerId || 'general'; // Asumimos un nuevo estado para recordar la selección
+            selectedCustomerElement.value = currentCustomerId;
+            toggleCustomerDetailsFields(currentCustomerId); // Llama a la función para ajustar la visibilidad
+        }
+        // NUEVA FUNCIONALIDAD: Rellenar campos del cliente si es uno existente
+        if (state.currentSaleCustomerId && state.currentSaleCustomerId !== 'general' && state.currentSaleCustomerId !== 'new-customer') {
+            const selectedClient = state.clientes.find(c => c.id === state.currentSaleCustomerId);
+            if (selectedClient) {
+                document.getElementById('new-customer-cedula').value = selectedClient.cedula || '';
+                document.getElementById('new-customer-nombres').value = selectedClient.nombre || '';
+                document.getElementById('new-customer-telefono').value = selectedClient.telefono || '';
+                document.getElementById('new-customer-celular').value = selectedClient.celular || '';
+            }
+        }
     }
+
+    // NUEVA FUNCIONALIDAD: Función para mostrar/ocultar los campos de detalles del cliente
+    window.toggleCustomerDetailsFields = (selectedValue) => {
+        const customerDetailsDiv = document.getElementById('customer-details-fields');
+        const cedulaInput = document.getElementById('new-customer-cedula');
+        const nombresInput = document.getElementById('new-customer-nombres');
+        const telefonoInput = document.getElementById('new-customer-telefono');
+        const celularInput = document.getElementById('new-customer-celular');
+
+        // Limpiar campos y quitar requeridos al cambiar de opción
+        cedulaInput.value = '';
+        nombresInput.value = '';
+        telefonoInput.value = '';
+        celularInput.value = '';
+        cedulaInput.removeAttribute('required');
+        nombresInput.removeAttribute('required');
+        telefonoInput.removeAttribute('required');
+
+        if (selectedValue === 'new-customer') {
+            customerDetailsDiv.style.display = 'block';
+            cedulaInput.setAttribute('required', 'true');
+            nombresInput.setAttribute('required', 'true');
+            telefonoInput.setAttribute('required', 'true');
+            // Celular no es requerido por tu solicitud
+        } else if (selectedValue !== 'general') {
+            // Si se selecciona un cliente existente, mostrar los campos pero no requerirlos
+            // y rellenar con la información del cliente
+            customerDetailsDiv.style.display = 'block';
+            const selectedClient = state.clientes.find(c => c.id === selectedValue);
+            if (selectedClient) {
+                cedulaInput.value = selectedClient.cedula || '';
+                nombresInput.value = selectedClient.nombre || '';
+                telefonoInput.value = selectedClient.telefono || '';
+                celularInput.value = selectedClient.celular || '';
+            }
+        } else {
+            customerDetailsDiv.style.display = 'none';
+        }
+        state.currentSaleCustomerId = selectedValue; // Almacenar la selección actual del cliente
+    };
 
     // --- NUEVA FUNCIÓN: Renderiza solo los productos filtrados ---
     function renderFilteredProducts() {
@@ -763,18 +878,20 @@
     }
 
     function renderClientes() {
+        // NUEVA FUNCIONALIDAD: Mostrar cédula y celular en la tabla de clientes
         const customersHtml = state.clientes.length > 0 ? state.clientes.map(customer => `
             <tr class="border-b hover:bg-gray-50">
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${customer.nombre}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${customer.email || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${customer.cedula || 'N/A'}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${customer.telefono || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${customer.celular || 'N/A'}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$${customer.totalCompras ? customer.totalCompras.toFixed(2) : '0.00'}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button onclick="showCustomerForm(${JSON.stringify(customer).replace(/'/g, "\\'")})" class="text-indigo-600 hover:text-indigo-900 mr-2"><i class="fas fa-edit"></i></button>
                     <button onclick="deleteCustomer('${customer.id}')" class="text-red-600 hover:text-red-900"><i class="fas fa-trash-alt"></i></button>
                 </td>
             </tr>
-        `).join('') : `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No hay clientes registrados.</td></tr>`;
+        `).join('') : `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No hay clientes registrados.</td></tr>`;
 
         DOMElements.contentArea.innerHTML = `
             <h2 class="text-2xl font-bold mb-6">Gestión de Clientes</h2>
@@ -787,9 +904,10 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre/Razón Social</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cédula/RUC</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Celular</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Compras</th>
                             <th scope="col" class="relative px-6 py-3"><span class="sr-only">Acciones</span></th>
                         </tr>
@@ -910,6 +1028,67 @@
             </div>
         `;
     }
+
+    // NUEVA FUNCIONALIDAD: Renderizar y gestionar la configuración del negocio
+    function renderConfiguracionNegocio() {
+        const business = state.businessInfo;
+        DOMElements.contentArea.innerHTML = `
+            <h2 class="text-2xl font-bold mb-6">Configuración del Negocio</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold mb-4">Datos de la Empresa para Facturas/Recibos</h3>
+                <form id="business-info-form" class="space-y-4">
+                    <div>
+                        <label for="business-name" class="block text-sm font-medium text-gray-700">Nombre de la Empresa:</label>
+                        <input type="text" id="business-name" name="nombre" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${business.nombre || ''}" required>
+                    </div>
+                    <div>
+                        <label for="business-address" class="block text-sm font-medium text-gray-700">Dirección:</label>
+                        <input type="text" id="business-address" name="direccion" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${business.direccion || ''}" required>
+                    </div>
+                    <div>
+                        <label for="business-phone" class="block text-sm font-medium text-gray-700">Teléfono:</label>
+                        <input type="text" id="business-phone" name="telefono" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${business.telefono || ''}" required>
+                    </div>
+                    <div>
+                        <label for="business-ruc" class="block text-sm font-medium text-gray-700">RUC/Identificación Fiscal:</label>
+                        <input type="text" id="business-ruc" name="ruc" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${business.ruc || ''}" required>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                            <i class="fas fa-save mr-2"></i> Guardar Configuración
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        document.getElementById('business-info-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                nombre: formData.get('nombre'),
+                direccion: formData.get('direccion'),
+                telefono: formData.get('telefono'),
+                ruc: formData.get('ruc')
+            };
+            await updateBusinessInfo(data);
+        });
+    }
+
+    // NUEVA FUNCIONALIDAD: Guardar/Actualizar la información del negocio en Firebase
+    window.updateBusinessInfo = async (businessData) => {
+        try {
+            // Usamos setDoc con merge: true para crear el documento si no existe o actualizarlo
+            await setDoc(doc(db, "configuracion", "negocio"), businessData, { merge: true });
+            state.businessInfo = { ...businessData }; // Actualizar el estado local
+            alert('Información del negocio guardada exitosamente!');
+            renderConfiguracionNegocio(); // Volver a renderizar para reflejar los cambios
+        } catch (e) {
+            console.error("Error al guardar la información del negocio: ", e);
+            alert('Error al guardar la información del negocio.');
+        }
+    }
+
 
     // --- FASE 5: TODAS LAS DEMÁS FUNCIONES (CRUD, Lógica de Venta, etc.) ---
 
@@ -1053,20 +1232,29 @@
         const title = isEditing ? 'Editar Cliente' : 'Nuevo Cliente';
         const submitText = isEditing ? 'Actualizar' : 'Guardar';
 
+        // NUEVA FUNCIONALIDAD: Campos para cédula y celular en el formulario de cliente
         const formHtml = `
             <h3 class="text-xl font-semibold mb-4">${title}</h3>
             <form id="customer-form" class="space-y-4">
                 <div>
-                    <label for="nombreCliente" class="block text-sm font-medium text-gray-700">Nombre</label>
+                    <label for="nombreCliente" class="block text-sm font-medium text-gray-700">Nombres / Razón Social</label>
                     <input type="text" id="nombreCliente" name="nombre" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${customer ? customer.nombre : ''}" required>
+                </div>
+                <div>
+                    <label for="cedulaCliente" class="block text-sm font-medium text-gray-700">Cédula / RUC</label>
+                    <input type="text" id="cedulaCliente" name="cedula" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${customer ? customer.cedula : ''}" required>
+                </div>
+                <div>
+                    <label for="telefonoCliente" class="block text-sm font-medium text-gray-700">Teléfono Convencional</label>
+                    <input type="text" id="telefonoCliente" name="telefono" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${customer ? customer.telefono : ''}">
+                </div>
+                <div>
+                    <label for="celularCliente" class="block text-sm font-medium text-gray-700">Teléfono Celular</label>
+                    <input type="text" id="celularCliente" name="celular" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${customer ? customer.celular : ''}">
                 </div>
                 <div>
                     <label for="emailCliente" class="block text-sm font-medium text-gray-700">Email</label>
                     <input type="email" id="emailCliente" name="email" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${customer ? customer.email : ''}">
-                </div>
-                <div>
-                    <label for="telefonoCliente" class="block text-sm font-medium text-gray-700">Teléfono</label>
-                    <input type="text" id="telefonoCliente" name="telefono" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="${customer ? customer.telefono : ''}">
                 </div>
                 <div class="flex justify-end space-x-3">
                     <button type="button" onclick="hideModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancelar</button>
@@ -1081,8 +1269,10 @@
             const formData = new FormData(e.target);
             const data = {
                 nombre: formData.get('nombre'),
-                email: formData.get('email'),
+                cedula: formData.get('cedula'), // NUEVA FUNCIONALIDAD: Cédula
                 telefono: formData.get('telefono'),
+                celular: formData.get('celular'), // NUEVA FUNCIONALIDAD: Celular
+                email: formData.get('email'),
             };
             if (isEditing) {
                 await window.updateCustomer(customer.id, data);
@@ -1246,26 +1436,94 @@
 
     window.processSaleWrapper = async () => {
         const selectedCustomerElement = document.getElementById('selected-customer');
-        const clienteId = selectedCustomerElement ? selectedCustomerElement.value : 'general';
+        let clienteId = selectedCustomerElement ? selectedCustomerElement.value : 'general';
         const metodoPago = 'efectivo'; // Podrías añadir un selector de método de pago en el futuro
         
+        // NUEVA FUNCIONALIDAD: Lógica para cliente nuevo
+        let clienteDataForSale = {}; // Objeto para guardar los datos del cliente en la venta
+        if (clienteId === 'new-customer') {
+            const cedula = document.getElementById('new-customer-cedula').value.trim();
+            const nombres = document.getElementById('new-customer-nombres').value.trim();
+            const telefono = document.getElementById('new-customer-telefono').value.trim();
+            const celular = document.getElementById('new-customer-celular').value.trim();
+
+            if (!cedula || !nombres || !telefono) {
+                alert('Por favor, complete los campos de Cédula/RUC, Nombres/Razón Social y Teléfono para el nuevo cliente.');
+                return;
+            }
+
+            // Verificar si el cliente ya existe por cédula
+            const existingClient = state.clientes.find(c => c.cedula === cedula);
+            if (existingClient) {
+                alert('Ya existe un cliente con esta Cédula/RUC. Por favor, seleccione el cliente existente o ingrese una cédula diferente.');
+                return;
+            }
+
+            try {
+                // Añadir el nuevo cliente a la base de datos
+                const newClientRef = await addDoc(collection(db, "clientes"), {
+                    cedula: cedula,
+                    nombre: nombres,
+                    telefono: telefono,
+                    celular: celular,
+                    email: '', // Puedes añadir un campo de email si lo deseas en el formulario de cliente
+                    totalCompras: 0
+                });
+                clienteId = newClientRef.id; // Asignar el ID del nuevo cliente para la venta
+                clienteDataForSale = {
+                    clienteId: clienteId,
+                    clienteNombre: nombres,
+                    clienteCedula: cedula,
+                    clienteTelefono: telefono,
+                    clienteCelular: celular
+                };
+                await fetchData('clientes'); // Actualizar la lista de clientes en el estado
+                alert('Nuevo cliente registrado exitosamente.');
+            } catch (error) {
+                console.error("Error al registrar nuevo cliente:", error);
+                alert('Hubo un error al registrar el nuevo cliente. La venta no se procesará.');
+                return;
+            }
+        } else if (clienteId !== 'general') {
+            // Si es un cliente existente, obtener sus datos completos
+            const existingClient = state.clientes.find(c => c.id === clienteId);
+            if (existingClient) {
+                clienteDataForSale = {
+                    clienteId: clienteId,
+                    clienteNombre: existingClient.nombre,
+                    clienteCedula: existingClient.cedula || 'N/A',
+                    clienteTelefono: existingClient.telefono || 'N/A',
+                    clienteCelular: existingClient.celular || 'N/A'
+                };
+            }
+        } else {
+            // Cliente general, no hay datos adicionales
+            clienteDataForSale = {
+                clienteId: null,
+                clienteNombre: 'Cliente General',
+                clienteCedula: 'N/A',
+                clienteTelefono: 'N/A',
+                clienteCelular: 'N/A'
+            };
+        }
+
         // Validar que se ha ingresado un monto recibido suficiente
         const { total } = calculateCartTotals();
         if (state.amountReceived < total) {
             alert('El monto recibido es menor que el total de la venta. Por favor, ingrese un monto suficiente.');
             return;
         }
-        await processSale(clienteId, metodoPago);
+        await processSale(clienteId, metodoPago, clienteDataForSale);
     };
 
-    window.processSale = async (clienteId, metodoPago) => {
+    window.processSale = async (clienteId, metodoPago, clienteDataForSale) => {
         if (state.cart.length === 0) {
             alert('El carrito está vacío. Agrega productos para procesar la venta.');
             return;
         }
 
-        const cliente = state.clientes.find(c => c.id === clienteId);
-        const clienteNombre = cliente ? cliente.nombre : 'Cliente General';
+        // Reutiliza los datos del cliente preparados en processSaleWrapper
+        const { clienteNombre, clienteCedula, clienteTelefono, clienteCelular } = clienteDataForSale;
         const { subtotal, total } = calculateCartTotals(); // Recoge solo subtotal y total
         const currentTimestamp = new Date(); // Usar una fecha actual para el recibo
 
@@ -1273,7 +1531,11 @@
             fecha: serverTimestamp(), // Esto se guardará en Firestore
             fechaLocal: currentTimestamp.toISOString(), // Guardar la fecha local para el recibo
             clienteId: clienteId === 'general' ? null : clienteId,
-            clienteNombre: clienteId === 'general' ? 'Cliente General' : clienteNombre,
+            clienteNombre: clienteNombre,
+            // NUEVA FUNCIONALIDAD: Guardar datos de cédula, teléfono y celular en la venta
+            clienteCedula: clienteCedula,
+            clienteTelefono: clienteTelefono,
+            clienteCelular: clienteCelular,
             items: state.cart.map(item => ({
                 productoId: item.id,
                 nombre: item.name,
@@ -1321,6 +1583,8 @@
             state.cart = []; // Vacía el carrito después de la venta
             state.searchTerm = ''; // Limpia el término de búsqueda
             state.amountReceived = 0; // Reinicia el monto recibido
+            state.currentSaleCustomerId = 'general'; // Reinicia la selección del cliente
+
             await fetchData('productos'); // Actualiza el stock
             await fetchData('ventas'); // Agrega la nueva venta
             await fetchData('clientes'); // Actualiza el total de compras del cliente
@@ -1338,10 +1602,11 @@
     // --- NUEVAS FUNCIONES PARA EL RECIBO ---
 
     function generateReceiptContent(saleData) {
-        const empresaNombre = "Distribuidora Chacha";
-        const direccion = "Tu Dirección, Ciudad, País";
-        const telefono = "123-456-7890";
-        const ruc = "0000000000001"; // RUC o Identificación fiscal
+        // NUEVA FUNCIONALIDAD: Usar datos del negocio desde el estado
+        const empresaNombre = state.businessInfo.nombre || "Distribuidora Chacha";
+        const direccion = state.businessInfo.direccion || "Tu Dirección, Ciudad, País";
+        const telefono = state.businessInfo.telefono || "123-456-7890";
+        const ruc = state.businessInfo.ruc || "0000000000001"; // RUC o Identificación fiscal
 
         const saleDateTime = saleData.fechaLocal ? new Date(saleData.fechaLocal).toLocaleString('es-ES', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : new Date().toLocaleString('es-ES');
         const saleId = saleData.id ? saleData.id.substring(0, 12) : 'N/A'; // Usar los primeros 12 caracteres del ID para el recibo
@@ -1365,7 +1630,10 @@
                 <p class="mt-2"><strong>ID Venta:</strong> #${saleId}</p>
                 <p><strong>Fecha:</strong> ${saleDateTime}</p>
                 <p><strong>Cliente:</strong> ${saleData.clienteNombre}</p>
-                
+                ${saleData.clienteCedula && saleData.clienteCedula !== 'N/A' ? `<p><strong>C.I./RUC:</strong> ${saleData.clienteCedula}</p>` : ''}
+                ${saleData.clienteTelefono && saleData.clienteTelefono !== 'N/A' ? `<p><strong>Teléfono:</strong> ${saleData.clienteTelefono}</p>` : ''}
+                ${saleData.clienteCelular && saleData.clienteCelular !== 'N/A' ? `<p><strong>Celular:</strong> ${saleData.clienteCelular}</p>` : ''}
+
                 <div class="mt-4 border-t border-dashed pt-2">
                     <div class="flex justify-between font-bold">
                         <span style="flex: 1; text-align: left;">Artículo</span>
@@ -1448,6 +1716,10 @@
             <div class="space-y-2 text-gray-700">
                 <p><strong>Fecha:</strong> ${saleDate}</p>
                 <p><strong>Cliente:</strong> ${sale.clienteNombre || 'Cliente General'}</p>
+                ${sale.clienteCedula && sale.clienteCedula !== 'N/A' ? `<p><strong>C.I./RUC:</strong> ${sale.clienteCedula}</p>` : ''}
+                ${sale.clienteTelefono && sale.clienteTelefono !== 'N/A' ? `<p><strong>Teléfono:</strong> ${sale.clienteTelefono}</p>` : ''}
+                ${sale.clienteCelular && sale.clienteCelular !== 'N/A' ? `<p><strong>Celular:</strong> ${sale.clienteCelular}</p>` : ''}
+
                 <p><strong>Método de Pago:</strong> ${sale.metodoPago}</p>
                 <p><strong>Estado:</strong> <span class="bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs">${sale.estado}</span></p>
                 <div class="mt-4 pt-2 border-t">
@@ -1751,6 +2023,8 @@
         await fetchData('empleados');
         await fetchData('ventas');
         await fetchData('cuentas_por_cobrar');
+        // NUEVA FUNCIONALIDAD: Cargar datos del negocio al iniciar
+        await fetchBusinessInfo();
         window.showSection('dashboard-section');
     });
 </script>
