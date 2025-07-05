@@ -135,8 +135,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 min-h-screen flex">
-
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
     <div id="overlay" class="overlay lg:hidden"></div>
 
     <aside id="sidebar" class="w-64 h-full bg-white shadow-lg fixed top-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 transition-transform">
@@ -167,6 +166,10 @@
 
         <main id="content-area" class="p-4 lg:p-6 flex-1 overflow-y-auto">
             </main>
+
+        <footer class="bg-gray-200 text-gray-600 text-center text-xs py-3 px-4 mt-auto border-t">
+            ©2025 DISTRIBUIDORA CHACHA | Creado y desarrollado por Jonathan Tuquerrez
+        </footer>
     </div>
 
     <div id="modal-container"></div>
@@ -174,7 +177,8 @@
 <script type="module">
     // --- FASE 1: CONEXIÓN A FIREBASE ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, addDoc, deleteDoc, updateDoc, setDoc, writeBatch, serverTimestamp, query, where, Timestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, doc, addDoc, deleteDoc, updateDoc, setDoc, writeBatch, serverTimestamp, query, where, Timestamp, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+    //                                                                                                                                                           ^ AÑADIDO: getDoc
     // Importación de QuaggaJS para el escáner de código de barras
     // QuaggaJS no es un módulo ES6, se carga globalmente o a través de un script tag separado.
     // Para simplificar, asumiremos que QuaggaJS está disponible globalmente si se carga con un <script> antes de este.
@@ -341,7 +345,7 @@
     const fetchBusinessInfo = async () => {
         try {
             const docRef = doc(db, "configuracion", "negocio"); // Usaremos un documento fijo para la configuración del negocio
-            const docSnap = await getDocs(docRef);
+            const docSnap = await getDoc(docRef); // ¡CORREGIDO: Usar getDoc para un solo documento!
             if (docSnap.exists()) {
                 state.businessInfo = { ...docSnap.data() };
                 console.log("Información del negocio cargada:", state.businessInfo);
@@ -784,7 +788,7 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button onclick="showCuentaPorCobrarForm(${JSON.stringify(cuenta).replace(/'/g, "\\'")})" class="text-indigo-600 hover:text-indigo-900 mr-2"><i class="fas fa-edit"></i></button>
+                        <button onclick="showCuentaPorCobrarForm(${JSON.stringify(cuenta).replace(/"/g, '&quot;')})" class="text-indigo-600 hover:text-indigo-900 mr-2"><i class="fas fa-edit"></i></button>
                         <button onclick="markCuentaAsPaid('${cuenta.id}')" class="text-green-600 hover:text-green-900 mr-2 ${cuenta.estado === 'Pagada' ? 'cursor-not-allowed opacity-50' : ''}" ${cuenta.estado === 'Pagada' ? 'disabled' : ''} title="Marcar como Pagada"><i class="fas fa-check-circle"></i></button>
                         <button onclick="deleteCuentaPorCobrar('${cuenta.id}')" class="text-red-600 hover:text-red-900"><i class="fas fa-trash-alt"></i></button>
                     </td>
@@ -844,7 +848,7 @@
                     </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button onclick="showProductForm(${JSON.stringify(product).replace(/'/g, "\\'")})" class="text-indigo-600 hover:text-indigo-900 mr-2"><i class="fas fa-edit"></i></button>
+                    <button onclick="showProductForm(${JSON.stringify(product).replace(/"/g, '&quot;')})" class="text-indigo-600 hover:text-indigo-900 mr-2"><i class="fas fa-edit"></i></button>
                     <button onclick="deleteProduct('${product.id}')" class="text-red-600 hover:text-red-900"><i class="fas fa-trash-alt"></i></button>
                 </td>
             </tr>
@@ -887,7 +891,7 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${customer.celular || 'N/A'}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$${customer.totalCompras ? customer.totalCompras.toFixed(2) : '0.00'}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button onclick="showCustomerForm(${JSON.stringify(customer).replace(/'/g, "\\'")})" class="text-indigo-600 hover:text-indigo-900 mr-2"><i class="fas fa-edit"></i></button>
+                    <button onclick="showCustomerForm(${JSON.stringify(customer).replace(/"/g, '&quot;')})" class="text-indigo-600 hover:text-indigo-900 mr-2"><i class="fas fa-edit"></i></button>
                     <button onclick="deleteCustomer('${customer.id}')" class="text-red-600 hover:text-red-900"><i class="fas fa-trash-alt"></i></button>
                 </td>
             </tr>
@@ -927,7 +931,7 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${employee.cargo || 'N/A'}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${employee.telefono || 'N/A'}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button onclick="showEmployeeForm(${JSON.stringify(employee).replace(/'/g, "\\'")})" class="text-indigo-600 hover:text-indigo-900 mr-2"><i class="fas fa-edit"></i></button>
+                    <button onclick="showEmployeeForm(${JSON.stringify(employee).replace(/"/g, '&quot;')})" class="text-indigo-600 hover:text-indigo-900 mr-2"><i class="fas fa-edit"></i></button>
                     <button onclick="deleteEmployee('${employee.id}')" class="text-red-600 hover:text-red-900"><i class="fas fa-trash-alt"></i></button>
                 </td>
             </tr>
